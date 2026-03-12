@@ -20,7 +20,12 @@ import {
   Info,
   Copy,
   Share2,
-  Check
+  Check,
+  Sun,
+  CloudRain,
+  CloudLightning,
+  CloudSun,
+  Thermometer
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -108,29 +113,82 @@ function ProfilePage() {
   }, []);
 
   useEffect(() => {
+    const CACHE_KEY = `weather_${STATION.lat}_${STATION.lon}`;
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
     const fetchWeather = async () => {
+      // 1. Check LocalStorage Cache
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) {
+            setWeather(data);
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem(CACHE_KEY);
+        }
+      }
+
       if (!WEATHER_API_KEY) {
-        setWeather({
+        const mockData = {
           main: { temp: 31, humidity: 62 },
           weather: [{ description: 'partly cloudy', main: 'Clouds' }],
           wind: { speed: 4.1 },
           mock: true
-        });
+        };
+        setWeather(mockData);
         return;
       }
+
       try {
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${STATION.lat}&lon=${STATION.lon}&appid=${WEATHER_API_KEY}&units=metric`
         );
         const data = await response.json();
-        setWeather(data);
-      } catch (err) { console.error(err); }
+
+        if (response.ok) {
+          setWeather(data);
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            data,
+            timestamp: Date.now()
+          }));
+        }
+      } catch (err) {
+        console.error("Weather fetch error:", err);
+      }
     };
     fetchWeather();
   }, []);
 
-  const getUtcTime = () => time.toISOString().slice(11, 16);
-  const getIstTime = () => time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+  const getWeatherIcon = (condition) => {
+    const main = condition?.main?.toLowerCase();
+    const desc = condition?.description?.toLowerCase();
+
+    if (main === 'clear') return <Sun size={48} className="weather-icon-sun" />;
+    if (main === 'clouds') {
+      if (desc?.includes('few') || desc?.includes('scattered')) return <CloudSun size={48} className="weather-icon-cloudy" />;
+      return <Cloud size={48} className="weather-icon-cloudy" />;
+    }
+    if (main === 'rain' || main === 'drizzle' || main === 'mist') return <CloudRain size={48} className="weather-icon-rain" />;
+    if (main === 'thunderstorm') return <CloudLightning size={48} className="weather-icon-storm" />;
+    return <Cloud size={48} className="weather-icon-cloudy" />;
+  };
+
+  const getUtcTime = () => {
+    const d = time.getUTCDate().toString().padStart(2, '0');
+    const m = time.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+    const y = time.getUTCFullYear();
+    const t = time.toISOString().slice(11, 16);
+    return `${m} ${d}, ${y} • ${t}`;
+  };
+
+  const getIstTime = () => {
+    const datePart = time.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+    const timePart = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+    return `${datePart} • ${timePart}`;
+  };
 
   return (
     <div className="modern-container" style={{ margin: 0, maxWidth: 'none' }}>
@@ -153,6 +211,7 @@ function ProfilePage() {
         <div className="modern-card">
           <div className="card-label"><Award size={14} /> License</div>
           <div className="card-value">ASOC Restricted Grade</div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>Licensed since: March 2026</p>
         </div>
         <div className="modern-card">
           <div className="card-label"><Compass size={14} /> Grid Square</div>
@@ -166,19 +225,29 @@ function ProfilePage() {
         <div className="modern-card full-width-card weather-section">
           <div className="card-label"><Cloud size={14} /> Live Weather @ {STATION.name}</div>
           {weather && (
-            <div className="weather-content">
-              <div>
-                <div className="temp-big">{Math.round(weather.main.temp)}°C</div>
-                <div style={{ textTransform: 'capitalize', color: 'var(--muted-foreground)', fontWeight: 500 }}>{weather.weather[0].description}</div>
-              </div>
-              <div style={{ textAlign: 'right', display: 'flex', gap: '1rem' }}>
-                <div>
-                  <div className="card-label" style={{ marginBottom: '0.25rem' }}><Droplets size={12} /> Humidity</div>
-                  <div className="card-value" style={{ fontSize: '0.875rem' }}>{weather.main.humidity}%</div>
+            <div className="weather-content-enhanced">
+              <div className="weather-main-info">
+                <div className="weather-icon-big">
+                  {getWeatherIcon(weather.weather[0])}
                 </div>
                 <div>
-                  <div className="card-label" style={{ marginBottom: '0.25rem' }}><Wind size={12} /> Wind</div>
-                  <div className="card-value" style={{ fontSize: '0.875rem' }}>{weather.wind.speed} m/s</div>
+                  <div className="temp-big">{Math.round(weather.main.temp)}°C</div>
+                  <div className="weather-desc-pill">{weather.weather[0].description}</div>
+                </div>
+              </div>
+
+              <div className="weather-stats-grid">
+                <div className="stat-item">
+                  <div className="stat-label"><Thermometer size={12} /> Feels Like</div>
+                  <div className="stat-value">{Math.round(weather.main.feels_like || weather.main.temp)}°C</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label"><Droplets size={12} /> Humidity</div>
+                  <div className="stat-value">{weather.main.humidity}%</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-label"><Wind size={12} /> Wind</div>
+                  <div className="stat-value">{weather.wind.speed} m/s</div>
                 </div>
               </div>
             </div>
@@ -187,11 +256,11 @@ function ProfilePage() {
 
         <div className="modern-card">
           <div className="card-label"><Clock size={14} /> UTC Time</div>
-          <div className="card-value">{getUtcTime()} Z</div>
+          <div className="card-value" style={{ fontSize: '0.9rem' }}>{getUtcTime()} Z</div>
         </div>
         <div className="modern-card">
-          <div className="card-label"><MapPin size={14} /> Local Time</div>
-          <div className="card-value">{getIstTime()} IST</div>
+          <div className="card-label"><MapPin size={14} /> Station Local Time</div>
+          <div className="card-value" style={{ fontSize: '0.9rem' }}>{getIstTime()} IST</div>
         </div>
 
         <div className="modern-card full-width-card">
@@ -460,6 +529,10 @@ function App() {
         </div>
 
         <div style={{ marginTop: 'auto', padding: '1.25rem', borderTop: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <div className="card-label" style={{ fontSize: '0.65rem', marginBottom: '0.25rem' }}>Contact</div>
+            <a href="mailto:vu35kb@gmail.com" style={{ fontSize: '0.75rem', color: 'var(--foreground)', textDecoration: 'none', fontWeight: 600 }}>vu35kb@gmail.com</a>
+          </div>
           <div style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></span>
             STATION QRV
