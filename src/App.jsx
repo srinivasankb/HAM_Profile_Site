@@ -71,6 +71,18 @@ function getMaidenhead(lat, lon) {
 }
 
 /**
+ * Formats a grid square (e.g., MJ89sk)
+ */
+function formatGrid(grid) {
+  if (!grid || typeof grid !== 'string') return '';
+  const clean = grid.trim();
+  if (clean.length === 6) {
+    return clean.slice(0, 4).toUpperCase() + clean.slice(4).toLowerCase();
+  }
+  return clean.toUpperCase();
+}
+
+/**
  * Calculates the bounding box for a given grid square
  */
 function getGridBounds(grid) {
@@ -309,9 +321,9 @@ function GridCalculator() {
     setGrid(newGrid);
     setCoords({ lat, lon });
     setBounds(getGridBounds(newGrid));
-    setInputGrid(newGrid.toUpperCase());
+    setInputGrid(formatGrid(newGrid));
     // Update hash without reloading
-    window.history.replaceState(null, null, `/grid#${newGrid}`);
+    window.history.replaceState(null, null, `/grid#${formatGrid(newGrid)}`);
   };
 
   const handleUpdateByGrid = (gridStr) => {
@@ -323,27 +335,30 @@ function GridCalculator() {
     setError("");
     const centerLat = (newBounds[0][0] + newBounds[1][0]) / 2;
     const centerLon = (newBounds[0][1] + newBounds[1][1]) / 2;
-    setGrid(gridStr.toLowerCase());
+    const formatted = formatGrid(gridStr);
+    setGrid(formatted);
     setCoords({ lat: centerLat, lon: centerLon });
     setBounds(newBounds);
     setInputCoords({ lat: centerLat.toFixed(4), lon: centerLon.toFixed(4) });
-    window.history.replaceState(null, null, `/grid#${gridStr.toUpperCase()}`);
+    window.history.replaceState(null, null, `/grid#${formatted}`);
   };
 
   const copyLink = () => {
-    const url = `${window.location.origin}/grid#${grid.toUpperCase()}`;
+    const formatted = formatGrid(grid);
+    const url = `${window.location.origin}/grid#${formatted}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const shareLink = async () => {
-    const url = `${window.location.origin}/grid#${grid.toUpperCase()}`;
+    const formatted = formatGrid(grid);
+    const url = `${window.location.origin}/grid#${formatted}`;
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Maidenhead Grid Explorer',
-          text: `Check out grid square ${grid.toUpperCase()} on my Ham Radio Explorer!`,
+          text: `Check out grid square ${formatted} on my Ham Radio Explorer!`,
           url: url,
         });
       } catch (err) { console.error("Error sharing:", err); }
@@ -356,7 +371,7 @@ function GridCalculator() {
     const hashValue = location.hash.replace('#', '').trim();
     if (hashValue && /^[A-R]{2}[0-9]{2}([A-X]{2})?$/i.test(hashValue)) {
       setMode('grid');
-      setInputGrid(hashValue.toUpperCase());
+      setInputGrid(formatGrid(hashValue));
       handleUpdateByGrid(hashValue);
     }
   }, [location.hash]);
@@ -384,8 +399,8 @@ function GridCalculator() {
   return (
     <div className="modern-container calc-container" style={{ margin: 0, maxWidth: 'none' }}>
       <SEO
-        title={`Grid ${grid.toUpperCase()} | Maidenhead Explorer`}
-        description={`Locate and visualize Maidenhead Grid Square ${grid.toUpperCase()} on the interactive map. Tool by VU35KB.`}
+        title={`Grid ${formatGrid(grid)} | Maidenhead Explorer`}
+        description={`Locate and visualize Maidenhead Grid Square ${formatGrid(grid)} on the interactive map. Tool by VU35KB.`}
       />
       <header style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
         <h2 className="name-heading" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Maidenhead Grid Explorer</h2>
@@ -414,7 +429,7 @@ function GridCalculator() {
           <div className="input-row">
             <div className="input-group">
               <label className="card-label">Grid Square ID</label>
-              <input className="input-field" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(e.target.value.toUpperCase())} maxLength={6} />
+              <input className="input-field" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(formatGrid(e.target.value))} maxLength={6} />
             </div>
             <button className="calc-button" onClick={() => handleUpdateByGrid(inputGrid)}>Search</button>
           </div>
@@ -424,11 +439,11 @@ function GridCalculator() {
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, padding: '1rem', background: 'var(--secondary)', borderRadius: '8px', textAlign: 'center' }}>
             <div className="card-label" style={{ justifyContent: 'center' }}>4-DIGIT SQUARE</div>
-            <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700 }}>{grid.toUpperCase().slice(0, 4)}</div>
+            <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700 }}>{grid.slice(0, 4).toUpperCase()}</div>
           </div>
           <div style={{ flex: 1, padding: '1rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '8px', textAlign: 'center' }}>
             <div className="card-label" style={{ justifyContent: 'center', color: '#2563eb' }}>6-DIGIT SUBSQUARE</div>
-            <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>{grid.toUpperCase()}</div>
+            <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>{formatGrid(grid)}</div>
           </div>
         </div>
 
