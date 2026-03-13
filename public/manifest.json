@@ -1,0 +1,42 @@
+{
+    "name": "VU35KB | Ham Radio Profile",
+    "short_name": "VU35KB",
+    "description": "Amateur Radio Operator profile and Grid Square Explorer by Srinivasan KB (VU35KB), Rajapalayam.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fafafa",
+    "theme_color": "#18181b",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Grid Explorer",
+            "short_name": "Grid",
+            "description": "Open the Maidenhead Grid Explorer tool",
+            "url": "/grid",
+            "icons": [
+                {
+                    "src": "/favicon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "categories": [
+        "utilities",
+        "navigation"
+    ]
+}

@@ -25,7 +25,9 @@ import {
   CloudRain,
   CloudLightning,
   CloudSun,
-  Thermometer
+  Thermometer,
+  Sunrise,
+  Sunset
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -114,10 +116,70 @@ function getGridBounds(grid) {
   ];
 }
 
+/**
+ * Calculates UTC sunrise and sunset times for given lat/lon and date.
+ * Based on the NOAA Solar Calculations algorithm.
+ * Returns { sunrise: Date, sunset: Date }
+ */
+function getSunTimes(lat, lon, date = new Date()) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const toDeg = (rad) => (rad * 180) / Math.PI;
+
+  const JD = Math.floor(date.getTime() / 86400000) + 2440587.5;
+  const n = JD - 2451545.0;
+  const L = (280.46 + 0.9856474 * n) % 360;
+  const g = toRad((357.528 + 0.9856003 * n) % 360);
+  const lambda = toRad(L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g));
+  const epsilon = toRad(23.439 - 0.0000004 * n);
+  const sinDec = Math.sin(epsilon) * Math.sin(lambda);
+  const dec = Math.asin(sinDec);
+
+  const cosHA = (Math.cos(toRad(90.833)) - Math.sin(toRad(lat)) * sinDec) /
+    (Math.cos(toRad(lat)) * Math.cos(dec));
+
+  if (cosHA < -1 || cosHA > 1) return null; // polar day/night
+
+  const HA = toDeg(Math.acos(cosHA));
+  const EqT = 4 * (L - 0.0057183 - toDeg(Math.atan2(
+    Math.sin(lambda) * Math.cos(epsilon), Math.cos(lambda)
+  )) + 360 * Math.cos(epsilon) * Math.sin(lambda) / (2 * Math.PI));
+
+  const solarNoonMin = 720 - 4 * lon - EqT;
+  const sunriseMin = solarNoonMin - HA * 4;
+  const sunsetMin = solarNoonMin + HA * 4;
+
+  const toUtcDate = (minutesFromMidnightUtc) => {
+    const d = new Date(date);
+    d.setUTCHours(0, 0, 0, 0);
+    d.setTime(d.getTime() + minutesFromMidnightUtc * 60000);
+    return d;
+  };
+
+  return { sunrise: toUtcDate(sunriseMin), sunset: toUtcDate(sunsetMin) };
+}
+
 // --- Home Profile Page ---
 function ProfilePage() {
   const [weather, setWeather] = useState(null);
   const [time, setTime] = useState(new Date());
+  const [units, setUnits] = useState(() => localStorage.getItem('pref_units') || 'metric');
+  const [tzMode, setTzMode] = useState(() => localStorage.getItem('pref_tz') || 'utc');
+
+  const toggleUnits = () => setUnits(u => {
+    const next = u === 'metric' ? 'imperial' : 'metric';
+    localStorage.setItem('pref_units', next);
+    return next;
+  });
+
+  const toggleTz = () => setTzMode(t => {
+    const next = t === 'utc' ? 'ist' : 'utc';
+    localStorage.setItem('pref_tz', next);
+    return next;
+  });
+
+  // Unit conversion helpers (API always returns metric)
+  const toTemp = (c) => units === 'metric' ? `${Math.round(c)}°C` : `${Math.round(c * 9 / 5 + 32)}°F`;
+  const toWind = (ms) => units === 'metric' ? `${ms} m/s` : `${(ms * 2.237).toFixed(1)} mph`;
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -188,18 +250,26 @@ function ProfilePage() {
     return <Cloud size={48} className="weather-icon-cloudy" />;
   };
 
-  const getUtcTime = () => {
-    const d = time.getUTCDate().toString().padStart(2, '0');
-    const m = time.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
-    const y = time.getUTCFullYear();
-    const t = time.toISOString().slice(11, 16);
-    return `${m} ${d}, ${y} • ${t}`;
+  const getDisplayTime = () => {
+    if (tzMode === 'utc') {
+      const d = time.getUTCDate().toString().padStart(2, '0');
+      const m = time.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+      const y = time.getUTCFullYear();
+      const t = time.toISOString().slice(11, 16);
+      return { label: 'UTC Time', value: `${m} ${d}, ${y} • ${t} Z` };
+    } else {
+      const datePart = time.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+      const timePart = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+      return { label: 'Station Local Time', value: `${datePart} • ${timePart} IST` };
+    }
   };
 
-  const getIstTime = () => {
-    const datePart = time.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
-    const timePart = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
-    return `${datePart} • ${timePart}`;
+  const formatSunTime = (d) => {
+    if (tzMode === 'utc') {
+      return d.toUTCString().slice(17, 22) + ' UTC';
+    } else {
+      return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+    }
   };
 
   return (
@@ -234,8 +304,15 @@ function ProfilePage() {
           </div>
         </div>
 
-        <div className="modern-card full-width-card weather-section">
-          <div className="card-label"><Cloud size={14} /> Live Weather @ {STATION.name}</div>
+        <div className="modern-card weather-section">
+          <div className="card-label-row">
+            <span className="card-label"><Cloud size={14} /> Live Weather @ {STATION.name}</span>
+            <button className="unit-toggle" onClick={toggleUnits} title="Toggle units">
+              <span className={units === 'metric' ? 'active' : ''}>°C</span>
+              <span className="toggle-sep">|</span>
+              <span className={units === 'imperial' ? 'active' : ''}>°F</span>
+            </button>
+          </div>
           {weather && (
             <div className="weather-content-enhanced">
               <div className="weather-main-info">
@@ -243,7 +320,7 @@ function ProfilePage() {
                   {getWeatherIcon(weather.weather[0])}
                 </div>
                 <div>
-                  <div className="temp-big">{Math.round(weather.main.temp)}°C</div>
+                  <div className="temp-big">{toTemp(weather.main.temp)}</div>
                   <div className="weather-desc-pill">{weather.weather[0].description}</div>
                 </div>
               </div>
@@ -251,7 +328,7 @@ function ProfilePage() {
               <div className="weather-stats-grid">
                 <div className="stat-item">
                   <div className="stat-label"><Thermometer size={12} /> Feels Like</div>
-                  <div className="stat-value">{Math.round(weather.main.feels_like || weather.main.temp)}°C</div>
+                  <div className="stat-value">{toTemp(weather.main.feels_like || weather.main.temp)}</div>
                 </div>
                 <div className="stat-item">
                   <div className="stat-label"><Droplets size={12} /> Humidity</div>
@@ -259,20 +336,59 @@ function ProfilePage() {
                 </div>
                 <div className="stat-item">
                   <div className="stat-label"><Wind size={12} /> Wind</div>
-                  <div className="stat-value">{weather.wind.speed} m/s</div>
+                  <div className="stat-value">{toWind(weather.wind.speed)}</div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="modern-card">
-          <div className="card-label"><Clock size={14} /> UTC Time</div>
-          <div className="card-value" style={{ fontSize: '0.9rem' }}>{getUtcTime()} Z</div>
-        </div>
-        <div className="modern-card">
-          <div className="card-label"><MapPin size={14} /> Station Local Time</div>
-          <div className="card-value" style={{ fontSize: '0.9rem' }}>{getIstTime()} IST</div>
+        {/* Sunrise/Sunset Card */}
+        {(() => {
+          const sun = getSunTimes(STATION.lat, STATION.lon);
+          return (
+            <div className="modern-card sun-section">
+              <div className="card-label-row">
+                <span className="card-label"><Sun size={14} /> Sun Times @ {STATION.name}</span>
+                <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
+                  <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
+                  <span className="toggle-sep">|</span>
+                  <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
+                </button>
+              </div>
+              <div className="sun-times-content">
+                <div className="sun-time-item">
+                  <div className="sun-icon-wrap sunrise-icon"><Sunrise size={36} /></div>
+                  <div>
+                    <div className="sun-time-label">Sunrise</div>
+                    <div className="sun-time-value">{sun ? formatSunTime(sun.sunrise) : '--'}</div>
+                  </div>
+                </div>
+                <div className="sun-divider"></div>
+                <div className="sun-time-item">
+                  <div className="sun-icon-wrap sunset-icon"><Sunset size={36} /></div>
+                  <div>
+                    <div className="sun-time-label">Sunset</div>
+                    <div className="sun-time-value">{sun ? formatSunTime(sun.sunset) : '--'}</div>
+                  </div>
+                </div>
+              </div>
+              <p className="sun-note">{tzMode === 'utc' ? 'UTC' : 'IST (UTC+5:30)'} times for grid MJ89sk</p>
+            </div>
+          );
+        })()}
+
+        {/* Merged Time Card */}
+        <div className="modern-card full-width-card">
+          <div className="card-label-row">
+            <span className="card-label"><Clock size={14} /> {getDisplayTime().label}</span>
+            <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
+              <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
+              <span className="toggle-sep">|</span>
+              <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
+            </button>
+          </div>
+          <div className="card-value" style={{ fontSize: '0.9rem' }}>{getDisplayTime().value}</div>
         </div>
 
         <div className="modern-card full-width-card">
@@ -472,7 +588,7 @@ function GridCalculator() {
               }}
             />
           )}
-          <Marker position={[coords.lat, coords.lon]} />
+          {mode === 'coords' && <Marker position={[coords.lat, coords.lon]} />}
           <MapEvents />
           <SetView center={[coords.lat, coords.lon]} />
         </MapContainer>
@@ -575,6 +691,16 @@ function App() {
           <span>Grid</span>
         </NavLink>
       </nav>
+
+      {/* Mobile Footer Info */}
+      <div className="mobile-footer-info">
+        <a href="mailto:vu35kb@gmail.com" className="mobile-footer-email">vu35kb@gmail.com</a>
+        <div className="mobile-footer-status">
+          <span className="qrv-dot"></span>
+          STATION QRV
+        </div>
+        <span className="mobile-footer-sign">73 de VU35KB • Rajapalayam</span>
+      </div>
     </Router>
   );
 }
