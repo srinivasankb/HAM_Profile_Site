@@ -27,7 +27,11 @@ import {
   CloudSun,
   Thermometer,
   Sunrise,
-  Sunset
+  Sunset,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -694,74 +698,105 @@ function SEO({ title, description }) {
 
 // --- App Shell ---
 function App() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+
   return (
     <Router>
-      {/* Desktop Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <Radio size={24} /> VU35KB
+      {/* Mobile Header with Burger */}
+      <header className="mobile-header">
+        <div className="mobile-logo">
+          <Radio size={20} /> VU35KB
         </div>
+        <button className="burger-btn" onClick={toggleMobileMenu}>
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
 
-        <div className="sidebar-section">
-          <div className="sidebar-heading">Main</div>
-          <div className="nav-links-container-new">
-            <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              <MapPin size={18} /> My Profile
+      {/* Mobile Menu Overlay */}
+      <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
+        <nav className="mobile-nav-list">
+          <div className="mobile-menu-section">
+            <div className="sidebar-heading">Main</div>
+            <NavLink to="/" className="mobile-nav-item" onClick={() => setIsMobileMenuOpen(false)}>
+              <MapPin size={20} /> My Profile
             </NavLink>
           </div>
-        </div>
 
-        <div className="sidebar-section">
-          <div className="sidebar-heading">Tools</div>
-          <div className="nav-links-container-new">
-            <NavLink to="/grid" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              <Compass size={18} /> Grid Explorer
+          <div className="mobile-menu-section">
+            <div className="sidebar-heading">Tools</div>
+            <NavLink to="/grid" className="mobile-nav-item" onClick={() => setIsMobileMenuOpen(false)}>
+              <Compass size={20} /> Grid Explorer
             </NavLink>
           </div>
-        </div>
+        </nav>
 
-        <div style={{ marginTop: 'auto', padding: '1.25rem', borderTop: '1px solid var(--border)' }}>
-          <div style={{ marginBottom: '1rem' }}>
+        <div className="sidebar-footer" style={{ marginTop: 'auto' }}>
+          <div className="footer-contact">
             <div className="card-label" style={{ fontSize: '0.65rem', marginBottom: '0.25rem' }}>Contact</div>
-            <a href="mailto:vu35kb@gmail.com" style={{ fontSize: '0.75rem', color: 'var(--foreground)', textDecoration: 'none', fontWeight: 600 }}>vu35kb@gmail.com</a>
+            <a href="mailto:vu35kb@gmail.com" className="footer-link">vu35kb@gmail.com</a>
           </div>
-          <div style={{ color: '#10b981', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }}></span>
+          <div className="footer-status-row">
+            <span className="status-dot"></span>
             STATION QRV
           </div>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.65rem' }}>73 de VU35KB • Rajapalayam</p>
+          <p className="footer-sig-text">73 de VU35KB • Rajapalayam</p>
         </div>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+        <button className="sidebar-toggle-btn" onClick={toggleSidebar} title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+
+        <div className="sidebar-logo">
+          <Radio size={24} /> {!isSidebarCollapsed && "VU35KB"}
+        </div>
+
+        <div className="sidebar-section">
+          {!isSidebarCollapsed && <div className="sidebar-heading">Main</div>}
+          <div className="nav-links-container-new">
+            <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <MapPin size={18} /> {!isSidebarCollapsed && "My Profile"}
+            </NavLink>
+          </div>
+        </div>
+
+        <div className="sidebar-section">
+          {!isSidebarCollapsed && <div className="sidebar-heading">Tools</div>}
+          <div className="nav-links-container-new">
+            <NavLink to="/grid" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Compass size={18} /> {!isSidebarCollapsed && "Grid Explorer"}
+            </NavLink>
+          </div>
+        </div>
+
+        {!isSidebarCollapsed && (
+          <div className="sidebar-footer">
+            <div className="footer-contact">
+              <div className="card-label" style={{ fontSize: '0.65rem', marginBottom: '0.25rem' }}>Contact</div>
+              <a href="mailto:vu35kb@gmail.com" className="footer-link">vu35kb@gmail.com</a>
+            </div>
+            <div className="footer-status-row">
+              <span className="status-dot"></span>
+              STATION QRV
+            </div>
+            <p className="footer-sig-text">73 de VU35KB • Rajapalayam</p>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
-      <main className="app-content">
+      <main className={`app-content ${isSidebarCollapsed ? 'expanded' : ''}`}>
         <Routes>
           <Route path="/" element={<ProfilePage />} />
           <Route path="/grid" element={<GridCalculator />} />
         </Routes>
       </main>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="mobile-bottom-nav">
-        <NavLink to="/" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}>
-          <MapPin />
-          <span>Profile</span>
-        </NavLink>
-        <NavLink to="/grid" className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}>
-          <Compass />
-          <span>Grid</span>
-        </NavLink>
-      </nav>
-
-      {/* Mobile Footer Info */}
-      <div className="mobile-footer-info">
-        <a href="mailto:vu35kb@gmail.com" className="mobile-footer-email">vu35kb@gmail.com</a>
-        <div className="mobile-footer-status">
-          <span className="qrv-dot"></span>
-          STATION QRV
-        </div>
-        <span className="mobile-footer-sign">73 de VU35KB • Rajapalayam</span>
-      </div>
     </Router>
   );
 }
