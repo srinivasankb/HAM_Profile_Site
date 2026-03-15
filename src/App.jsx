@@ -284,16 +284,18 @@ function ProfilePage() {
         </div>
         <div className="callsign-pill">VU35KB</div>
         <h1 className="name-heading">Srinivasan KB</h1>
-        <p style={{ color: 'var(--muted-foreground)', fontSize: '0.925rem' }}>
-          Amateur Radio Operator • Rajapalayam, IN
+        <p style={{ color: 'var(--muted-foreground)', fontSize: '0.925rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+          Amateur Radio Operator • Rajapalayam, IN <img src="https://flagcdn.com/w20/in.png" alt="India" style={{ width: '18px', height: 'auto', borderRadius: '2px', display: 'inline-block' }} />
         </p>
       </header>
 
       <div className="modern-grid">
         <div className="modern-card">
           <div className="card-label"><Award size={14} /> License</div>
-          <div className="card-value">ASOC Restricted Grade</div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>Licensed since: March 2026</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <div className="card-value">ASOC Restricted Grade</div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: March 2026</p>
+          </div>
         </div>
         <div className="modern-card">
           <div className="card-label"><Compass size={14} /> Grid Square</div>
@@ -327,15 +329,15 @@ function ProfilePage() {
 
               <div className="weather-stats-grid">
                 <div className="stat-item">
-                  <div className="stat-label"><Thermometer size={12} /> Feels Like</div>
+                  <div className="stat-label"><Thermometer size={14} /> Feels Like</div>
                   <div className="stat-value">{toTemp(weather.main.feels_like || weather.main.temp)}</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label"><Droplets size={12} /> Humidity</div>
+                  <div className="stat-label"><Droplets size={14} /> Humidity</div>
                   <div className="stat-value">{weather.main.humidity}%</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label"><Wind size={12} /> Wind</div>
+                  <div className="stat-label"><Wind size={14} /> Wind</div>
                   <div className="stat-value">{toWind(weather.wind.speed)}</div>
                 </div>
               </div>
@@ -393,18 +395,20 @@ function ProfilePage() {
 
         <div className="modern-card full-width-card">
           <div className="card-label"><Radio size={14} /> Station & Rig</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)' }}>Rig: Baofeng UV-17R Plus</p>
               <p style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.6' }}>Operating primarily on <strong>2m/70cm</strong> bands with a focus on <strong>QRP</strong>.</p>
             </div>
-            <div style={{ flex: '1 1 200px', background: 'var(--secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-              <div className="card-label" style={{ marginBottom: '0.5rem' }}><Award size={12} /> QSL Policy</div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', marginBottom: '0.5rem' }}>Exclusive QRZ.com only.</p>
-              <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.5rem', borderRadius: '4px', fontSize: '0.85rem', textDecoration: 'none' }}>
-                QRZ Profile <ExternalLink size={14} />
-              </a>
+            <div style={{ flex: '1 1 200px', minWidth: 0, background: 'var(--secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="card-label"><Award size={12} /> QSL Policy</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>Exclusive QRZ.com only.</p>
+                <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.5rem', borderRadius: '4px', fontSize: '0.85rem', textDecoration: 'none' }}>
+                  QRZ Profile <ExternalLink size={14} />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -424,6 +428,8 @@ function GridCalculator() {
   const [inputGrid, setInputGrid] = useState(STATION.grid);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [locationInfo, setLocationInfo] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   const handleUpdateByCoords = (latStr, lonStr) => {
     const lat = parseFloat(latStr);
@@ -492,6 +498,35 @@ function GridCalculator() {
     }
   }, [location.hash]);
 
+  useEffect(() => {
+    const fetchLocationName = async () => {
+      setIsLocating(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=json&accept-language=en`,
+          {
+            headers: {
+              'User-Agent': 'HAM-Profile-Site/1.0'
+            }
+          }
+        );
+        const data = await response.json();
+        if (data && data.address) {
+          const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.state_district || "Unknown Location";
+          const country = data.address.country || "";
+          const countryCode = data.address.country_code || "";
+          setLocationInfo({ city, country, countryCode, displayName: data.display_name });
+        }
+      } catch (err) {
+        console.error("Nominatim fetch error:", err);
+      } finally {
+        setIsLocating(false);
+      }
+    };
+
+    fetchLocationName();
+  }, [coords.lat, coords.lon]);
+
   function MapEvents() {
     useMapEvents({
       click(e) {
@@ -504,11 +539,17 @@ function GridCalculator() {
     return null;
   }
 
-  function SetView({ center }) {
+  function SetView({ bounds, gridLength }) {
     const map = useMap();
     useEffect(() => {
-      map.setView(center, map.getZoom());
-    }, [center]);
+      if (bounds) {
+        // pad(0.4) adds 40% more area on all sides to show neighbors
+        // for 4-digit, we use slightly more to ensure context
+        const paddingFactor = gridLength === 4 ? 0.5 : 0.3;
+        const paddedBounds = L.latLngBounds(bounds).pad(paddingFactor);
+        map.fitBounds(paddedBounds, { animate: true });
+      }
+    }, [bounds, gridLength]);
     return null;
   }
 
@@ -533,11 +574,11 @@ function GridCalculator() {
           <div className="input-row">
             <div className="input-group">
               <label className="card-label">Latitude</label>
-              <input className="input-field" placeholder="9.45" value={inputCoords.lat} onChange={e => setInputCoords(p => ({ ...p, lat: e.target.value }))} />
+              <input className="input-field" placeholder="9.45" value={inputCoords.lat} onChange={e => setInputCoords(p => ({ ...p, lat: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
             </div>
             <div className="input-group">
               <label className="card-label">Longitude</label>
-              <input className="input-field" placeholder="77.55" value={inputCoords.lon} onChange={e => setInputCoords(p => ({ ...p, lon: e.target.value }))} />
+              <input className="input-field" placeholder="77.55" value={inputCoords.lon} onChange={e => setInputCoords(p => ({ ...p, lon: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
             </div>
             <button className="calc-button" onClick={() => handleUpdateByCoords(inputCoords.lat, inputCoords.lon)}>Locate</button>
           </div>
@@ -545,23 +586,43 @@ function GridCalculator() {
           <div className="input-row">
             <div className="input-group">
               <label className="card-label">Grid Square ID</label>
-              <input className="input-field" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(formatGrid(e.target.value))} maxLength={6} />
+              <input className="input-field" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(formatGrid(e.target.value))} maxLength={6} onKeyDown={e => e.key === 'Enter' && handleUpdateByGrid(inputGrid)} />
             </div>
             <button className="calc-button" onClick={() => handleUpdateByGrid(inputGrid)}>Search</button>
           </div>
         )}
         {error && <div className="error-text">{error}</div>}
 
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, padding: '1rem', background: 'var(--secondary)', borderRadius: '8px', textAlign: 'center' }}>
-            <div className="card-label" style={{ justifyContent: 'center' }}>4-DIGIT SQUARE</div>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 120px', minWidth: 0, padding: '1rem', background: 'var(--secondary)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="card-label" style={{ justifyContent: 'center' }}>4-DIGIT</div>
             <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700 }}>{grid.slice(0, 4).toUpperCase()}</div>
           </div>
-          <div style={{ flex: 1, padding: '1rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '8px', textAlign: 'center' }}>
-            <div className="card-label" style={{ justifyContent: 'center', color: '#2563eb' }}>6-DIGIT SUBSQUARE</div>
+          <div style={{ flex: '1 1 120px', minWidth: 0, padding: '1rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '8px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div className="card-label" style={{ justifyContent: 'center', color: '#2563eb' }}>6-DIGIT</div>
             <div className="card-value" style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 700, color: '#2563eb' }}>{formatGrid(grid)}</div>
           </div>
         </div>
+
+        {isLocating ? (
+          <div style={{ marginTop: '1rem', color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>
+            Fetching location details...
+          </div>
+        ) : locationInfo && (
+          <div className="location-info-box">
+            <div className="card-label"><MapPin size={14} /> Location</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {locationInfo.countryCode && (
+                <img
+                  src={`https://flagcdn.com/w40/${locationInfo.countryCode.toLowerCase()}.png`}
+                  alt={locationInfo.country}
+                  style={{ width: '24px', height: 'auto', borderRadius: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                />
+              )}
+              <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{locationInfo.city}, {locationInfo.country}</div>
+            </div>
+          </div>
+        )}
 
         <div className="share-action-container">
           <button className="share-btn" onClick={copyLink}>
@@ -588,9 +649,9 @@ function GridCalculator() {
               }}
             />
           )}
-          {mode === 'coords' && <Marker position={[coords.lat, coords.lon]} />}
+          <Marker position={[coords.lat, coords.lon]} />
           <MapEvents />
-          <SetView center={[coords.lat, coords.lon]} />
+          <SetView bounds={bounds} gridLength={grid.length} />
         </MapContainer>
       </div>
 
