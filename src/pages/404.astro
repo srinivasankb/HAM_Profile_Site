@@ -1,0 +1,89 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Radio, SignalHigh, Home, ArrowLeft } from 'lucide-react';
+---
+
+<Layout title="404: Signal Lost | VU35KB" description="The frequency you are looking for is currently silent.">
+  <div class="modern-container" style="min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    
+    <div class="error-visual" style="position: relative; margin-bottom: 2rem;">
+      <div class="radio-waves">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <Radio size={80} strokeWidth={1.5} style={{ color: 'var(--primary)', opacity: 0.8 }} />
+    </div>
+
+    <h1 class="name-heading" style="font-size: 4rem; margin-bottom: 0.5rem; letter-spacing: -0.05em;">404</h1>
+    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Signal Lost in the Noise</h2>
+    
+    <p style="color: var(--muted-foreground); max-width: 450px; line-height: 1.6; margin-bottom: 3rem;">
+      The frequency you're trying to reach is currently silent. It might have drifted off-air or moved to a different band.
+    </p>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+      <a href="/" class="contact-btn" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem;">
+        <Home size={18} /> Return to base
+      </a>
+      <button onclick="history.back()" class="nav-item" style="border: 1px solid var(--border); padding: 0.8rem 1.5rem; border-radius: 8px; font-size: 0.9rem; background: transparent; cursor: pointer;">
+        <ArrowLeft size={18} /> Previous contact
+      </button>
+    </div>
+
+    <div class="q-code" style="margin-top: 4rem; font-family: monospace; opacity: 0.4; font-size: 0.85rem;">
+      [ SIGNAL STATUS: QRL? ]
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .radio-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+  }
+
+  .radio-waves span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+    animation: ripple 3s infinite linear;
+  }
+
+  .radio-waves span:nth-child(2) {
+    animation-delay: 1s;
+  }
+
+  .radio-waves span:nth-child(3) {
+    animation-delay: 2s;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .contact-btn {
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+
+  .contact-btn:hover {
+    transform: translateY(-2px);
+  }
+</style>
