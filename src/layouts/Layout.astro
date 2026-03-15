@@ -1,5 +1,5 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, ChevronLeft, ChevronRight, Menu, X, Home } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Menu, Home } from 'lucide-react';
 import '../styles/global.css';
 
 interface Props {
@@ -62,7 +62,7 @@ const recentBlogs = blogs.slice(0, 3);
     <meta name="theme-color" content="#18181b" />
 	</head>
 	<body>
-    <div id="app-root">
+    <div id="app-root" class="app-layout">
       <!-- Ported from App.jsx App Shell -->
       <script>
         // Check local storage for preferences on boot
@@ -106,7 +106,7 @@ const recentBlogs = blogs.slice(0, 3);
           </div>
         </header>
 
-        {/* Mobile Header */}
+        <!-- Mobile Header -->
         <header class="mobile-header">
           <a href="/" class="mobile-logo" style="text-decoration: none; color: inherit;">
             <Radio size={20} /> VU35KB
@@ -116,7 +116,7 @@ const recentBlogs = blogs.slice(0, 3);
           </button>
         </header>
 
-        {/* Mobile Menu Overlay */}
+        <!-- Mobile Menu Overlay -->
         <div class="mobile-menu-overlay">
           <nav class="mobile-nav-list">
             <div class="mobile-menu-section">
