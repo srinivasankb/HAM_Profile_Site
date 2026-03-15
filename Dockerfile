@@ -17,15 +17,15 @@ WORKDIR /usr/share/caddy
 # Copy the static build from the previous stage
 COPY --from=build /app/dist .
 
-# Add a basic Caddy configuration to handle routing/compression
-RUN echo "localhost:80 {
-    root * /usr/share/caddy
-    file_server
-    encode gzip
-    handle_errors {
-        rewrite * /404.html
-        file_server
-    }
+# Add a basic Caddy configuration
+RUN printf "localhost:80 {\n\
+    root * /usr/share/caddy\n\
+    file_server\n\
+    encode gzip\n\
+    handle_errors {\n\
+        rewrite * /404.html\n\
+        file_server\n\
+    }\n\
 }" > /etc/caddy/Caddyfile
 
 EXPOSE 80
