@@ -1,0 +1,208 @@
+---
+import { Rss, Radio, MapPin, BookText, Compass, ChevronLeft, ChevronRight, Menu, X, Home } from 'lucide-react';
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	description?: string;
+	image?: string;
+	article?: boolean;
+}
+
+const { 
+  title, 
+  description = "A curious newcomer exploring Amateur Radio and QRP operations from Rajapalayam, IN. Documenting the learning journey of VU35KB.", 
+  image = "/avatar.png",
+  article = false
+} = Astro.props;
+
+const siteUrl = Astro.url.origin;
+const currentUrl = Astro.url.href;
+const pathname = Astro.url.pathname;
+const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+
+// We'll need the blog data for the sidebar
+import { getCollection } from 'astro:content';
+const blogs = (await getCollection('blogs')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const recentBlogs = blogs.slice(0, 3);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="manifest" href="/manifest.json" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<!-- Primary Meta Tags -->
+		<title>{title}</title>
+		<meta name="title" content={title} />
+		<meta name="description" content={description} />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={article ? "article" : "website"} />
+		<meta property="og:url" content={currentUrl} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImage} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={currentUrl} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={ogImage} />
+    
+    <!-- RSS Discovery -->
+    <link rel="alternate" type="application/rss+xml" title="VU35KB Radio Journal RSS Feed" href="/blog/rss.xml" />
+    <meta name="theme-color" content="#18181b" />
+	</head>
+	<body>
+    <div id="app-root">
+      <!-- Ported from App.jsx App Shell -->
+      <script>
+        // Check local storage for preferences on boot
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      </script>
+
+        <script>
+          const toggleMobile = () => {
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            overlay?.classList.toggle('open');
+          };
+
+          document.querySelector('.burger-btn')?.addEventListener('click', toggleMobile);
+          
+          // Close mobile menu on nav
+          document.querySelectorAll('.mobile-nav-item, .mobile-recent-item').forEach(link => {
+            link.addEventListener('click', () => {
+              document.querySelector('.mobile-menu-overlay')?.classList.remove('open');
+            });
+          });
+        </script>
+
+        <!-- Desktop Top Nav -->
+        <header class="desktop-nav">
+          <div class="nav-container">
+            <a href="/" class="nav-logo">
+              <Radio size={24} /> <span class="logo-text">VU35KB</span>
+            </a>
+            
+            <nav class="nav-links">
+              <a href="/" class={`nav-item ${pathname === '/' ? 'active' : ''}`}><Home size={18} /> Home</a>
+              <a href="/station" class={`nav-item ${pathname.startsWith('/station') ? 'active' : ''}`}><MapPin size={18} /> Station</a>
+              <a href="/blog" class={`nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}><BookText size={18} /> Journal</a>
+              <a href="/grid" class={`nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}><Compass size={18} /> Grid Explorer</a>
+            </nav>
+
+            <div class="nav-actions">
+               <a href="mailto:VU35KB@qsl.net" class="contact-btn">Get in touch</a>
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile Header */}
+        <header class="mobile-header">
+          <a href="/" class="mobile-logo" style="text-decoration: none; color: inherit;">
+            <Radio size={20} /> VU35KB
+          </a>
+          <button class="burger-btn">
+            <Menu size={24} />
+          </button>
+        </header>
+
+        {/* Mobile Menu Overlay */}
+        <div class="mobile-menu-overlay">
+          <nav class="mobile-nav-list">
+            <div class="mobile-menu-section">
+              <div class="sidebar-heading">Main</div>
+              <a href="/" class={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
+                <Home size={20} /> Home
+              </a>
+              <a href="/station" class={`mobile-nav-item ${pathname.startsWith('/station') ? 'active' : ''}`}>
+                <MapPin size={20} /> Station Details
+              </a>
+            </div>
+
+            <div class="mobile-menu-section">
+              <div class="sidebar-heading">Journal</div>
+              <a href="/blog" class={`mobile-nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}>
+                <BookText size={20} /> Journal
+              </a>
+              <div class="mobile-blog-recent">
+                {recentBlogs.map(blog => (
+                  <a href={`/blog/${blog.id}`} class="mobile-recent-item">
+                    {blog.data.title}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div class="mobile-menu-section">
+              <div class="sidebar-heading">Tools</div>
+              <a href="/grid" class={`mobile-nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}>
+                <Compass size={20} /> Grid Explorer
+              </a>
+              <a href="/blog/rss.xml" class="mobile-nav-item">
+                <Rss size={20} /> RSS Feed
+              </a>
+            </div>
+          </nav>
+
+          <div class="sidebar-footer" style="margin-top: auto;">
+             <div class="footer-contact">
+                <div class="card-label" style="font-size: 0.65rem; margin-bottom: 0.25rem;">Contact</div>
+                <a href="mailto:VU35KB@qsl.net" class="footer-link">VU35KB@qsl.net</a>
+              </div>
+              <div class="footer-status-row">
+                <span class="status-dot"></span>
+                STATION QRV
+              </div>
+              <p class="footer-sig-text">73 de VU35KB • Rajapalayam</p>
+          </div>
+        </div>
+
+        <main class="app-content">
+          <slot />
+        </main>
+
+        <footer class="desktop-footer">
+          <div class="footer-container">
+            <div class="footer-info">
+               <Radio size={20} /> <span class="logo-text">VU35KB</span>
+                <p class="footer-desc">Curious newcomer to Amateur Radio & QRP operations.</p>
+            </div>
+            <div class="footer-links-grid">
+              <div class="footer-group">
+                <h4>Explore</h4>
+                <a href="/">Home</a>
+                <a href="/station">Station Details</a>
+                <a href="/blog">Radio Journal</a>
+                <a href="/grid">Grid Explorer</a>
+              </div>
+              <div class="footer-group">
+                <h4>Connect</h4>
+                <a href="mailto:VU35KB@qsl.net">Email</a>
+                <a href="/blog/rss.xml">RSS Feed</a>
+              </div>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <p>73 de VU35KB • Rajapalayam, IN • <a href="https://srinivasan.online/" target="_blank" style="color: inherit; text-decoration: none; opacity: 0.6;">Professional Profile</a></p>
+          </div>
+        </footer>
+    </div>
+	</body>
+</html>
+<style is:global>
+  .app-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+</style>

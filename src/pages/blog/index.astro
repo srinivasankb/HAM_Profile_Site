@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BlogList from '../../components/BlogList';
+import { getCollection } from 'astro:content';
+
+const blogs = (await getCollection('blogs')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<Layout 
+  title="Radio Journal | VU35KB"
+  description="Technical guides, project unboxings, and radio stories from VU35KB."
+>
+	<BlogList client:load blogs={blogs} />
+</Layout>

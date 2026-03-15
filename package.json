@@ -4,18 +4,23 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.0",
+    "@astrojs/rss": "^4.0.17",
+    "astro": "^6.0.4",
+    "gray-matter": "^4.0.3",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.23",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.13.1"
   },
   "devDependencies": {

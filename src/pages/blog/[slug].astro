@@ -1,0 +1,96 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { ChevronLeft, Share2 } from 'lucide-react';
+
+export async function getStaticPaths() {
+  const blogs = await getCollection('blogs');
+  return blogs.map(entry => ({
+    params: { slug: entry.id }, props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, date, description, tags, image, author } = entry.data;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<Layout 
+  title={`${title} | VU35KB Journal`}
+  description={description}
+  image={image}
+  article={true}
+>
+  <div class="modern-container">
+    <a href="/blog" style="display: flex; align-items: center; gap: 0.5rem; color: var(--muted-foreground); text-decoration: none; margin-bottom: 2rem;">
+      <ChevronLeft size={16} /> Back to journal
+    </a>
+
+    <header style="margin-bottom: 3rem;">
+      <div class="card-label" style="margin-bottom: 0.75rem;">{formattedDate} • By {author}</div>
+      <h1 class="name-heading" style="text-align: left; font-size: 2.5rem; margin-bottom: 1.5rem;">{title}</h1>
+      <div style="display: flex; gap: 0.5rem;">
+        {tags.map(t => <span class="tag-pill">{t}</span>)}
+      </div>
+    </header>
+
+    <article class="prose">
+      <Content />
+    </article>
+
+    <div style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+          <p style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem;">Enjoyed the read?</p>
+          <p style="font-size: 0.85rem; color: var(--muted-foreground);">73 de VU35KB • <a href="mailto:VU35KB@qsl.net" style="color: inherit;">Get in touch</a></p>
+        </div>
+        
+        <button id="share-post-btn" class="share-btn" style="background: var(--primary); color: white; border: none; padding: 0.6rem 1.25rem;">
+          <Share2 size={16} /> Share Post
+        </button>
+      </div>
+
+      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px dashed var(--border);">
+        <script src="https://giscus.app/client.js"
+                data-repo="srinivasankb/HAM_Profile_Site"
+                data-repo-id="R_kgDORlCMbQ"
+                data-category="General"
+                data-category-id="DIC_kwDORlCMbc4C4cvd"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="light"
+                data-lang="en"
+                crossorigin="anonymous"
+                async>
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Share functionality
+    const shareBtn = document.getElementById('share-post-btn');
+    shareBtn?.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: document.title,
+            url: window.location.href,
+          });
+        } catch (err) { console.info("Share cancelled"); }
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Link copied to clipboard!");
+      }
+    });
+  </script>
+</Layout>

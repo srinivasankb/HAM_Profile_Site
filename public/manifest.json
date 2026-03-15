@@ -1,7 +1,7 @@
 {
-    "name": "VU35KB | Ham Radio Profile",
+    "name": "VU35KB | Amateur Radio Explorer",
     "short_name": "VU35KB",
-    "description": "Amateur Radio Operator profile and Grid Square Explorer by Srinivasan KB (VU35KB), Rajapalayam.",
+    "description": "Amateur Radio Operator, QRP enthusiast, and technical explorer based in Rajapalayam, IN.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#fafafa",

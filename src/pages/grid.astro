@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GridCalculator from '../components/GridCalculator';
+---
+
+<Layout 
+  title="Grid Explorer | VU35KB"
+  description="Locate and visualize Maidenhead Grid Squares on an interactive map. Essential tool for HAM radio operators."
+>
+	<GridCalculator client:only="react" />
+</Layout>
