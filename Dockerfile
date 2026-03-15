@@ -18,7 +18,7 @@ WORKDIR /usr/share/caddy
 COPY --from=build /app/dist .
 
 # Add a basic Caddy configuration
-RUN printf "localhost:80 {\n\
+RUN printf ":80 {\n\
     root * /usr/share/caddy\n\
     file_server\n\
     encode gzip\n\
