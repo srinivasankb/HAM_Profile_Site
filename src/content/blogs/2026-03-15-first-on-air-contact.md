@@ -7,6 +7,6 @@ tags: [Amateur Radio, QRP]
 image: /images/blog/first-contact.jpg
 ---
 
-Today was a momentous day. I made my first contact using my new Baofeng UV-17R Plus. After setting up a simple dipole antenna on my balcony, I heard VU2XYZ calling.
+Today was a momentous day. I made my first contact using my new Baofeng M13 Pro. After setting up a simple dipole antenna on my balcony, I heard VU2XYZ calling.
 
 The audio was crystal clear...

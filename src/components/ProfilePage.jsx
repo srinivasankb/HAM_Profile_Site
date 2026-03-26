@@ -246,7 +246,7 @@ export default function ProfilePage() {
                     <div className="card-label"><Radio size={14} /> Station & Rig</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
                         <div style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)' }}>Rig: Baofeng UV-17R Plus</p>
+                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)' }}>Rig: Baofeng M13 Pro</p>
                             <p style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.6' }}>Operating primarily on <strong>2m/70cm</strong> bands with a focus on <strong>QRP</strong>.</p>
                         </div>
                         <div style={{ flex: '1 1 200px', minWidth: 0, background: 'var(--secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>

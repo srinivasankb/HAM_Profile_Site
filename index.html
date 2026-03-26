@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VU35KB - Srinivasan KB | Amateur Radio Station</title>
+    <meta name="description"
+        content="Personal amateur radio profile of VU35KB - Srinivasan KB based in Rajapalayam, India.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fdfdfd;
+            --card-bg: #ffffff;
+            --text: #171717;
+            --text-muted: #737373;
+            --accent: #0f172a;
+            --accent-light: #f1f5f9;
+            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+            --morse-color: rgba(15, 23, 42, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            padding: 4rem 1.5rem;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .morse-bg {
+            position: fixed;
+            top: 10%;
+            left: -5%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15vw;
+            color: var(--morse-color);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: -1;
+            user-select: none;
+            letter-spacing: -0.05em;
+        }
+
+        .container {
+            max-width: 900px;
+            /* narrowed for a tighter reading experience */
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .callsign {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            /* Pill shape */
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+            color: #000000;
+        }
+
+        .location {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            font-weight: 400;
+        }
+
+        .utc-clock {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            background: #ffffff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-label {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .icon {
+            width: 1.2rem;
+            height: 1.2rem;
+            stroke-width: 2.5;
+        }
+
+        .icon-pulse {
+            width: 1.2rem;
+            height: 1.2rem;
+            stroke-width: 2.5;
+        }
+
+        .wave {
+            animation: broadcast 2s infinite ease-out;
+            transform-origin: center 20px;
+        }
+
+        .wave-1 {
+            animation-delay: 0s;
+        }
+
+        .wave-2 {
+            animation-delay: 0.3s;
+        }
+
+        .wave-3 {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes broadcast {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 0;
+                transform: scale(1.2);
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .details-list {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .details-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .details-list li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-key {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .detail-val {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text);
+            text-align: right;
+        }
+
+        .copyable {
+            cursor: pointer;
+            transition: color 0.2s;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .copyable:hover {
+            color: var(--accent);
+        }
+
+        .copy-hint {
+            font-size: 0.7rem;
+            background: var(--accent);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .copyable:hover .copy-hint {
+            opacity: 1;
+            bottom: calc(100% + 5px);
+        }
+
+        .bio {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            line-height: 1.7;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 3rem;
+        }
+
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: var(--text);
+        }
+
+        .sign-off {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #a3a3a3;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            main {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="morse-bg">...- ..- ...-- ..... -.- -...</div>
+    <div class="container">
+        <header>
+            <div class="callsign" id="callsign">
+                <svg class="icon-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                    <path class="wave wave-1" d="M8.5 16.5a5 5 0 0 1 7 0" />
+                    <path class="wave wave-2" d="M5.5 13.5a9 9 0 0 1 13 0" />
+                    <path class="wave wave-3" d="M2.5 10.5a13 13 0 0 1 19 0" />
+                </svg>
+                VU35KB
+            </div>
+            <h1 id="name">Srinivasan KB</h1>
+            <div class="location">
+                <span>Rajapalayam, Tamil Nadu, India 🇮🇳</span>
+                <span class="utc-clock" id="utc-clock">00:00:00 UTC</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="card">
+                <span class="card-label">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 2v20" />
+                        <path d="M7 22h10" />
+                        <path d="M9 10h6" />
+                        <path d="M10 6h4" />
+                        <path d="M8 16h8" />
+                    </svg>
+                    Station Information
+                </span>
+                <ul class="details-list">
+                    <li><span class="detail-key">Grid Square</span>
+                        <span class="detail-val copyable" onclick="copyGrid('MJ89sk', this)">
+                            MJ89sk
+                            <span class="copy-hint">Copy Grid</span>
+                        </span>
+                    </li>
+                    <li><span class="detail-key">License</span> <span class="detail-val">ASOC Restricted Grade</span>
+                    </li>
+                    <li><span class="detail-key">Operator Since</span> <span class="detail-val">March 2026</span></li>
+                </ul>
+                <p class="bio">
+                    A newcomer exploring the world of Amateur Radio and QRP operations from Southern India. Focused on
+                    learning and experimenting with various modes and antennas.
+                </p>
+            </section>
+
+            <section class="card">
+                <span class="card-label">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                        <line x1="12" y1="18" x2="12.01" y2="18" />
+                    </svg>
+                    Equipment & Operations
+                </span>
+                <ul class="details-list">
+                    <li><span class="detail-key">Primary Rig</span> <span class="detail-val">Baofeng M13 Pro</span>
+                    </li>
+                    <li><span class="detail-key">Frequency Bands</span> <span class="detail-val">2m / 70cm
+                            (VHF/UHF)</span></li>
+                    <li><span class="detail-key">Operating Style</span> <span class="detail-val">QRP / Portable</span>
+                    </li>
+                </ul>
+            </section>
+
+
+        </main>
+
+        <footer>
+            <div class="links">
+                <a href="https://ham.srinikb.in/" target="_blank">Personal Portal</a>
+                <a href="https://www.qrz.com/db/VU35KB" target="_blank">QRZ Profile</a>
+            </div>
+            <p class="sign-off">73 de VU35KB - Small Power, Big Fun (QRP)!</p>
+        </footer>
+    </div>
+
+    <script>
+        // UTC Clock
+        function updateUTC() {
+            const now = new Date();
+            const timeString = now.toISOString().split('T')[1].split('.')[0] + ' UTC';
+            document.getElementById('utc-clock').textContent = timeString;
+        }
+        setInterval(updateUTC, 1000);
+        updateUTC();
+
+        // Copy Grid Function
+        function copyGrid(text, el) {
+            navigator.clipboard.writeText(text).then(() => {
+                const hint = el.querySelector('.copy-hint');
+                const originalText = hint.textContent;
+                hint.textContent = 'Copied!';
+                hint.style.background = '#22c55e';
+                el.style.color = '#22c55e';
+
+                setTimeout(() => {
+                    hint.textContent = originalText;
+                    hint.style.background = '';
+                    el.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
