@@ -3,9 +3,9 @@ import Layout from '../../layouts/Layout.astro';
 import BlogList from '../../components/BlogList';
 import { getCollection } from 'astro:content';
 
-const blogs = (await getCollection('blogs')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const blogs = (await getCollection('blogs'))
+  .filter(blog => !blog.data.unlist)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
 <Layout 

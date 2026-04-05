@@ -12,9 +12,9 @@ import {
   Sun
 } from 'lucide-react';
 
-const allBlogs = (await getCollection('blogs')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const allBlogs = (await getCollection('blogs'))
+  .filter(blog => !blog.data.unlist)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const recentBlogs = allBlogs.slice(0, 3);
 ---
 

@@ -7,7 +7,7 @@ export async function GET(context) {
         title: 'VU35KB Radio Journal',
         description: 'Latest updates, technical guides, and stories from VU35KB.',
         site: context.site || 'https://vu35kb.qrz.com',
-        items: blogs.map((post) => ({
+        items: blogs.filter(post => !post.data.unlist).map((post) => ({
             title: post.data.title,
             pubDate: post.data.date,
             description: post.data.description,
