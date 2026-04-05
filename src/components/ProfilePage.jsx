@@ -145,7 +145,7 @@ export default function ProfilePage() {
                     <div className="card-label"><Award size={14} /> License</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <div className="card-value">ASOC Restricted Grade</div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: March 2026</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: April 2026</p>
                     </div>
                 </div>
                 <div className="modern-card">
