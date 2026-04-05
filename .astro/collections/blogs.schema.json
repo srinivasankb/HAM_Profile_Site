@@ -2,6 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "unlisted": {
+      "default": false,
+      "type": "boolean"
+    },
     "title": {
       "type": "string"
     },
@@ -10,21 +14,18 @@
       "format": "date-time"
     },
     "author": {
-      "default": "Srinivasan KB",
       "type": "string"
     },
     "description": {
       "type": "string"
     },
     "tags": {
-      "default": [],
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "image": {
-      "default": "/avatar.png",
       "type": "string"
     },
     "$schema": {
@@ -32,12 +33,12 @@
     }
   },
   "required": [
+    "unlisted",
     "title",
     "date",
     "author",
     "description",
-    "tags",
-    "image"
+    "tags"
   ],
   "additionalProperties": false
 }

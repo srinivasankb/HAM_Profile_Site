@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 const allBlogs = (await getCollection('blogs'))
-  .filter(blog => !blog.data.unlist)
+  .filter(blog => !blog.data.unlisted)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const recentBlogs = allBlogs.slice(0, 3);
 ---

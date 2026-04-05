@@ -5,7 +5,7 @@ author: Srinivasan KB
 description: My first ever contact on the 2m band with a local operator.
 tags: [Amateur Radio, QRP]
 image: /images/blog/first-contact.jpg
-unlist: true
+unlisted: true
 ---
 
 Today was a momentous day. I made my first contact using my new Baofeng M13 Pro. After setting up a simple dipole antenna on my balcony, I heard VU2XYZ calling.

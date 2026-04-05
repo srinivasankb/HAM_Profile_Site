@@ -23,9 +23,9 @@ const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
 
 // We'll need the blog data for the sidebar
 import { getCollection } from 'astro:content';
-const blogs = (await getCollection('blogs')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const blogs = (await getCollection('blogs'))
+  .filter(blog => !blog.data.unlisted)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const recentBlogs = blogs.slice(0, 3);
 ---
 

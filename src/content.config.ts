@@ -4,12 +4,13 @@ import { glob } from 'astro/loaders';
 const blogs = defineCollection({
     loader: glob({ pattern: "**/*.md", base: "./src/content/blogs" }),
     schema: z.object({
+        unlisted: z.boolean().default(false),
         title: z.string(),
-        date: z.coerce.date(), // Using z.coerce.date() is cleaner in Astro 6
-        author: z.string().default('Srinivasan KB'),
+        date: z.coerce.date(),
+        author: z.string(),
         description: z.string(),
-        tags: z.array(z.string()).default([]),
-        image: z.string().default('/avatar.png'),
+        tags: z.array(z.string()),
+        image: z.string().optional(),
     }),
 });
 
