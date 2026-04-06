@@ -1,0 +1,22 @@
+# VU35KB - Amateur Radio Profile
+
+> A curated resource for Amateur Radio (HAM), QRP operations, and technical technical technical technical technical technical explorations.
+
+## Key Sections
+
+- [Radio Journal](https://ham.srinikb.in/blog): Chronicling the journey of a newcomer in HAM radio, with technical updates and first-hand experiences.
+- [Resource Library](https://ham.srinikb.in/resources): A knowledge base of technical manuals, operating procedures, and curated tools for radio communication.
+- [Station Details](https://ham.srinikb.in/station): Technical specifications of the station, including current rig, license status, and live environmental data.
+- [Grid Explorer](https://ham.srinikb.in/grid): Interactive maidenhead grid square visualization for radio propagation analysis.
+
+## Core Knowledge Areas
+
+- **Operating Standards**: NATO Phonetic Alphabet, Voice Q-Codes, RST reporting, and standard contact procedures.
+- **Station Infrastructure**: QRP rig setup (Baofeng M13 Pro), license grades (ASOC Restricted), and Rajapalayam locale details.
+- **Tech Explorations**: Grid Square mathematics, station automation, and HAM radio digital tools.
+
+## Meta
+- **Callsign**: VU35KB
+- **Location**: Rajapalayam, IN
+- **Grid Square**: MJ89sk
+- **Primary Domain**: https://ham.srinikb.in

@@ -9,7 +9,8 @@ import {
   ArrowRight, 
   Award,
   Cloud,
-  Sun
+  Sun,
+  Users
 } from 'lucide-react';
 
 const allBlogs = (await getCollection('blogs'))
@@ -56,6 +57,18 @@ const recentBlogs = allBlogs.slice(0, 3);
         <p style="font-size: 0.8rem; color: var(--muted-foreground);">Focusing on 2m/70cm QRP ops</p>
       </div>
     </div>
+
+    <!-- Radio Clubs Membership -->
+    <section style="margin-top: 4rem;">
+       <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 2rem;">Radio Clubs</h2>
+       <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+         <div class="modern-card club-card">
+           <div class="card-label"><Users size={14} /> Member</div>
+           <div class="card-value" style="font-size: 1.1rem; line-height: 1.4;">Rajapalayam International Radio Communicators Club – RIRCOM</div>
+           <p style="font-size: 0.85rem; color: var(--muted-foreground);">Engaging with the local and international HAM community.</p>
+         </div>
+       </div>
+    </section>
 
     <!-- Latest Blogs Section -->
     <section style="margin-top: 4rem;">

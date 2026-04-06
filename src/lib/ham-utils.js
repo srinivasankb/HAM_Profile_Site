@@ -51,28 +51,39 @@ export function getGridBounds(grid) {
 }
 
 export function getSunTimes(lat, lon, date = new Date()) {
-    const toRad = (deg) => (deg * Math.PI) / 180;
-    const toDeg = (rad) => (rad * 180) / Math.PI;
-    const JD = Math.floor(date.getTime() / 86400000) + 2440587.5;
-    const n = JD - 2451545.0;
-    const L = (280.46 + 0.9856474 * n) % 360;
-    const g = toRad((357.528 + 0.9856003 * n) % 360);
-    const lambda = toRad(L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g));
-    const epsilon = toRad(23.439 - 0.0000004 * n);
-    const sinDec = Math.sin(epsilon) * Math.sin(lambda);
-    const dec = Math.asin(sinDec);
-    const cosHA = (Math.cos(toRad(90.833)) - Math.sin(toRad(lat)) * sinDec) / (Math.cos(toRad(lat)) * Math.cos(dec));
-    if (cosHA < -1 || cosHA > 1) return null;
-    const HA = toDeg(Math.acos(cosHA));
-    const EqT = 4 * (L - 0.0057183 - toDeg(Math.atan2(Math.sin(lambda) * Math.cos(epsilon), Math.cos(lambda))) + 360 * Math.cos(epsilon) * Math.sin(lambda) / (2 * Math.PI));
-    const solarNoonMin = 720 - 4 * lon - EqT;
-    const sunriseMin = solarNoonMin - HA * 4;
-    const sunsetMin = solarNoonMin + HA * 4;
-    const toUtcDate = (minutesFromMidnightUtc) => {
+    const rad = Math.PI / 180;
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+
+    // Fractional year in radians
+    const gamma = (2 * Math.PI / 365) * (dayOfYear - 1 + (date.getUTCHours() - 12) / 24);
+
+    // Equation of time in minutes
+    const eqtime = 229.18 * (0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
+
+    // Solar declination angle in radians
+    const decl = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma) - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma) - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+
+    // Hour angle for sunrise/sunset (90.833 degrees zenith accounts for refraction)
+    const ha_arg = (Math.cos(90.833 * rad) / (Math.cos(lat * rad) * Math.cos(decl)) - Math.tan(lat * rad) * Math.tan(decl));
+
+    if (ha_arg < -1 || ha_arg > 1) return null; // Sun doesn't rise or set
+
+    const ha = Math.acos(ha_arg) / rad;
+
+    // Solar noon in UTC minutes
+    const solarNoon = 720 - (4 * lon) - eqtime;
+    const sunriseMin = solarNoon - (4 * ha);
+    const sunsetMin = solarNoon + (4 * ha);
+
+    const minutesToDate = (min) => {
         const d = new Date(date);
         d.setUTCHours(0, 0, 0, 0);
-        d.setTime(d.getTime() + minutesFromMidnightUtc * 60000);
+        d.setUTCMinutes(Math.round(min));
         return d;
     };
-    return { sunrise: toUtcDate(sunriseMin), sunset: toUtcDate(sunsetMin) };
+
+    return {
+        sunrise: minutesToDate(sunriseMin),
+        sunset: minutesToDate(sunsetMin)
+    };
 }

@@ -1,0 +1,246 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import { 
+  ChevronLeft,
+  Calendar,
+  Tag,
+  Clock,
+  ExternalLink,
+  BookOpen
+} from 'lucide-react';
+
+export async function getStaticPaths() {
+  const resources = await getCollection('resources');
+  return resources.map(resource => ({
+    params: { id: resource.id },
+    props: { resource },
+  }));
+}
+
+const { resource } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(resource);
+
+const categories = {
+  operating: { label: 'Operating' },
+  technical: { label: 'Technical' },
+  software: { label: 'Software' },
+  learning: { label: 'Learning' },
+  tools: { label: 'Tools' },
+};
+
+const categoryLabel = categories[resource.data.category as keyof typeof categories]?.label || resource.data.category;
+---
+
+<Layout title={`${resource.data.title} | Resource Library`} description={resource.data.description}>
+  <div class="modern-container article-container">
+    <nav class="breadcrumb">
+      <a href="/resources" class="back-link">
+        <ChevronLeft size={16} /> Back to Library
+      </a>
+    </nav>
+
+    <header class="article-header">
+      <div class="article-meta">
+        <span class={`category-tag ${resource.data.category}`}>
+          {categoryLabel}
+        </span>
+        {resource.data.pinned && <span class="pinned-label">Essential</span>}
+      </div>
+      
+      <h1 class="article-title">{resource.data.title}</h1>
+      <p class="article-description">{resource.data.description}</p>
+
+      {resource.data.url && (
+        <div class="external-box">
+          <p>This resource is also available at an external location:</p>
+          <a href={resource.data.url} target="_blank" rel="noopener noreferrer" class="external-action">
+            Visit Source Website <ExternalLink size={16} />
+          </a>
+        </div>
+      )}
+    </header>
+
+    <hr class="header-divider" />
+
+    <article class="prose">
+      <Content />
+    </article>
+
+    <footer class="article-footer">
+      <div class="footer-note">
+        <BookOpen size={16} /> Part of the VU35KB Knowledge Base
+      </div>
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  .article-container {
+    max-width: 720px;
+    padding-top: 2rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 3rem;
+  }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--primary);
+  }
+
+  .article-header {
+    margin-bottom: 3rem;
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+  }
+
+  .category-tag.software { background: #eff6ff; color: #1e40af; }
+  .category-tag.learning { background: #f0fdf4; color: #166534; }
+  .category-tag.technical { background: #faf5ff; color: #6b21a8; }
+  .category-tag.operating { background: #fff7ed; color: #9a3412; }
+  .category-tag.tools { background: #f8fafc; color: #334155; }
+
+  .pinned-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #f59e0b;
+    text-transform: uppercase;
+  }
+
+  .article-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1.25rem;
+    color: var(--foreground);
+  }
+
+  .article-description {
+    font-size: 1.25rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .external-box {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .external-box p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    margin-bottom: 0.75rem;
+  }
+
+  .external-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    text-decoration: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .external-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-divider {
+    border: 0;
+    height: 1px;
+    background: var(--border);
+    margin: 3rem 0;
+  }
+
+  .prose {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--foreground);
+  }
+
+  .prose :global(h2) {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 3rem 0 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .prose :global(p) {
+    margin-bottom: 1.5rem;
+  }
+
+  .prose :global(ul), .prose :global(ol) {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose :global(code) {
+    background: var(--secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .article-footer {
+    margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+  }
+
+  @media (max-width: 640px) {
+    .article-title {
+      font-size: 2rem;
+    }
+  }
+</style>

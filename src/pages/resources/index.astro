@@ -1,0 +1,269 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { 
+  Cpu, 
+  GraduationCap, 
+  Radio, 
+  Wrench, 
+  Library, 
+  ArrowUpRight,
+  ShieldQuestion,
+  ExternalLink,
+  BookOpen,
+  Pin
+} from 'lucide-react';
+
+const allResources = (await getCollection('resources'))
+  .filter(resource => !resource.data.unlisted)
+  .sort((a, b) => {
+    // Sort by pinned first, then by title
+    if (a.data.pinned && !b.data.pinned) return -1;
+    if (!a.data.pinned && b.data.pinned) return 1;
+    return a.data.title.localeCompare(b.data.title);
+  });
+
+const categories = {
+  operating: { icon: Radio, label: 'Operating' },
+  technical: { icon: Cpu, label: 'Technical' },
+  software: { icon: Library, label: 'Software' },
+  learning: { icon: GraduationCap, label: 'Learning' },
+  tools: { icon: Wrench, label: 'Tools' },
+};
+
+// Map Lucide components for dynamic icon usage
+const iconMap = {
+  Cpu,
+  GraduationCap,
+  Radio,
+  Wrench,
+  Library,
+  BookOpen,
+  ShieldQuestion,
+};
+
+const title = "Resource Library";
+const description = "A curated collection of tools, manuals, and learning materials for the amateur radio enthusiast.";
+---
+
+<Layout title={title} description={description}>
+  <div class="modern-container">
+    <div class="resources-header">
+      <div class="header-badge">Collective Intelligence</div>
+      <h1 class="name-heading">Resource Library</h1>
+      <p class="resources-intro">
+        A hand-picked selection of external links and knowledge bases I've found indispensable for operating and learning the ropes of HAM radio.
+      </p>
+    </div>
+
+    <div class="resources-grid">
+      {allResources.map((resource) => {
+        const IconComponent = iconMap[resource.data.icon as keyof typeof iconMap] || ShieldQuestion;
+        const CategoryInfo = categories[resource.data.category as keyof typeof categories];
+        const CategoryIcon = CategoryInfo.icon;
+        
+        const isExternal = resource.data.url?.startsWith('http');
+        const hasBody = resource.body?.trim().length > 0;
+        
+        // If it has a body, it's an internal article regardless of external URL status
+        const isInternalArticle = hasBody;
+        const targetUrl = isInternalArticle ? `/resources/${resource.id}` : (resource.data.url || '#');
+        const isActuallyExternal = isExternal && !isInternalArticle;
+        
+        return (
+          <a href={targetUrl} target={isActuallyExternal ? "_blank" : "_self"} rel={isActuallyExternal ? "noopener noreferrer" : ""} class="resource-card modern-card">
+            <div class="card-header-row">
+              <div class={`category-tag ${resource.data.category}`}>
+                <CategoryIcon size={12} />
+                <span>{CategoryInfo.label}</span>
+              </div>
+              {resource.data.pinned && (
+                <div class="pinned-badge" title="Essential Resource">
+                  <Pin size={12} />
+                </div>
+              )}
+            </div>
+
+            <div class="card-main">
+              <div class="resource-icon-wrap">
+                <IconComponent size={24} />
+              </div>
+              <div class="resource-text">
+                <h3 class="resource-title">{resource.data.title}</h3>
+                <p class="resource-desc">{resource.data.description}</p>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <span class="external-indicator">
+                {isExternal && !resource.body?.trim() ? (
+                  <>Visit Site <ExternalLink size={12} /></>
+                ) : (
+                  <>Read Full Guide <ArrowUpRight size={12} /></>
+                )}
+              </span>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    {allResources.length === 0 && (
+      <div class="empty-state">
+        <Library size={48} stroke-width={1} />
+        <p>No resources found yet. Check back soon!</p>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .resources-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .header-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--secondary);
+    color: var(--muted-foreground);
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .resources-intro {
+    color: var(--muted-foreground);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .resources-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .resource-card {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+    background: var(--card);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+    padding: 1.5rem;
+  }
+
+  .resource-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+  }
+
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+  }
+
+  .category-tag.software { background: #eff6ff; color: #1e40af; }
+  .category-tag.learning { background: #f0fdf4; color: #166534; }
+  .category-tag.technical { background: #faf5ff; color: #6b21a8; }
+  .category-tag.operating { background: #fff7ed; color: #9a3412; }
+  .category-tag.tools { background: #f8fafc; color: #334155; }
+
+  .pinned-badge {
+    color: #f59e0b;
+  }
+
+  .card-main {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .resource-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  .resource-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .resource-desc {
+    font-size: 0.9rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+  }
+
+  .card-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .external-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .resource-card:hover .external-indicator {
+    opacity: 1;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 6rem 0;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+</style>

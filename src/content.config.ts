@@ -14,6 +14,20 @@ const blogs = defineCollection({
     }),
 });
 
+const resources = defineCollection({
+    loader: glob({ pattern: "**/*.md", base: "./src/content/resources" }),
+    schema: z.object({
+        unlisted: z.boolean().default(false),
+        title: z.string(),
+        description: z.string(),
+        url: z.string().optional(),
+        category: z.enum(['operating', 'technical', 'software', 'learning', 'tools']),
+        icon: z.string().optional(),
+        pinned: z.boolean().default(false),
+    }),
+});
+
 export const collections = {
     'blogs': blogs,
+    'resources': resources,
 };

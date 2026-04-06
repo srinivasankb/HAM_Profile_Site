@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "unlisted": {
+      "default": false,
+      "type": "boolean"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "operating",
+        "technical",
+        "software",
+        "learning",
+        "tools"
+      ]
+    },
+    "icon": {
+      "type": "string"
+    },
+    "pinned": {
+      "default": false,
+      "type": "boolean"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "unlisted",
+    "title",
+    "description",
+    "category",
+    "pinned"
+  ],
+  "additionalProperties": false
+}

@@ -1,5 +1,7 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Menu, Home } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library, Search } from 'lucide-react';
+import CommandMenu from '../components/CommandMenu.astro';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
@@ -26,7 +28,20 @@ import { getCollection } from 'astro:content';
 const blogs = (await getCollection('blogs'))
   .filter(blog => !blog.data.unlisted)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const resources = (await getCollection('resources'))
+  .filter(resource => !resource.data.unlisted);
+
 const recentBlogs = blogs.slice(0, 3);
+
+// Build search items for CommandMenu
+const searchItems = [
+  { title: 'Home', url: '/', type: 'page' },
+  { title: 'Station Details', url: '/station', type: 'page' },
+  { title: 'Grid Explorer', url: '/grid', type: 'page' },
+  ...blogs.map(b => ({ title: b.data.title, url: `/blog/${b.id}`, type: 'blog', description: b.data.description })),
+  ...resources.map(r => ({ title: r.data.title, url: `/resources/${r.id}`, type: 'resource', description: r.data.description }))
+];
 ---
 
 <!doctype html>
@@ -57,6 +72,8 @@ const recentBlogs = blogs.slice(0, 3);
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content={ogImage} />
     
+    <ClientRouter />
+
     <!-- RSS Discovery -->
     <link rel="alternate" type="application/rss+xml" title="VU35KB Radio Journal RSS Feed" href="/blog/rss.xml" />
     <meta name="theme-color" content="#18181b" />
@@ -64,6 +81,26 @@ const recentBlogs = blogs.slice(0, 3);
     <!-- Analytics -->
     <script is:inline defer data-domain="ham.srinikb.in" src="https://analytics.srinikb.in/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js"></script>
     <script is:inline>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+
+    <!-- SEO Enhancements -->
+    <link rel="canonical" href={currentUrl} />
+    
+    <!-- JSON-LD / Structured Data -->
+    <script type="application/ld+json" is:inline>
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "description": "Amateur Radio Operator Station VU35KB - Rajapalayam, IN",
+        "name": "VU35KB Station",
+        "mainEntity": {
+          "@type": "Person",
+          "name": "Srinivasan KB",
+          "alternateName": "VU35KB",
+          "description": "HAM Radio Operator, QRP Enthusiast",
+          "jobTitle": "Amateur Radio Explorer"
+        }
+      }
+    </script>
 	</head>
 	<body>
     <div id="app-root" class="app-layout">
@@ -93,7 +130,7 @@ const recentBlogs = blogs.slice(0, 3);
         <!-- Desktop Top Nav -->
         <header class="desktop-nav">
           <div class="nav-container">
-            <a href="/" class="nav-logo">
+            <a href="/" class="nav-logo" transition:name="site-logo">
               <Radio size={24} /> <span class="logo-text">VU35KB</span>
             </a>
             
@@ -101,10 +138,16 @@ const recentBlogs = blogs.slice(0, 3);
               <a href="/" class={`nav-item ${pathname === '/' ? 'active' : ''}`}><Home size={18} /> Home</a>
               <a href="/station" class={`nav-item ${pathname.startsWith('/station') ? 'active' : ''}`}><MapPin size={18} /> Station</a>
               <a href="/blog" class={`nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}><BookText size={18} /> Journal</a>
+              <a href="/resources" class={`nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}><Library size={18} /> Resources</a>
               <a href="/grid" class={`nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}><Compass size={18} /> Grid Explorer</a>
             </nav>
 
             <div class="nav-actions">
+               <button class="search-trigger" title="Search (Cmd+K)">
+                 <Search size={18} />
+                 <span>Search</span>
+                 <kbd class="cmd-k">⌘K</kbd>
+               </button>
                <a href="mailto:VU35KB@qsl.net" class="contact-btn">Get in touch</a>
             </div>
           </div>
@@ -115,9 +158,14 @@ const recentBlogs = blogs.slice(0, 3);
           <a href="/" class="mobile-logo" style="text-decoration: none; color: inherit;">
             <Radio size={20} /> VU35KB
           </a>
-          <button class="burger-btn">
-            <Menu size={24} />
-          </button>
+          <div class="mobile-header-actions">
+            <button class="mobile-search-btn" aria-label="Search">
+              <Search size={22} />
+            </button>
+            <button class="burger-btn">
+              <Menu size={24} />
+            </button>
+          </div>
         </header>
 
         <!-- Mobile Menu Overlay -->
@@ -134,11 +182,15 @@ const recentBlogs = blogs.slice(0, 3);
             </div>
 
             <div class="mobile-menu-section">
-              <div class="sidebar-heading">Journal</div>
+              <div class="sidebar-heading">Knowledge Base</div>
               <a href="/blog" class={`mobile-nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}>
-                <BookText size={20} /> Journal
+                <BookText size={20} /> Radio Journal
+              </a>
+              <a href="/resources" class={`mobile-nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}>
+                <Library size={20} /> Resource Library
               </a>
               <div class="mobile-blog-recent">
+                <div class="sidebar-subheading">Recent Journal Entries</div>
                 {recentBlogs.map(blog => (
                   <a href={`/blog/${blog.id}`} class="mobile-recent-item">
                     {blog.data.title}
@@ -149,6 +201,9 @@ const recentBlogs = blogs.slice(0, 3);
 
             <div class="mobile-menu-section">
               <div class="sidebar-heading">Tools</div>
+              <a href="/resources" class={`mobile-nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}>
+                <Library size={20} /> Resource Library
+              </a>
               <a href="/grid" class={`mobile-nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}>
                 <Compass size={20} /> Grid Explorer
               </a>
@@ -200,6 +255,8 @@ const recentBlogs = blogs.slice(0, 3);
             <p>73 de VU35KB • Rajapalayam, IN • <a href="https://srinivasan.online/" target="_blank" style="color: inherit; text-decoration: none; opacity: 0.6;">Professional Profile</a></p>
           </div>
         </footer>
+
+        <CommandMenu items={searchItems} transition:persist />
     </div>
 	</body>
 </html>
