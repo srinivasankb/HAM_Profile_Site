@@ -270,7 +270,25 @@ export default function ProfilePage() {
                                     <MapPin size={20} />
                                     <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{station.name} {station.isPrimary && <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>PRIMARY</span>}</span>
                                 </div>
-                                <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', opacity: 0.8 }}>GRID: {station.grid}</div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(station.grid);
+                                        const btn = document.getElementById(`grid-copy-${station.id}`);
+                                        if (btn) {
+                                            const oldText = btn.innerText;
+                                            btn.innerText = 'COPIED!';
+                                            btn.style.color = '#10b981';
+                                            setTimeout(() => {
+                                                btn.innerText = oldText;
+                                                btn.style.color = '';
+                                            }, 2000);
+                                        }
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.9rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    title="Click to copy Grid Square"
+                                >
+                                    GRID: <span id={`grid-copy-${station.id}`}>{station.grid}</span>
+                                </button>
                             </div>
 
                             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
@@ -283,7 +301,7 @@ export default function ProfilePage() {
                                             <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', textTransform: 'capitalize' }}>{weather ? weather.weather[0].description : 'Loading...'}</div>
                                         </div>
                                     </div>
-                                    <button className="unit-toggle" onClick={toggleUnits}>
+                                    <button className="unit-toggle" onClick={toggleUnits} aria-label={`Switch to ${units === 'metric' ? 'imperial' : 'metric'} units`}>
                                         <span className={units === 'metric' ? 'active' : ''}>°C</span>
                                         <span className="toggle-sep">|</span>
                                         <span className={units === 'imperial' ? 'active' : ''}>°F</span>
@@ -308,7 +326,7 @@ export default function ProfilePage() {
                                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
                                     <div className="card-label-row" style={{ marginBottom: '1rem' }}>
                                         <span className="card-label"><Sun size={14} /> Sun Data</span>
-                                        <button className="unit-toggle" onClick={toggleTz}>
+                                        <button className="unit-toggle" onClick={toggleTz} aria-label={`Switch to ${tzMode === 'utc' ? 'IST' : 'UTC'} timezone`}>
                                             <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
                                             <span className="toggle-sep">|</span>
                                             <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
@@ -355,11 +373,11 @@ export default function ProfilePage() {
                 <div className="modern-card">
                     <div className="card-label-row">
                         <span className="card-label"><Clock size={14} /> {getDisplayTime().label}</span>
-                        <div className="unit-toggle">
+                        <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
                             <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
                             <span className="toggle-sep">|</span>
                             <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
-                        </div>
+                        </button>
                     </div>
                     <div className="card-value" style={{ fontSize: '0.95rem' }}>{getDisplayTime().value}</div>
                 </div>

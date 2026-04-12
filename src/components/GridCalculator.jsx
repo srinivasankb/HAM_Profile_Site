@@ -10,7 +10,7 @@ import {
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Rectangle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { STATION, getMaidenhead, formatGrid, getGridBounds } from '../lib/ham-utils';
+import { STATIONS, getMaidenhead, formatGrid, getGridBounds } from '../lib/ham-utils';
 
 // Fix for default marker icon in leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -20,13 +20,15 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+const PRIMARY_STATION = STATIONS.find(s => s.isPrimary) || STATIONS[0];
+
 export default function GridCalculator() {
     const [mode, setMode] = useState('coords');
-    const [coords, setCoords] = useState({ lat: STATION.lat, lon: STATION.lon });
-    const [grid, setGrid] = useState(STATION.grid);
-    const [bounds, setBounds] = useState(getGridBounds(STATION.grid));
-    const [inputCoords, setInputCoords] = useState({ lat: STATION.lat.toFixed(4), lon: STATION.lon.toFixed(4) });
-    const [inputGrid, setInputGrid] = useState(STATION.grid);
+    const [coords, setCoords] = useState({ lat: PRIMARY_STATION.lat, lon: PRIMARY_STATION.lon });
+    const [grid, setGrid] = useState(PRIMARY_STATION.grid);
+    const [bounds, setBounds] = useState(getGridBounds(PRIMARY_STATION.grid));
+    const [inputCoords, setInputCoords] = useState({ lat: PRIMARY_STATION.lat.toFixed(4), lon: PRIMARY_STATION.lon.toFixed(4) });
+    const [inputGrid, setInputGrid] = useState(PRIMARY_STATION.grid);
     const [error, setError] = useState("");
     const [copied, setCopied] = useState(false);
     const [locationInfo, setLocationInfo] = useState(null);

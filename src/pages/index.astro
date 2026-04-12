@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import { STATIONS } from '../lib/ham-utils';
 import { 
   Radio, 
   MapPin, 
@@ -51,16 +52,13 @@ const recentBlogs = allBlogs.slice(0, 3);
         <div class="card-value">ASOC Restricted</div>
         <p style="font-size: 0.8rem; color: var(--muted-foreground);">Govt. of India</p>
       </div>
-      <div class="modern-card highlight-card">
-        <div class="card-label"><MapPin size={14} /> Station I</div>
-        <div class="card-value">Rajapalayam</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: MJ89sk</p>
-      </div>
-      <div class="modern-card highlight-card">
-        <div class="card-label"><MapPin size={14} /> Station II</div>
-        <div class="card-value">Bangalore</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: MK82uu</p>
-      </div>
+      {STATIONS.map(station => (
+        <div class="modern-card highlight-card">
+          <div class="card-label"><MapPin size={14} /> {station.isPrimary ? 'Primary Station' : 'Secondary Station'}</div>
+          <div class="card-value">{station.name}</div>
+          <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: {station.grid}</p>
+        </div>
+      ))}
       <div class="modern-card highlight-card">
         <div class="card-label"><Radio size={14} /> Primary Rig</div>
         <div class="card-value">Baofeng M13 Pro</div>

@@ -1,6 +1,5 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library, Search } from 'lucide-react';
-import CommandMenu from '../components/CommandMenu.astro';
+import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library } from 'lucide-react';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
@@ -29,19 +28,7 @@ const blogs = (await getCollection('blogs'))
   .filter(blog => !blog.data.unlisted)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const resources = (await getCollection('resources'))
-  .filter(resource => !resource.data.unlisted);
-
 const recentBlogs = blogs.slice(0, 3);
-
-// Build search items for CommandMenu
-const searchItems = [
-  { title: 'Home', url: '/', type: 'page' },
-  { title: 'Station Details', url: '/station', type: 'page' },
-  { title: 'Grid Explorer', url: '/grid', type: 'page' },
-  ...blogs.map(b => ({ title: b.data.title, url: `/blog/${b.id}`, type: 'blog', description: b.data.description })),
-  ...resources.map(r => ({ title: r.data.title, url: `/resources/${r.id}`, type: 'resource', description: r.data.description }))
-];
 ---
 
 <!doctype html>
@@ -112,19 +99,24 @@ const searchItems = [
       </script>
 
         <script>
-          const toggleMobile = () => {
-            const overlay = document.querySelector('.mobile-menu-overlay');
-            overlay?.classList.toggle('open');
+          const initLayout = () => {
+            const toggleMobile = () => {
+              const overlay = document.querySelector('.mobile-menu-overlay');
+              overlay?.classList.toggle('open');
+            };
+
+            document.querySelector('.burger-btn')?.addEventListener('click', toggleMobile);
+            
+            // Close mobile menu on nav
+            document.querySelectorAll('.mobile-nav-item, .mobile-recent-item').forEach(link => {
+              link.addEventListener('click', () => {
+                document.querySelector('.mobile-menu-overlay')?.classList.remove('open');
+              });
+            });
           };
 
-          document.querySelector('.burger-btn')?.addEventListener('click', toggleMobile);
-          
-          // Close mobile menu on nav
-          document.querySelectorAll('.mobile-nav-item, .mobile-recent-item').forEach(link => {
-            link.addEventListener('click', () => {
-              document.querySelector('.mobile-menu-overlay')?.classList.remove('open');
-            });
-          });
+          // Run on initial load and every navigation
+          document.addEventListener('astro:page-load', initLayout);
         </script>
 
         <!-- Desktop Top Nav -->
@@ -143,11 +135,6 @@ const searchItems = [
             </nav>
 
             <div class="nav-actions">
-               <button class="search-trigger" title="Search (Cmd+K)">
-                 <Search size={18} />
-                 <span>Search</span>
-                 <kbd class="cmd-k">⌘K</kbd>
-               </button>
                <a href="mailto:VU35KB@qsl.net" class="contact-btn">Get in touch</a>
             </div>
           </div>
@@ -159,9 +146,6 @@ const searchItems = [
             <Radio size={20} /> VU35KB
           </a>
           <div class="mobile-header-actions">
-            <button class="mobile-search-btn" aria-label="Search">
-              <Search size={22} />
-            </button>
             <button class="burger-btn">
               <Menu size={24} />
             </button>
@@ -201,9 +185,6 @@ const searchItems = [
 
             <div class="mobile-menu-section">
               <div class="sidebar-heading">Tools</div>
-              <a href="/resources" class={`mobile-nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}>
-                <Library size={20} /> Resource Library
-              </a>
               <a href="/grid" class={`mobile-nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}>
                 <Compass size={20} /> Grid Explorer
               </a>
@@ -257,7 +238,6 @@ const searchItems = [
           </div>
         </footer>
 
-        <CommandMenu items={searchItems} transition:persist />
     </div>
 	</body>
 </html>

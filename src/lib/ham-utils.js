@@ -17,7 +17,7 @@ export const STATIONS = [
     }
 ];
 
-export const STATION = STATIONS[0]; // Keep for backward compatibility if needed
+
 
 
 export function getMaidenhead(lat, lon) {

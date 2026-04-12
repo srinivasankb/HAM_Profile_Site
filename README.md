@@ -8,12 +8,12 @@ A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasa
 
 - **Personal Portal**: High-level introduction and bio on the homepage.
 - **Radio Journal**: A lightweight blog system using Markdown and Astro Content Collections.
-- **Station Dashboard**: Real-time station details including local time, UTC, weather (OpenWeatherMap API), and sun times.
-- **Maidenhead Grid Explorer**: Interactive tool to visualize grid square boundaries and locate coordinates.
-- **Interactive Interactivity**: Giscus (GitHub-powered) comments and reactions on blog posts.
-- **RSS Feed**: Generic RSS support for the radio journal (`/blog/rss.xml`).
-- **PWA Ready**: Manifest support for a native-like experience on mobile.
-- **Responsive Design**: Fluid layout with a collapsible sidebar for desktop and a burger menu for mobile.
+- **Multi-Station Dashboard**: Real-time telemetry for multiple stations (Rajapalayam and Bangalore) including local time, UTC, weather (OpenWeatherMap API), and sun times.
+- **Resource Library**: A curated collection of HAM radio guides, frequency charts, and technical resources.
+- **Maidenhead Grid Explorer**: Interactive tool to visualize grid square boundaries and locate coordinates with "click-to-copy" convenience.
+- **PWA Ready**: Manifest support and optimized for a high-performance experience on all devices.
+- **Responsive Design**: Modern, high-density layout featuring a collapsible mobile menu and elegant desktop navigation.
+- **Privacy First Analytics**: Lightweight visit tracking via Plausible Analytics.
 
 ## 🛠️ Tech Stack
 
@@ -24,6 +24,7 @@ A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasa
   - **Maps**: React Leaflet
   - **Icons**: Lucide React
   - **Comments**: Giscus (GitHub Discussions)
+- **Analytics**: Plausible Analytics (Privacy-focused tracking)
 - **RSS**: @astrojs/rss
 
 ## ⚡ Development
