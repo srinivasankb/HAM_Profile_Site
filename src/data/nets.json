@@ -1,0 +1,86 @@
+{
+    "bangalore": [
+        {
+            "id": "blr_01",
+            "name": "KOKHROKO NET",
+            "start": "06:30",
+            "end": "07:15",
+            "rx": "145.800",
+            "tx": "145.200",
+            "offset": "-0.6",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_02",
+            "name": "SILICON CITY NET (HF)",
+            "start": "16:30",
+            "end": "17:00",
+            "rx": "7.088",
+            "tx": "7.088",
+            "offset": "HF",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_03",
+            "name": "KREIS NET",
+            "start": "16:30",
+            "end": "17:00",
+            "rx": "145.275",
+            "tx": "144.675",
+            "offset": "-0.6",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_04",
+            "name": "EVENING NET",
+            "start": "17:00",
+            "end": "17:15",
+            "rx": "145.800",
+            "tx": "145.200",
+            "offset": "-0.6",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_05",
+            "name": "NAMMA BENGALURU DMR",
+            "start": "20:00",
+            "end": "20:15",
+            "rx": "145.275",
+            "tx": "144.675",
+            "offset": "-0.6",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_06",
+            "name": "UHF GE NET",
+            "start": "20:30",
+            "end": "20:45",
+            "rx": "434.050",
+            "tx": "437.650",
+            "offset": "+3.6",
+            "days": "Daily"
+        },
+        {
+            "id": "blr_07",
+            "name": "SILICON CITY NET (VHF)",
+            "start": "21:00",
+            "end": "21:30",
+            "rx": "145.800",
+            "tx": "145.200",
+            "offset": "-0.6",
+            "days": "Daily"
+        }
+    ],
+    "rajapalayam": [
+        {
+            "id": "rjp_01",
+            "name": "LOCAL MORNING NET",
+            "start": "07:00",
+            "end": "07:15",
+            "rx": "145.450",
+            "tx": "145.450",
+            "offset": "Simplex",
+            "days": "Daily"
+        }
+    ]
+}

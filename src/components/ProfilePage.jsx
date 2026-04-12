@@ -15,9 +15,13 @@ import {
     Thermometer,
     Sunrise,
     Sunset,
-    MapPin
+    MapPin,
+    Calendar,
+    Zap,
+    History
 } from 'lucide-react';
 import { STATIONS, getSunTimes } from '../lib/ham-utils';
+import netsData from '../data/nets.json';
 
 const WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -140,6 +144,109 @@ export default function ProfilePage() {
         }
     };
 
+    const getISTMinutes = () => {
+        const istStr = time.toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour12: false });
+        const timeStr = istStr.split(', ')[1];
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    };
+
+    const parseTimeToMinutes = (t) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+    };
+
+    const renderNetSchedule = (stationId) => {
+        const nets = netsData[stationId] || [];
+        if (nets.length === 0) return <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', fontStyle: 'italic' }}>No scheduled nets for this location.</p>;
+
+        const currentMins = getISTMinutes();
+        const ongoing = nets.filter(n => {
+            const start = parseTimeToMinutes(n.start);
+            const end = parseTimeToMinutes(n.end);
+            return currentMins >= start && currentMins < end;
+        });
+
+        const upcoming = nets.filter(n => {
+            const start = parseTimeToMinutes(n.start);
+            return start > currentMins;
+        }).sort((a, b) => parseTimeToMinutes(a.start) - parseTimeToMinutes(b.start));
+
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="net-status-section">
+                    <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem', color: ongoing.length > 0 ? '#ef4444' : 'var(--muted-foreground)' }}>
+                        <Zap size={14} fill={ongoing.length > 0 ? '#ef4444' : 'transparent'} className={ongoing.length > 0 ? 'pulse' : ''} />
+                        {ongoing.length > 0 ? 'ONGOING NOW (LIVE)' : 'NO ONGOING NETS'}
+                    </div>
+                    {ongoing.length > 0 ? (
+                        ongoing.map(n => (
+                            <div key={n.id} className="net-item ongoing" style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.05)' }}>
+                                <div>
+                                    <div style={{ fontWeight: 800, fontSize: '1rem', color: '#b91c1c' }}>{n.name}</div>
+                                    <div style={{ fontSize: '0.8rem', opacity: 0.8, color: '#b91c1c' }}>Ends at {n.end} IST</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '1.1rem' }}>{n.rx}</div>
+                                    <div style={{ fontSize: '0.7rem', opacity: 0.7, color: '#b91c1c' }}>Offset: {n.offset}</div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div style={{ padding: '0.75rem', borderRadius: '8px', border: '1px dashed var(--border)', fontSize: '0.8rem', color: 'var(--muted-foreground)', textAlign: 'center' }}>
+                            Station is currently clear. Next net starts soon.
+                        </div>
+                    )}
+                </div>
+
+                {upcoming.length > 0 && (
+                    <div className="net-status-section">
+                        <div className="card-label" style={{ color: '#2563eb', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem' }}>
+                            <Clock size={14} /> UPCOMING TODAY
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {upcoming.slice(0, 2).map(n => (
+                                <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px dashed var(--border)' }}>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{n.name}</span>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700 }}>{n.start} IST</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="net-status-section">
+                    <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem' }}>
+                        <History size={14} /> FULL SCHEDULE
+                    </div>
+                    <div className="table-container" style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>TIME (IST)</th>
+                                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>NET NAME</th>
+                                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>FREQ (MHz)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {nets.map(n => (
+                                    <tr key={n.id} style={{ borderBottom: '1px solid var(--border)', opacity: parseTimeToMinutes(n.end) < currentMins ? 0.4 : 1 }}>
+                                        <td style={{ padding: '0.5rem', whiteSpace: 'nowrap' }}>{n.start} - {n.end}</td>
+                                        <td style={{ padding: '0.5rem' }}>
+                                            <div style={{ fontWeight: 600 }}>{n.name}</div>
+                                            <div style={{ fontSize: '0.65rem', opacity: 0.6 }}>Offset: {n.offset} | TX: {n.tx}</div>
+                                        </td>
+                                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>{n.rx}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="modern-container" style={{ maxWidth: '1000px' }}>
             <header className="profile-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -151,7 +258,7 @@ export default function ProfilePage() {
                 <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>Real-time telemetry and schedule for active stations.</p>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                 {STATIONS.map(station => {
                     const weather = weatherData[station.id];
                     const sun = getSunTimes(station.lat, station.lon);
@@ -236,7 +343,7 @@ export default function ProfilePage() {
                 })}
             </div>
 
-            <div className="modern-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+            <div className="modern-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginBottom: '3rem' }}>
                 <div className="modern-card">
                     <div className="card-label"><Award size={14} /> Global License</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -257,7 +364,7 @@ export default function ProfilePage() {
                     <div className="card-value" style={{ fontSize: '0.95rem' }}>{getDisplayTime().value}</div>
                 </div>
 
-                <div className="modern-card" style={{ gridColumn: 'span 1' }}>
+                <div className="modern-card">
                     <div className="card-label"><Radio size={14} /> Rig Details</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Baofeng M13 Pro</p>
@@ -265,16 +372,38 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <div className="modern-card" style={{ gridColumn: 'span 1' }}>
+                <div className="modern-card" style={{ gridColumn: '1 / -1' }}>
                     <div className="card-label"><Award size={14} /> QSL Policy</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>QRZ.com logbook confirmed only.</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: '300px' }}>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--foreground)', marginBottom: '0.5rem', fontWeight: 600 }}>Confirmed via QRZ.com logbook.</p>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: '1.5' }}>
+                                I value technical confirmation of all my contacts. Please log our QSO on QRZ.com for immediate confirmation. For paper QSLs or other methods, please reach out via email.
+                            </p>
+                        </div>
                         <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.5rem', borderRadius: '4px', fontSize: '0.85rem', textDecoration: 'none' }}>
-                            QRZ Profile <ExternalLink size={14} />
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
+                            View QRZ Profile <ExternalLink size={16} />
                         </a>
                     </div>
                 </div>
+            </div>
+
+            { /* Net Schedule Section */}
+            <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted-foreground)', maxWidth: '600px', margin: '0 auto' }}>
+                    I regularly monitor these local nets to stay connected with the amateur radio community and occasionally participate to practice my operating skills.
+                </p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                {STATIONS.map(station => (
+                    <div key={`nets-${station.id}`} className="modern-card">
+                        <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
+                            <Calendar size={16} /> NET SCHEDULE • {station.name.toUpperCase()}
+                        </div>
+                        {renderNetSchedule(station.id)}
+                    </div>
+                ))}
             </div>
         </div>
     );
