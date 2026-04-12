@@ -1,9 +1,24 @@
-export const STATION = {
-    name: "Rajapalayam",
-    lat: 9.4503,
-    lon: 77.5516,
-    grid: "MJ89sk"
-};
+export const STATIONS = [
+    {
+        id: "rajapalayam",
+        name: "Rajapalayam",
+        lat: 9.4503,
+        lon: 77.5516,
+        grid: "MJ89sk",
+        isPrimary: true
+    },
+    {
+        id: "bangalore",
+        name: "Bangalore",
+        lat: 12.872044601068696,
+        lon: 77.67335959965526,
+        grid: "MK82uu",
+        isPrimary: false
+    }
+];
+
+export const STATION = STATIONS[0]; // Keep for backward compatibility if needed
+
 
 export function getMaidenhead(lat, lon) {
     let grid = "";

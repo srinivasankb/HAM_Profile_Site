@@ -14,14 +14,15 @@ import {
     CloudSun,
     Thermometer,
     Sunrise,
-    Sunset
+    Sunset,
+    MapPin
 } from 'lucide-react';
-import { STATION, getSunTimes } from '../lib/ham-utils';
+import { STATIONS, getSunTimes } from '../lib/ham-utils';
 
 const WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 export default function ProfilePage() {
-    const [weather, setWeather] = useState(null);
+    const [weatherData, setWeatherData] = useState({});
     const [time, setTime] = useState(new Date());
     const [units, setUnits] = useState('metric');
     const [tzMode, setTzMode] = useState('utc');
@@ -45,64 +46,76 @@ export default function ProfilePage() {
         return next;
     });
 
-    const toTemp = (c) => units === 'metric' ? `${Math.round(c)}°C` : `${Math.round(c * 9 / 5 + 32)}°F`;
+    const toTemp = (c) => {
+        if (c === undefined || c === null || isNaN(c)) return '--';
+        return units === 'metric' ? `${Math.round(c)}°C` : `${Math.round(c * 9 / 5 + 32)}°F`;
+    };
     const toWind = (ms) => units === 'metric' ? `${ms} m/s` : `${(ms * 2.237).toFixed(1)} mph`;
 
     useEffect(() => {
-        const CACHE_KEY = `weather_${STATION.lat}_${STATION.lon}`;
-        const CACHE_TTL = 5 * 60 * 1000;
+        const fetchAllWeather = async () => {
+            const results = {};
+            for (const station of STATIONS) {
+                const CACHE_KEY = `weather_${station.lat}_${station.lon}`;
+                const CACHE_TTL = 5 * 60 * 1000;
 
-        const fetchWeather = async () => {
-            const cached = localStorage.getItem(CACHE_KEY);
-            if (cached) {
-                try {
-                    const { data, timestamp } = JSON.parse(cached);
-                    if (Date.now() - timestamp < CACHE_TTL) {
-                        setWeather(data);
-                        return;
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    try {
+                        const { data, timestamp } = JSON.parse(cached);
+                        if (Date.now() - timestamp < CACHE_TTL) {
+                            results[station.id] = data;
+                            continue;
+                        }
+                    } catch (e) {
+                        localStorage.removeItem(CACHE_KEY);
                     }
-                } catch (e) {
-                    localStorage.removeItem(CACHE_KEY);
+                }
+
+                if (!WEATHER_API_KEY) {
+                    results[station.id] = {
+                        main: {
+                            temp: station.id === 'bangalore' ? 28 : 31,
+                            humidity: station.id === 'bangalore' ? 55 : 62,
+                            feels_like: station.id === 'bangalore' ? 29 : 33
+                        },
+                        weather: [{ description: 'partly cloudy', main: 'Clouds' }],
+                        wind: { speed: station.id === 'bangalore' ? 3.5 : 4.1 },
+                        mock: true
+                    };
+                    continue;
+                }
+
+
+                try {
+                    const response = await fetch(
+                        `https://api.openweathermap.org/data/2.5/weather?lat=${station.lat}&lon=${station.lon}&appid=${WEATHER_API_KEY}&units=metric`
+                    );
+                    const data = await response.json();
+                    if (response.ok) {
+                        results[station.id] = data;
+                        localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+                    }
+                } catch (err) {
+                    console.error(`Weather fetch error for ${station.name}:`, err);
                 }
             }
-
-            if (!WEATHER_API_KEY) {
-                setWeather({
-                    main: { temp: 31, humidity: 62 },
-                    weather: [{ description: 'partly cloudy', main: 'Clouds' }],
-                    wind: { speed: 4.1 },
-                    mock: true
-                });
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?lat=${STATION.lat}&lon=${STATION.lon}&appid=${WEATHER_API_KEY}&units=metric`
-                );
-                const data = await response.json();
-                if (response.ok) {
-                    setWeather(data);
-                    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-                }
-            } catch (err) {
-                console.error("Weather fetch error:", err);
-            }
+            setWeatherData(results);
         };
-        fetchWeather();
+        fetchAllWeather();
     }, []);
 
     const getWeatherIcon = (condition) => {
         const main = condition?.main?.toLowerCase();
         const desc = condition?.description?.toLowerCase();
-        if (main === 'clear') return <Sun size={48} className="weather-icon-sun" />;
+        if (main === 'clear') return <Sun size={32} className="weather-icon-sun" />;
         if (main === 'clouds') {
-            if (desc?.includes('few') || desc?.includes('scattered')) return <CloudSun size={48} className="weather-icon-cloudy" />;
-            return <Cloud size={48} className="weather-icon-cloudy" />;
+            if (desc?.includes('few') || desc?.includes('scattered')) return <CloudSun size={32} className="weather-icon-cloudy" />;
+            return <Cloud size={32} className="weather-icon-cloudy" />;
         }
-        if (main === 'rain' || main === 'drizzle' || main === 'mist') return <CloudRain size={48} className="weather-icon-rain" />;
-        if (main === 'thunderstorm') return <CloudLightning size={48} className="weather-icon-storm" />;
-        return <Cloud size={48} className="weather-icon-cloudy" />;
+        if (main === 'rain' || main === 'drizzle' || main === 'mist') return <CloudRain size={32} className="weather-icon-rain" />;
+        if (main === 'thunderstorm') return <CloudLightning size={32} className="weather-icon-storm" />;
+        return <Cloud size={32} className="weather-icon-cloudy" />;
     };
 
     const getDisplayTime = () => {
@@ -128,140 +141,143 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="modern-container">
+        <div className="modern-container" style={{ maxWidth: '1000px' }}>
             <header className="profile-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>
                 <div className="callsign-pill" style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ opacity: 0.6, fontWeight: 400, fontSize: '0.7rem' }}>CALL SIGN:</span>
                     <span>VU35KB</span>
                 </div>
-                <h1 className="name-heading" style={{ fontSize: '2rem' }}>Station Details</h1>
-                <p style={{ color: 'var(--muted-foreground)', fontSize: '0.925rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-                    Rajapalayam, IN <img src="https://flagcdn.com/w20/in.png" alt="India" style={{ width: '18px', height: 'auto', borderRadius: '2px', display: 'inline-block' }} />
-                </p>
+                <h1 className="name-heading" style={{ fontSize: '2.5rem' }}>Operating Stations</h1>
+                <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>Real-time telemetry and schedule for active stations.</p>
             </header>
 
-            <div className="modern-grid">
-                <div className="modern-card">
-                    <div className="card-label"><Award size={14} /> License</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <div className="card-value">ASOC Restricted Grade</div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: April 2026</p>
-                    </div>
-                </div>
-                <div className="modern-card">
-                    <div className="card-label"><Compass size={14} /> Grid Square</div>
-                    <div className="card-value">
-                        <a href={`/grid#${STATION.grid}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            {STATION.grid} <ExternalLink size={12} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
-                        </a>
-                    </div>
-                </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                {STATIONS.map(station => {
+                    const weather = weatherData[station.id];
+                    const sun = getSunTimes(station.lat, station.lon);
 
-                <div className="modern-card weather-section">
-                    <div className="card-label-row">
-                        <span className="card-label"><Cloud size={14} /> Live Weather @ {STATION.name}</span>
-                        <button className="unit-toggle" onClick={toggleUnits} title="Toggle units">
-                            <span className={units === 'metric' ? 'active' : ''}>°C</span>
-                            <span className="toggle-sep">|</span>
-                            <span className={units === 'imperial' ? 'active' : ''}>°F</span>
-                        </button>
-                    </div>
-                    {weather && (
-                        <div className="weather-content-enhanced">
-                            <div className="weather-main-info">
-                                <div className="weather-icon-big">
-                                    {getWeatherIcon(weather.weather[0])}
-                                </div>
-                                <div>
-                                    <div className="temp-big">{toTemp(weather.main.temp)}</div>
-                                    <div className="weather-desc-pill">{weather.weather[0].description}</div>
-                                </div>
-                            </div>
-
-                            <div className="weather-stats-grid">
-                                <div className="stat-item">
-                                    <div className="stat-label"><Thermometer size={14} /> Feels Like</div>
-                                    <div className="stat-value">{toTemp(weather.main.feels_like || weather.main.temp)}</div>
-                                </div>
-                                <div className="stat-item">
-                                    <div className="stat-label"><Droplets size={14} /> Humidity</div>
-                                    <div className="stat-value">{weather.main.humidity}%</div>
-                                </div>
-                                <div className="stat-item">
-                                    <div className="stat-label"><Wind size={14} /> Wind</div>
-                                    <div className="stat-value">{toWind(weather.wind.speed)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {(() => {
-                    const sun = getSunTimes(STATION.lat, STATION.lon);
                     return (
-                        <div className="modern-card sun-section">
-                            <div className="card-label-row">
-                                <span className="card-label"><Sun size={14} /> Sun Times @ {STATION.name}</span>
-                                <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
-                                    <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
-                                    <span className="toggle-sep">|</span>
-                                    <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
-                                </button>
+                        <div key={station.id} className="modern-card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <MapPin size={20} />
+                                    <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{station.name} {station.isPrimary && <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>PRIMARY</span>}</span>
+                                </div>
+                                <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', opacity: 0.8 }}>GRID: {station.grid}</div>
                             </div>
-                            <div className="sun-times-content">
-                                <div className="sun-time-item">
-                                    <div className="sun-icon-wrap sunrise-icon"><Sunrise size={36} /></div>
-                                    <div>
-                                        <div className="sun-time-label">Sunrise</div>
-                                        <div className="sun-time-value">{sun ? formatSunTime(sun.sunrise) : '--'}</div>
+
+                            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
+                                { /* Weather Section */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        {weather && getWeatherIcon(weather.weather[0])}
+                                        <div>
+                                            <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{weather ? toTemp(weather.main.temp) : '--'}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', textTransform: 'capitalize' }}>{weather ? weather.weather[0].description : 'Loading...'}</div>
+                                        </div>
+                                    </div>
+                                    <button className="unit-toggle" onClick={toggleUnits}>
+                                        <span className={units === 'metric' ? 'active' : ''}>°C</span>
+                                        <span className="toggle-sep">|</span>
+                                        <span className={units === 'imperial' ? 'active' : ''}>°F</span>
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                                    <div className="stat-item">
+                                        <div className="stat-label"><Thermometer size={14} /> Feels</div>
+                                        <div className="stat-value">{weather ? toTemp(weather.main.feels_like) : '--'}</div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div className="stat-label"><Droplets size={14} /> Humidity</div>
+                                        <div className="stat-value">{weather ? `${weather.main.humidity}%` : '--'}</div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div className="stat-label"><Wind size={14} /> Wind</div>
+                                        <div className="stat-value">{weather ? toWind(weather.wind.speed) : '--'}</div>
                                     </div>
                                 </div>
-                                <div className="sun-divider"></div>
-                                <div className="sun-time-item">
-                                    <div className="sun-icon-wrap sunset-icon"><Sunset size={36} /></div>
-                                    <div>
-                                        <div className="sun-time-label">Sunset</div>
-                                        <div className="sun-time-value">{sun ? formatSunTime(sun.sunset) : '--'}</div>
+
+                                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                                    <div className="card-label-row" style={{ marginBottom: '1rem' }}>
+                                        <span className="card-label"><Sun size={14} /> Sun Data</span>
+                                        <button className="unit-toggle" onClick={toggleTz}>
+                                            <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
+                                            <span className="toggle-sep">|</span>
+                                            <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
+                                        </button>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                            <Sunrise size={24} className="sunrise-icon" />
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', fontWeight: 600 }}>SUNRISE</div>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace' }}>{sun ? formatSunTime(sun.sunrise) : '--'}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                            <Sunset size={24} className="sunset-icon" />
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', fontWeight: 600 }}>SUNSET</div>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace' }}>{sun ? formatSunTime(sun.sunset) : '--'}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                                    <a href={`/grid#${station.grid}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '0.75rem', borderRadius: '8px', background: 'var(--secondary)', color: 'var(--foreground)', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+                                        Explore Grid <Compass size={14} />
+                                    </a>
+                                </div>
                             </div>
-                            <p className="sun-note">{tzMode === 'utc' ? 'UTC' : 'IST (UTC+5:30)'} times for grid MJ89sk</p>
                         </div>
                     );
-                })()}
+                })}
+            </div>
 
-                <div className="modern-card full-width-card">
+            <div className="modern-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+                <div className="modern-card">
+                    <div className="card-label"><Award size={14} /> Global License</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div className="card-value">ASOC Restricted Grade</div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: April 2026 • Govt. of India</p>
+                    </div>
+                </div>
+
+                <div className="modern-card">
                     <div className="card-label-row">
                         <span className="card-label"><Clock size={14} /> {getDisplayTime().label}</span>
-                        <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
+                        <div className="unit-toggle">
                             <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
                             <span className="toggle-sep">|</span>
                             <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
-                        </button>
+                        </div>
                     </div>
-                    <div className="card-value" style={{ fontSize: '0.9rem' }}>{getDisplayTime().value}</div>
+                    <div className="card-value" style={{ fontSize: '0.95rem' }}>{getDisplayTime().value}</div>
                 </div>
 
-                <div className="modern-card full-width-card">
-                    <div className="card-label"><Radio size={14} /> Station & Rig</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)' }}>Rig: Baofeng M13 Pro</p>
-                            <p style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.6' }}>Operating primarily on <strong>2m/70cm</strong> bands with a focus on <strong>QRP</strong>.</p>
-                        </div>
-                        <div style={{ flex: '1 1 200px', minWidth: 0, background: 'var(--secondary)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div className="card-label"><Award size={12} /> QSL Policy</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>Exclusive QRZ.com only.</p>
-                                <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.5rem', borderRadius: '4px', fontSize: '0.85rem', textDecoration: 'none' }}>
-                                    QRZ Profile <ExternalLink size={14} />
-                                </a>
-                            </div>
-                        </div>
+                <div className="modern-card" style={{ gridColumn: 'span 1' }}>
+                    <div className="card-label"><Radio size={14} /> Rig Details</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Baofeng M13 Pro</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>2m/70cm • QRP Operation • Mobile Ready</p>
+                    </div>
+                </div>
+
+                <div className="modern-card" style={{ gridColumn: 'span 1' }}>
+                    <div className="card-label"><Award size={14} /> QSL Policy</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>QRZ.com logbook confirmed only.</p>
+                        <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.5rem', borderRadius: '4px', fontSize: '0.85rem', textDecoration: 'none' }}>
+                            QRZ Profile <ExternalLink size={14} />
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+

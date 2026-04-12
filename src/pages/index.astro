@@ -31,8 +31,8 @@ const recentBlogs = allBlogs.slice(0, 3);
           <div class="hero-bio-container">
             <p class="hero-description">
               A curious newcomer exploring the world of Amateur Radio and QRP operations 
-              from Rajapalayam, IN. Discovering the magic of radio waves and 
-              documenting the journey.
+              from <strong>Rajapalayam</strong> and <strong>Bangalore</strong>, IN. 
+              Discovering the magic of radio waves and documenting the journey.
             </p>
           </div>
         </div>
@@ -45,18 +45,29 @@ const recentBlogs = allBlogs.slice(0, 3);
     </section>
 
     <!-- Quick Stats / Station Highlight -->
-    <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 2rem;">
+    <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 2rem;">
       <div class="modern-card highlight-card">
         <div class="card-label"><Award size={14} /> License</div>
-        <div class="card-value">ASOC Restricted Grade</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Licensed from WPC, Govt. of India</p>
+        <div class="card-value">ASOC Restricted</div>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Govt. of India</p>
       </div>
       <div class="modern-card highlight-card">
-        <div class="card-label"><Radio size={14} /> Rig</div>
+        <div class="card-label"><MapPin size={14} /> Station I</div>
+        <div class="card-value">Rajapalayam</div>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: MJ89sk</p>
+      </div>
+      <div class="modern-card highlight-card">
+        <div class="card-label"><MapPin size={14} /> Station II</div>
+        <div class="card-value">Bangalore</div>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: MK82uu</p>
+      </div>
+      <div class="modern-card highlight-card">
+        <div class="card-label"><Radio size={14} /> Primary Rig</div>
         <div class="card-value">Baofeng M13 Pro</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Focusing on 2m/70cm QRP ops</p>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Focusing on QRP</p>
       </div>
     </div>
+
 
     <!-- Radio Clubs Membership -->
     <section style="margin-top: 4rem;">
