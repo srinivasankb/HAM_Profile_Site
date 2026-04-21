@@ -71,16 +71,5 @@
             "days": "Daily"
         }
     ],
-    "rajapalayam": [
-        {
-            "id": "rjp_01",
-            "name": "LOCAL MORNING NET",
-            "start": "07:00",
-            "end": "07:15",
-            "rx": "145.450",
-            "tx": "145.450",
-            "offset": "Simplex",
-            "days": "Daily"
-        }
-    ]
+    "rajapalayam": []
 }

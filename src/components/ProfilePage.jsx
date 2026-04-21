@@ -2,17 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Radio,
     Award,
-    Cloud,
-    Clock,
     Compass,
-    Wind,
-    Droplets,
+    Clock,
     ExternalLink,
     Sun,
-    CloudRain,
-    CloudLightning,
-    CloudSun,
-    Thermometer,
     Sunrise,
     Sunset,
     MapPin,
@@ -23,26 +16,19 @@ import {
 import { STATIONS, getSunTimes } from '../lib/ham-utils';
 import netsData from '../data/nets.json';
 
-const WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+
 
 export default function ProfilePage() {
-    const [weatherData, setWeatherData] = useState({});
     const [time, setTime] = useState(new Date());
-    const [units, setUnits] = useState('metric');
     const [tzMode, setTzMode] = useState('utc');
 
     useEffect(() => {
-        setUnits(localStorage.getItem('pref_units') || 'metric');
         setTzMode(localStorage.getItem('pref_tz') || 'utc');
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const toggleUnits = () => setUnits(u => {
-        const next = u === 'metric' ? 'imperial' : 'metric';
-        localStorage.setItem('pref_units', next);
-        return next;
-    });
+
 
     const toggleTz = () => setTzMode(t => {
         const next = t === 'utc' ? 'ist' : 'utc';
@@ -50,77 +36,11 @@ export default function ProfilePage() {
         return next;
     });
 
-    const toTemp = (c) => {
-        if (c === undefined || c === null || isNaN(c)) return '--';
-        return units === 'metric' ? `${Math.round(c)}°C` : `${Math.round(c * 9 / 5 + 32)}°F`;
-    };
-    const toWind = (ms) => units === 'metric' ? `${ms} m/s` : `${(ms * 2.237).toFixed(1)} mph`;
-
-    useEffect(() => {
-        const fetchAllWeather = async () => {
-            const results = {};
-            for (const station of STATIONS) {
-                const CACHE_KEY = `weather_${station.lat}_${station.lon}`;
-                const CACHE_TTL = 5 * 60 * 1000;
-
-                const cached = localStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    try {
-                        const { data, timestamp } = JSON.parse(cached);
-                        if (Date.now() - timestamp < CACHE_TTL) {
-                            results[station.id] = data;
-                            continue;
-                        }
-                    } catch (e) {
-                        localStorage.removeItem(CACHE_KEY);
-                    }
-                }
-
-                if (!WEATHER_API_KEY) {
-                    results[station.id] = {
-                        main: {
-                            temp: station.id === 'bangalore' ? 28 : 31,
-                            humidity: station.id === 'bangalore' ? 55 : 62,
-                            feels_like: station.id === 'bangalore' ? 29 : 33
-                        },
-                        weather: [{ description: 'partly cloudy', main: 'Clouds' }],
-                        wind: { speed: station.id === 'bangalore' ? 3.5 : 4.1 },
-                        mock: true
-                    };
-                    continue;
-                }
 
 
-                try {
-                    const response = await fetch(
-                        `https://api.openweathermap.org/data/2.5/weather?lat=${station.lat}&lon=${station.lon}&appid=${WEATHER_API_KEY}&units=metric`
-                    );
-                    const data = await response.json();
-                    if (response.ok) {
-                        results[station.id] = data;
-                        localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-                    }
-                } catch (err) {
-                    console.error(`Weather fetch error for ${station.name}:`, err);
-                }
-            }
-            setWeatherData(results);
-        };
-        fetchAllWeather();
-    }, []);
 
-    const getWeatherIcon = (condition) => {
-        const main = condition?.main?.toLowerCase();
-        const desc = condition?.description?.toLowerCase();
-        if (main === 'clear') return <Sun size={32} className="weather-icon-sun" />;
-        if (main === 'clouds') {
-            if (desc?.includes('few') || desc?.includes('scattered')) return <CloudSun size={32} className="weather-icon-cloudy" />;
-            return <Cloud size={32} className="weather-icon-cloudy" />;
-        }
-        if (main === 'rain' || main === 'drizzle' || main === 'mist') return <CloudRain size={32} className="weather-icon-rain" />;
-        if (main === 'thunderstorm') return <CloudLightning size={32} className="weather-icon-storm" />;
-        return <Cloud size={32} className="weather-icon-cloudy" />;
-    };
+
+
 
     const getDisplayTime = () => {
         if (tzMode === 'utc') {
@@ -255,12 +175,13 @@ export default function ProfilePage() {
                     <span>VU35KB</span>
                 </div>
                 <h1 className="name-heading" style={{ fontSize: '2.5rem' }}>Operating Stations</h1>
-                <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>Real-time telemetry and schedule for active stations.</p>
+                <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>
+                    Real-time telemetry and schedule for active stations.
+                </p>
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                 {STATIONS.map(station => {
-                    const weather = weatherData[station.id];
                     const sun = getSunTimes(station.lat, station.lon);
 
                     return (
@@ -292,34 +213,14 @@ export default function ProfilePage() {
                             </div>
 
                             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
-                                { /* Weather Section */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        {weather && getWeatherIcon(weather.weather[0])}
-                                        <div>
-                                            <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{weather ? toTemp(weather.main.temp) : '--'}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', textTransform: 'capitalize' }}>{weather ? weather.weather[0].description : 'Loading...'}</div>
-                                        </div>
-                                    </div>
-                                    <button className="unit-toggle" onClick={toggleUnits} aria-label={`Switch to ${units === 'metric' ? 'imperial' : 'metric'} units`}>
-                                        <span className={units === 'metric' ? 'active' : ''}>°C</span>
-                                        <span className="toggle-sep">|</span>
-                                        <span className={units === 'imperial' ? 'active' : ''}>°F</span>
-                                    </button>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                                     <div className="stat-item">
-                                        <div className="stat-label"><Thermometer size={14} /> Feels</div>
-                                        <div className="stat-value">{weather ? toTemp(weather.main.feels_like) : '--'}</div>
+                                        <div className="stat-label"><Compass size={14} /> Latitude</div>
+                                        <div className="stat-value" style={{ fontSize: '0.9rem' }}>{station.lat.toFixed(4)}°</div>
                                     </div>
                                     <div className="stat-item">
-                                        <div className="stat-label"><Droplets size={14} /> Humidity</div>
-                                        <div className="stat-value">{weather ? `${weather.main.humidity}%` : '--'}</div>
-                                    </div>
-                                    <div className="stat-item">
-                                        <div className="stat-label"><Wind size={14} /> Wind</div>
-                                        <div className="stat-value">{weather ? toWind(weather.wind.speed) : '--'}</div>
+                                        <div className="stat-label"><Compass size={14} /> Longitude</div>
+                                        <div className="stat-value" style={{ fontSize: '0.9rem' }}>{station.lon.toFixed(4)}°</div>
                                     </div>
                                 </div>
 
