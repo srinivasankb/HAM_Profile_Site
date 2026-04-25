@@ -11,7 +11,8 @@ import {
     MapPin,
     Calendar,
     Zap,
-    History
+    History,
+    Users
 } from 'lucide-react';
 import { STATIONS, getSunTimes } from '../lib/ham-utils';
 import netsData from '../data/nets.json';
@@ -180,7 +181,7 @@ export default function ProfilePage() {
                 </p>
             </header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="modern-grid grid-2" style={{ marginBottom: '2rem' }}>
                 {STATIONS.map(station => {
                     const sun = getSunTimes(station.lat, station.lon);
 
@@ -262,12 +263,20 @@ export default function ProfilePage() {
                 })}
             </div>
 
-            <div className="modern-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginBottom: '3rem' }}>
+            <div className="modern-grid grid-2" style={{ marginBottom: '3rem' }}>
                 <div className="modern-card">
                     <div className="card-label"><Award size={14} /> Global License</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <div className="card-value">ASOC Restricted Grade</div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Licensed since: April 2026 • Govt. of India</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Valid till: 03 July 2075 • Govt. of India</p>
+                    </div>
+                </div>
+
+                <div className="modern-card">
+                    <div className="card-label"><Users size={14} /> Echolink</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Available on Echolink</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>Search for VU35KB to connect.</p>
                     </div>
                 </div>
 

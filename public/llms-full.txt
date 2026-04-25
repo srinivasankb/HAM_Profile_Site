@@ -1,0 +1,43 @@
+# VU35KB - Amateur Radio Profile (Full Index)
+
+This document provides a comprehensive overview of the technical knowledge and content available on the VU35KB Amateur Radio platform.
+
+## Station Overview
+
+- **Operator**: Srinivasan KB (VU35KB)
+- **License**: ASOC Restricted Grade (Govt. of India), valid until 03 July 2075.
+- **Primary Rig**: Baofeng M13 Pro (VHF/UHF, 2m/70cm)
+- **Operation Style**: QRP (Low Power), Portable, Digital Exploration.
+- **Primary QTH**: Rajapalayam, Tamil Nadu, India (Grid: MJ89sk)
+- **Secondary QTH**: Bangalore, Karnataka, India (Grid: MK82uu)
+
+## Knowledge Base & Articles
+
+### [Voice Communication Essentials](https://ham.srinikb.in/resources/voice-comm-basics)
+A comprehensive guide to standard operating procedures:
+- **NATO Phonetic Alphabet**: Alpha to Zulu for clear spelling.
+- **Essential Q-Codes**: QRG, QRM, QRN, QRO, QRP, QRV, QRX, QRZ, QSB, QSL, QSO, QSY, QTH.
+- **RST Signal Reporting**: Scale for Readability (1-5) and Strength (1-9).
+- **Pro-words**: 73, CQ, OM, YL, XYL, DX, Rig, Shack, Roger, Over, Clear.
+
+### [Radio Journal (Blog)](https://ham.srinikb.in/blog)
+Documentation of the HAM radio learning journey:
+- **Understanding Maidenhead Grid Squares**: Explanation of the MJ89sk coordinate system.
+- **Unboxing the Baofeng M13 Pro**: First impressions of the primary station rig.
+- **First On-Air Contact**: Narrative of the first successful 2m band QSO with VU2XYZ.
+
+## Interactive Tools
+
+### [Maidenhead Grid Explorer](https://ham.srinikb.in/grid)
+A technical tool for visualizing radio grids:
+- Converts between Latitude/Longitude and Grid Squares.
+- Visualizes grid boundaries on an interactive map.
+- Essential for propagation analysis and station locating.
+
+## Contact & QSL Info
+- **Email**: VU35KB@qsl.net
+- **QRZ**: [VU35KB Profile](https://www.qrz.com/db/VU35KB)
+- **Logbook**: QSOs are confirmed via the QRZ.com logbook.
+
+---
+73 de VU35KB

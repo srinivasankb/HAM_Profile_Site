@@ -58,6 +58,8 @@ const recentBlogs = blogs.slice(0, 3);
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content={ogImage} />
+    <meta name="twitter:site" content="@srinikb" />
+    <meta name="twitter:creator" content="@srinikb" />
     
     <ClientRouter />
 
@@ -77,15 +79,27 @@ const recentBlogs = blogs.slice(0, 3);
       {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
-        "description": "Amateur Radio Operator Station VU35KB - Rajapalayam, IN",
+        "description": "Amateur Radio Operator Station VU35KB - Technical explorer and QRP enthusiast.",
         "name": "VU35KB Station",
+        "url": "https://ham.srinikb.in",
         "mainEntity": {
           "@type": "Person",
           "name": "Srinivasan KB",
           "alternateName": "VU35KB",
-          "description": "HAM Radio Operator, QRP Enthusiast",
-          "jobTitle": "Amateur Radio Explorer"
-        }
+          "description": "HAM Radio Operator, QRP Enthusiast and Technical Explorer",
+          "jobTitle": "Amateur Radio Explorer",
+          "sameAs": [
+            "https://www.qrz.com/db/VU35KB",
+            "https://twitter.com/srinikb",
+            "https://github.com/srinivasankb"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "VU35KB@qsl.net",
+            "contactType": "technical support"
+          }
+        },
+        "knowsAbout": ["Amateur Radio", "QRP Operations", "Maidenhead Grid Squares", "Antenna Design", "VHF/UHF Communication"]
       }
     </script>
 	</head>

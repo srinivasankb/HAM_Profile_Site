@@ -155,30 +155,30 @@ export default function GridCalculator() {
                 <h2 className="name-heading" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Maidenhead Grid Explorer</h2>
                 <p style={{ color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>Visualize boundaries and locate grid squares on the map.</p>
             </header>
-            <div className="tabs-header">
-                <button className={`tab-btn ${mode === 'coords' ? 'active' : ''}`} onClick={() => setMode('coords')}>Location</button>
-                <button className={`tab-btn ${mode === 'grid' ? 'active' : ''}`} onClick={() => setMode('grid')}>Grid square</button>
+            <div className="tabs-header" role="tablist">
+                <button role="tab" aria-selected={mode === 'coords'} className={`tab-btn ${mode === 'coords' ? 'active' : ''}`} onClick={() => setMode('coords')}>Location</button>
+                <button role="tab" aria-selected={mode === 'grid'} className={`tab-btn ${mode === 'grid' ? 'active' : ''}`} onClick={() => setMode('grid')}>Grid square</button>
             </div>
             <div className="modern-card" style={{ marginBottom: '1.5rem' }}>
                 {mode === 'coords' ? (
                     <div className="input-row">
                         <div className="input-group">
-                            <label className="card-label">Latitude</label>
-                            <input className="input-field" placeholder="9.45" value={inputCoords.lat} onChange={e => setInputCoords(p => ({ ...p, lat: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
+                            <label className="card-label" htmlFor="lat-input">Latitude</label>
+                            <input id="lat-input" className="input-field" aria-label="Enter Latitude" placeholder="9.45" value={inputCoords.lat} onChange={e => setInputCoords(p => ({ ...p, lat: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
                         </div>
                         <div className="input-group">
-                            <label className="card-label">Longitude</label>
-                            <input className="input-field" placeholder="77.55" value={inputCoords.lon} onChange={e => setInputCoords(p => ({ ...p, lon: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
+                            <label className="card-label" htmlFor="lon-input">Longitude</label>
+                            <input id="lon-input" className="input-field" aria-label="Enter Longitude" placeholder="77.55" value={inputCoords.lon} onChange={e => setInputCoords(p => ({ ...p, lon: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleUpdateByCoords(inputCoords.lat, inputCoords.lon)} />
                         </div>
-                        <button className="calc-button" onClick={() => handleUpdateByCoords(inputCoords.lat, inputCoords.lon)}>Locate</button>
+                        <button className="calc-button" aria-label="Locate coordinates on grid" onClick={() => handleUpdateByCoords(inputCoords.lat, inputCoords.lon)}>Locate</button>
                     </div>
                 ) : (
                     <div className="input-row">
                         <div className="input-group">
-                            <label className="card-label">Grid Square ID</label>
-                            <input className="input-field" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(formatGrid(e.target.value))} maxLength={6} onKeyDown={e => e.key === 'Enter' && handleUpdateByGrid(inputGrid)} />
+                            <label className="card-label" htmlFor="grid-input">Grid Square ID</label>
+                            <input id="grid-input" className="input-field" aria-label="Enter 4 or 6 character grid square" placeholder="MJ89sk" value={inputGrid} onChange={e => setInputGrid(formatGrid(e.target.value))} maxLength={6} onKeyDown={e => e.key === 'Enter' && handleUpdateByGrid(inputGrid)} />
                         </div>
-                        <button className="calc-button" onClick={() => handleUpdateByGrid(inputGrid)}>Search</button>
+                        <button className="calc-button" aria-label="Search for grid square" onClick={() => handleUpdateByGrid(inputGrid)}>Search</button>
                     </div>
                 )}
                 {error && <div className="error-text">{error}</div>}
