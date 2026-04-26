@@ -114,12 +114,34 @@ export default function GridCalculator() {
                     { headers: { 'User-Agent': 'HAM-Profile-Site/1.0' } }
                 );
                 const data = await response.json();
-                if (data && data.address) {
-                    const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.state_district || "Unknown Location";
-                    setLocationInfo({ city, country: data.address.country || "", countryCode: data.address.country_code || "", displayName: data.display_name });
+
+                if (data) {
+                    const address = data.address || {};
+                    const locality = address.city || address.town || address.village || address.suburb || address.state_district || address.county || address.state;
+                    const country = address.country;
+
+                    if (locality || country) {
+                        setLocationInfo({
+                            city: locality || "Unnamed Region",
+                            country: country || "",
+                            countryCode: address.country_code || "",
+                            displayName: data.display_name
+                        });
+                    } else {
+                        // Likely open water or unsurveyed region
+                        setLocationInfo({
+                            city: "Open Water / Unnamed Area",
+                            country: "International Waters",
+                            countryCode: null,
+                            displayName: "Geographic coordinates in a remote or maritime region"
+                        });
+                    }
+                } else {
+                    setLocationInfo(null);
                 }
             } catch (err) {
                 console.error("Nominatim fetch error:", err);
+                setLocationInfo({ city: "Location data unavailable", country: "", countryCode: null });
             } finally { setIsLocating(false); }
         };
         fetchLocationName();

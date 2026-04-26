@@ -102,3 +102,54 @@ export function getSunTimes(lat, lon, date = new Date()) {
         sunset: minutesToDate(sunsetMin)
     };
 }
+
+let echolinkCache = {
+    data: null,
+    timestamp: 0
+};
+
+export async function getEcholinkStatus(callsign = "VU35KB") {
+    const now = Date.now();
+    const CACHE_KEY = `echolink_status_${callsign}`;
+
+    // 1. Check in-memory module cache (fastest, survives component remounts)
+    if (echolinkCache.data && (now - echolinkCache.timestamp < 60000)) {
+        return echolinkCache.data;
+    }
+
+    // 2. Check sessionStorage (survives page transitions/refreshes in same tab)
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+        try {
+            const stored = sessionStorage.getItem(CACHE_KEY);
+            if (stored) {
+                const { data, timestamp } = JSON.parse(stored);
+                if (now - timestamp < 60000) {
+                    echolinkCache = { data, timestamp }; // Sync to memory cache
+                    return data;
+                }
+            }
+        } catch (e) {
+            console.warn("Session storage access error:", e);
+        }
+    }
+
+    // 3. Fetch fresh data from API
+    try {
+        const response = await fetch(`https://n8n.srinikb.in/webhook/echolink-status?callsign=${callsign}`);
+        const data = await response.json();
+
+        const newCache = { data, timestamp: now };
+        echolinkCache = newCache;
+
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Echolink status fetch error:", error);
+        // If API fails, try to return stale data if available as fallback
+        if (echolinkCache.data) return echolinkCache.data;
+        return { error: "Service unavailable" };
+    }
+}

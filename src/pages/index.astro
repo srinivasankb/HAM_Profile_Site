@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { STATIONS } from '../lib/ham-utils';
+import EcholinkStatus from '../components/EcholinkStatus';
 import { 
   Radio, 
   MapPin, 
@@ -51,12 +52,10 @@ const recentBlogs = allBlogs.slice(0, 3);
       <div class="modern-card highlight-card">
         <div class="card-label"><Award size={14} /> License</div>
         <div class="card-value">ASOC Restricted</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Valid thru 03 July 2075</p>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Valid thru 2075</p>
       </div>
       <div class="modern-card highlight-card">
-        <div class="card-label"><Users size={14} /> Echolink</div>
-        <div class="card-value">Available</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Search: VU35KB</p>
+        <EcholinkStatus client:load variant="minimal" />
       </div>
       <div class="modern-card highlight-card">
         <div class="card-label"><Radio size={14} /> Primary Rig</div>

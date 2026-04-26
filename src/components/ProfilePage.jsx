@@ -14,8 +14,10 @@ import {
     History,
     Users
 } from 'lucide-react';
-import { STATIONS, getSunTimes } from '../lib/ham-utils';
+import { STATIONS, getSunTimes, getEcholinkStatus } from '../lib/ham-utils';
+import EcholinkStatus from './EcholinkStatus';
 import netsData from '../data/nets.json';
+
 
 
 
@@ -189,7 +191,7 @@ export default function ProfilePage() {
                         <div key={station.id} className="modern-card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                             <div style={{ background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <MapPin size={20} />
+                                    <div className={`status-pulse ${time > sun.sunrise && time < sun.sunset ? 'day' : 'night'}`}></div>
                                     <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{station.name} {station.isPrimary && <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.2)', padding: '2px 6px', borderRadius: '4px', marginLeft: '4px' }}>PRIMARY</span>}</span>
                                 </div>
                                 <button
@@ -226,24 +228,57 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-                                    <div className="card-label-row" style={{ marginBottom: '1rem' }}>
-                                        <span className="card-label"><Sun size={14} /> Sun Data</span>
+                                    <div className="card-label-row" style={{ marginBottom: '1.5rem' }}>
+                                        <span className="card-label"><Sun size={14} /> Solar State & Telemetry</span>
                                         <button className="unit-toggle" onClick={toggleTz} aria-label={`Switch to ${tzMode === 'utc' ? 'IST' : 'UTC'} timezone`}>
                                             <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
                                             <span className="toggle-sep">|</span>
                                             <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
                                         </button>
                                     </div>
+
+                                    {/* Real-time Solar Status */}
+                                    <div style={{
+                                        padding: '1rem',
+                                        borderRadius: '12px',
+                                        background: time > sun.sunrise && time < sun.sunset
+                                            ? 'rgba(251, 191, 36, 0.08)'
+                                            : 'rgba(30, 41, 59, 0.05)',
+                                        border: '1px solid ' + (time > sun.sunrise && time < sun.sunset ? 'rgba(251, 191, 36, 0.2)' : 'rgba(30, 41, 59, 0.1)'),
+                                        marginBottom: '1.5rem'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted-foreground)', letterSpacing: '0.05em' }}>CURRENT STATE</div>
+                                                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--foreground)', marginTop: '2px' }}>
+                                                    {time > sun.sunrise && time < sun.sunset ? 'Daylight' : 'Nightfall'}
+                                                </div>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted-foreground)', letterSpacing: '0.05em' }}>NEXT EVENT</div>
+                                                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--muted-foreground)', marginTop: '2px' }}>
+                                                    {(() => {
+                                                        const target = time < sun.sunrise ? sun.sunrise : (time < sun.sunset ? sun.sunset : new Date(sun.sunrise.getTime() + 86400000));
+                                                        const diff = Math.floor((target - time) / 1000);
+                                                        const h = Math.floor(diff / 3600);
+                                                        const m = Math.floor((diff % 3600) / 60);
+                                                        return `${target === sun.sunrise ? 'Sunrise' : 'Sunset'} in ${h}h ${m}m`;
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                            <Sunrise size={24} className="sunrise-icon" />
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', opacity: time < sun.sunrise ? 1 : 0.6 }}>
+                                            <Sunrise size={24} style={{ color: '#fbbf24' }} />
                                             <div>
                                                 <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', fontWeight: 600 }}>SUNRISE</div>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace' }}>{sun ? formatSunTime(sun.sunrise) : '--'}</div>
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                            <Sunset size={24} className="sunset-icon" />
+                                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', opacity: time >= sun.sunrise && time < sun.sunset ? 1 : 0.6 }}>
+                                            <Sunset size={24} style={{ color: '#f97316' }} />
                                             <div>
                                                 <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', fontWeight: 600 }}>SUNSET</div>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 700, fontFamily: 'monospace' }}>{sun ? formatSunTime(sun.sunset) : '--'}</div>
@@ -251,6 +286,7 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div style={{ marginTop: 'auto', paddingTop: '1rem' }}>
                                     <a href={`/grid#${station.grid}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '0.75rem', borderRadius: '8px', background: 'var(--secondary)', color: 'var(--foreground)', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -268,17 +304,11 @@ export default function ProfilePage() {
                     <div className="card-label"><Award size={14} /> Global License</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <div className="card-value">ASOC Restricted Grade</div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Valid till: 03 July 2075 • Govt. of India</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Valid till: 2075 • Govt. of India</p>
                     </div>
                 </div>
 
-                <div className="modern-card">
-                    <div className="card-label"><Users size={14} /> Echolink</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Available on Echolink</p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>Search for VU35KB to connect.</p>
-                    </div>
-                </div>
+                <EcholinkStatus variant="card" />
 
                 <div className="modern-card">
                     <div className="card-label-row">
@@ -333,6 +363,35 @@ export default function ProfilePage() {
                     </div>
                 ))}
             </div>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .status-pulse {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    position: relative;
+                }
+                .status-pulse.day {
+                    background: #fbbf24;
+                    box-shadow: 0 0 8px #fbbf24;
+                    animation: pulse-day 2s infinite;
+                }
+                .status-pulse.night {
+                    background: #3b82f6;
+                    box-shadow: 0 0 8px #3b82f6;
+                    animation: pulse-night 2s infinite;
+                }
+                @keyframes pulse-day {
+                    0% { opacity: 0.6; transform: scale(0.9); }
+                    50% { opacity: 1; transform: scale(1.1); }
+                    100% { opacity: 0.6; transform: scale(0.9); }
+                }
+                @keyframes pulse-night {
+                    0% { opacity: 0.4; transform: scale(0.9); }
+                    50% { opacity: 0.8; transform: scale(1.1); }
+                    100% { opacity: 0.4; transform: scale(0.9); }
+                }
+            `}} />
         </div>
     );
 }
