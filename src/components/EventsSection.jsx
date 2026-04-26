@@ -108,6 +108,7 @@ export default function EventsSection() {
                                     href={event.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    aria-label={`Visit official website for ${event.name}`}
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
