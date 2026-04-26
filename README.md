@@ -8,12 +8,13 @@ A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasa
 
 - **Personal Portal**: High-level introduction and bio on the homepage.
 - **Radio Journal**: A lightweight blog system using Markdown and Astro Content Collections.
-- **Multi-Station Dashboard**: Real-time telemetry for multiple stations (Rajapalayam and Bangalore) including local time, UTC, weather (OpenWeatherMap API), and sun times.
+- **Station Dashboard**: Real-time telemetry for operating locations including local/UTC times, solar countdowns (sunrise/sunset), and dynamic status indicators.
+- **Echolink Live Status**: Integrated realtime status for **VU35KB** (Node: 526521) with signal animations and session-level caching for performance.
 - **Resource Library**: A curated collection of HAM radio guides, frequency charts, and technical resources.
 - **Maidenhead Grid Explorer**: Interactive tool to visualize grid square boundaries and locate coordinates with "click-to-copy" convenience.
-- **PWA Ready**: Manifest support and optimized for a high-performance experience on all devices.
-- **Responsive Design**: Modern, high-density layout featuring a collapsible mobile menu and elegant desktop navigation.
-- **Privacy First Analytics**: Lightweight visit tracking via Plausible Analytics.
+- **PWA Ready**: Manifest support and optimized for high-performance experience on all devices.
+- **Responsive Design**: Modern, high-density layout featuring elegant desktop and mobile navigation.
+- **Privacy First**: License validity simplified for privacy; visit tracking via Plausible Analytics.
 
 ## 🛠️ Tech Stack
 
