@@ -258,11 +258,21 @@ export default function ProfilePage() {
                                                 <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted-foreground)', letterSpacing: '0.05em' }}>NEXT EVENT</div>
                                                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--muted-foreground)', marginTop: '2px' }}>
                                                     {(() => {
-                                                        const target = time < sun.sunrise ? sun.sunrise : (time < sun.sunset ? sun.sunset : new Date(sun.sunrise.getTime() + 86400000));
-                                                        const diff = Math.floor((target - time) / 1000);
+                                                        let target, label;
+                                                        if (time < sun.sunrise) {
+                                                            target = sun.sunrise;
+                                                            label = 'Sunrise';
+                                                        } else if (time < sun.sunset) {
+                                                            target = sun.sunset;
+                                                            label = 'Sunset';
+                                                        } else {
+                                                            target = new Date(sun.sunrise.getTime() + 86400000);
+                                                            label = 'Sunrise';
+                                                        }
+                                                        const diff = Math.max(0, Math.floor((target.getTime() - time.getTime()) / 1000));
                                                         const h = Math.floor(diff / 3600);
                                                         const m = Math.floor((diff % 3600) / 60);
-                                                        return `${target === sun.sunrise ? 'Sunrise' : 'Sunset'} in ${h}h ${m}m`;
+                                                        return `${label} in ${h}h ${m}m`;
                                                     })()}
                                                 </div>
                                             </div>

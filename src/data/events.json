@@ -1,0 +1,22 @@
+[
+    {
+        "id": "kollam-ham-fair-2026",
+        "name": "Kollam Ham Fair",
+        "location": "Kollam, India",
+        "countryId": "in",
+        "venue": "Rotary Club of Quilon, Beach",
+        "startDate": "2026-05-10",
+        "endDate": "2026-05-10",
+        "url": "https://vu2qar.com/hamfair.html"
+    },
+    {
+        "id": "hamfest-india-2026",
+        "name": "Hamfest India 2026",
+        "location": "Mangaluru, India",
+        "countryId": "in",
+        "venue": "NITK Surathkal",
+        "startDate": "2026-11-28",
+        "endDate": "2026-11-29",
+        "url": "https://hfi2026.nitk.ac.in/"
+    }
+]

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { STATIONS } from '../lib/ham-utils';
 import EcholinkStatus from '../components/EcholinkStatus';
+import EventsSection from '../components/EventsSection';
 import { 
   Radio, 
   MapPin, 
@@ -112,6 +113,9 @@ const recentBlogs = allBlogs.slice(0, 3);
         ))}
       </div>
     </section>
+
+    <!-- Events Section -->
+    <EventsSection client:visible />
 
     <!-- Tools CTA Section -->
     <section style="margin-top: 4rem; margin-bottom: 4rem;">

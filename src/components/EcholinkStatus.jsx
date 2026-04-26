@@ -74,21 +74,25 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
 
     // Default 'minimal' variant for Home Page highlight grid
     return (
-        <div>
+        <div style={{ display: 'contents' }}>
             {showLabel && (
-                <div className="card-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Users size={14} /> Echolink</div>
+                <div className="card-label card-label-row">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Users size={14} /> Echolink
+                    </div>
                     <div title="Real-time data synced with Echolink online status" style={{ display: 'flex', alignItems: 'center', cursor: 'help' }}>
                         <Info size={12} style={{ opacity: 0.4 }} />
                     </div>
                 </div>
             )}
-            <div className="card-value" style={{ color: isOnline ? '#10b981' : 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {isOnline ? <Wifi size={18} /> : <WifiOff size={18} />}
-                {isOnline ? 'Online' : 'Offline'}
+            <div className="card-value" style={{ color: isOnline ? '#10b981' : 'inherit', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {isOnline ? <Wifi size={18} /> : <WifiOff size={18} style={{ opacity: 0.7 }} />}
+                <span>{isOnline ? 'Online' : 'Offline'}</span>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>
-                {isOnline ? `Node: ${status.node} | ${status.location.split(',')[0]}` : 'Search: VU35KB'}
+                {isOnline ? (
+                    <><b>#{status.node}</b> • {status.location.split(',')[0]}</>
+                ) : 'Search: VU35KB'}
             </p>
             <style dangerouslySetInnerHTML={{
                 __html: `
