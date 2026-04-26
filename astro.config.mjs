@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-    integrations: [react(), sitemap()],
+    integrations: [react(), sitemap({ entryLimit: 10000 })],
     site: 'https://ham.srinikb.in',
     output: 'static',
 });

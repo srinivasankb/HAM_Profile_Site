@@ -83,33 +83,31 @@ const recentBlogs = blogs.slice(0, 3);
     <link rel="canonical" href={currentUrl} />
     
     <!-- JSON-LD / Structured Data -->
-    <script type="application/ld+json" is:inline define:vars={{ profileData }}>
-      {
-        "@context": "https://schema.org",
-        "@type": "ProfilePage",
-        "description": `Amateur Radio Operator Station ${profileData.callsign} - Technical explorer and QRP enthusiast.`,
-        "name": `${profileData.callsign} Station`,
-        "url": "https://ham.srinikb.in",
-        "mainEntity": {
-          "@type": "Person",
-          "name": profileData.name,
-          "alternateName": profileData.callsign,
-          "description": "HAM Radio Operator, QRP Enthusiast and Technical Explorer",
-          "jobTitle": profileData.seo.jobTitle,
-          "sameAs": [
-            `https://www.qrz.com/db/${profileData.callsign}`,
-            `https://twitter.com/${profileData.social.twitter}`,
-            `https://github.com/${profileData.social.github}`
-          ],
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "email": profileData.contact.email,
-            "contactType": "technical support"
-          }
-        },
-        "knowsAbout": profileData.seo.keywords
-      }
-    </script>
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "description": `Amateur Radio Operator Station ${profileData.callsign} - Technical explorer and QRP enthusiast.`,
+      "name": `${profileData.callsign} Station`,
+      "url": "https://ham.srinikb.in",
+      "mainEntity": {
+        "@type": "Person",
+        "name": profileData.name,
+        "alternateName": profileData.callsign,
+        "description": "HAM Radio Operator, QRP Enthusiast and Technical Explorer",
+        "jobTitle": profileData.seo.jobTitle,
+        "sameAs": [
+          `https://www.qrz.com/db/${profileData.callsign}`,
+          `https://twitter.com/${profileData.social.twitter}`,
+          `https://github.com/${profileData.social.github}`
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": profileData.contact.email,
+          "contactType": "technical support"
+        }
+      },
+      "knowsAbout": profileData.seo.keywords
+    })} />
 	</head>
 	<body>
     <div id="app-root" class="app-layout">
