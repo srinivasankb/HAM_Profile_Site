@@ -2,6 +2,10 @@
 import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library } from 'lucide-react';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
+import profileData from '../data/profile.json';
+import navData from '../data/navigation.json';
+
+const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, RSS: Rss, Radio };
 
 interface Props {
 	title: string;
@@ -12,8 +16,8 @@ interface Props {
 
 const { 
   title, 
-  description = "A curious newcomer exploring Amateur Radio and QRP operations from Rajapalayam, IN. Documenting the learning journey of VU35KB.", 
-  image = "/avatar.png",
+  description = profileData.description, 
+  image = profileData.images.profile,
   article = false
 } = Astro.props;
 
@@ -53,53 +57,53 @@ const recentBlogs = blogs.slice(0, 3);
 		<meta property="og:image" content={ogImage} />
 
 		<!-- Twitter -->
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={currentUrl} />
-		<meta property="twitter:title" content={title} />
-		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={ogImage} />
-    <meta name="twitter:site" content="@srinikb" />
-    <meta name="twitter:creator" content="@srinikb" />
+		<meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={currentUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:site" content={`@${profileData.social.twitter}`} />
+    <meta name="twitter:creator" content={`@${profileData.social.twitter}`} />
     
     <ClientRouter />
 
     <!-- RSS Discovery -->
-    <link rel="alternate" type="application/rss+xml" title="VU35KB Radio Journal RSS Feed" href="/blog/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${profileData.callsign} Radio Journal RSS Feed`} href="/blog/rss.xml" />
     <meta name="theme-color" content="#18181b" />
 
     <!-- Analytics -->
-    <script is:inline defer data-domain="ham.srinikb.in" src="https://analytics.srinikb.in/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js"></script>
+    <script is:inline defer data-domain={profileData.analytics.domain} src={profileData.analytics.scriptUrl}></script>
     <script is:inline>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 
     <!-- SEO Enhancements -->
     <link rel="canonical" href={currentUrl} />
     
     <!-- JSON-LD / Structured Data -->
-    <script type="application/ld+json" is:inline>
+    <script type="application/ld+json" is:inline define:vars={{ profileData }}>
       {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
-        "description": "Amateur Radio Operator Station VU35KB - Technical explorer and QRP enthusiast.",
-        "name": "VU35KB Station",
+        "description": `Amateur Radio Operator Station ${profileData.callsign} - Technical explorer and QRP enthusiast.`,
+        "name": `${profileData.callsign} Station`,
         "url": "https://ham.srinikb.in",
         "mainEntity": {
           "@type": "Person",
-          "name": "Srinivasan KB",
-          "alternateName": "VU35KB",
+          "name": profileData.name,
+          "alternateName": profileData.callsign,
           "description": "HAM Radio Operator, QRP Enthusiast and Technical Explorer",
-          "jobTitle": "Amateur Radio Explorer",
+          "jobTitle": profileData.seo.jobTitle,
           "sameAs": [
-            "https://www.qrz.com/db/VU35KB",
-            "https://twitter.com/srinikb",
-            "https://github.com/srinivasankb"
+            `https://www.qrz.com/db/${profileData.callsign}`,
+            `https://twitter.com/${profileData.social.twitter}`,
+            `https://github.com/${profileData.social.github}`
           ],
           "contactPoint": {
             "@type": "ContactPoint",
-            "email": "VU35KB@qsl.net",
+            "email": profileData.contact.email,
             "contactType": "technical support"
           }
         },
-        "knowsAbout": ["Amateur Radio", "QRP Operations", "Maidenhead Grid Squares", "Antenna Design", "VHF/UHF Communication"]
+        "knowsAbout": profileData.seo.keywords
       }
     </script>
 	</head>
@@ -137,19 +141,22 @@ const recentBlogs = blogs.slice(0, 3);
         <header class="desktop-nav">
           <div class="nav-container">
             <a href="/" class="nav-logo" transition:name="site-logo">
-              <Radio size={24} /> <span class="logo-text">VU35KB</span>
+              <Radio size={24} /> <span class="logo-text">{profileData.callsign}</span>
             </a>
             
             <nav class="nav-links">
-              <a href="/" class={`nav-item ${pathname === '/' ? 'active' : ''}`}><Home size={18} /> Home</a>
-              <a href="/station" class={`nav-item ${pathname.startsWith('/station') ? 'active' : ''}`}><MapPin size={18} /> Station</a>
-              <a href="/blog" class={`nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}><BookText size={18} /> Journal</a>
-              <a href="/resources" class={`nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}><Library size={18} /> Resources</a>
-              <a href="/grid" class={`nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}><Compass size={18} /> Grid Explorer</a>
+              {navData.map(item => {
+                const Icon = IconMap[item.icon];
+                return (
+                  <a href={item.path} class={`nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`}>
+                    {Icon && <Icon size={18} />} {item.name}
+                  </a>
+                );
+              })}
             </nav>
 
             <div class="nav-actions">
-               <a href="mailto:VU35KB@qsl.net" class="contact-btn">Get in touch</a>
+               <a href={`mailto:${profileData.contact.email}`} class="contact-btn">Get in touch</a>
             </div>
           </div>
         </header>
@@ -157,7 +164,7 @@ const recentBlogs = blogs.slice(0, 3);
         <!-- Mobile Header -->
         <header class="mobile-header">
           <a href="/" class="mobile-logo" style="text-decoration: none; color: inherit;">
-            <Radio size={20} /> VU35KB
+            <Radio size={20} /> {profileData.callsign}
           </a>
           <div class="mobile-header-actions">
             <button class="burger-btn">
@@ -168,56 +175,31 @@ const recentBlogs = blogs.slice(0, 3);
 
         <!-- Mobile Menu Overlay -->
         <div class="mobile-menu-overlay">
-          <nav class="mobile-nav-list">
             <div class="mobile-menu-section">
-              <div class="sidebar-heading">Main</div>
-              <a href="/" class={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
-                <Home size={20} /> Home
-              </a>
-              <a href="/station" class={`mobile-nav-item ${pathname.startsWith('/station') ? 'active' : ''}`}>
-                <MapPin size={20} /> Station Details
-              </a>
-            </div>
-
-            <div class="mobile-menu-section">
-              <div class="sidebar-heading">Knowledge Base</div>
-              <a href="/blog" class={`mobile-nav-item ${pathname.startsWith('/blog') ? 'active' : ''}`}>
-                <BookText size={20} /> Radio Journal
-              </a>
-              <a href="/resources" class={`mobile-nav-item ${pathname.startsWith('/resources') ? 'active' : ''}`}>
-                <Library size={20} /> Resource Library
-              </a>
-              <div class="mobile-blog-recent">
-                <div class="sidebar-subheading">Recent Journal Entries</div>
-                {recentBlogs.map(blog => (
-                  <a href={`/blog/${blog.id}`} class="mobile-recent-item">
-                    {blog.data.title}
+              <div class="sidebar-heading">Navigation</div>
+              {navData.map(item => {
+                const Icon = IconMap[item.icon];
+                return (
+                  <a href={item.path} class={`mobile-nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`}>
+                    {Icon && <Icon size={20} />} {item.name}
                   </a>
-                ))}
-              </div>
-            </div>
-
-            <div class="mobile-menu-section">
-              <div class="sidebar-heading">Tools</div>
-              <a href="/grid" class={`mobile-nav-item ${pathname.startsWith('/grid') ? 'active' : ''}`}>
-                <Compass size={20} /> Grid Explorer
-              </a>
+                );
+              })}
               <a href="/blog/rss.xml" class="mobile-nav-item">
                 <Rss size={20} /> RSS Feed
               </a>
             </div>
-          </nav>
 
           <div class="sidebar-footer" style="margin-top: auto;">
              <div class="footer-contact">
                 <div class="card-label" style="font-size: 0.65rem; margin-bottom: 0.25rem;">Contact</div>
-                <a href="mailto:VU35KB@qsl.net" class="footer-link">VU35KB@qsl.net</a>
+                <a href={`mailto:${profileData.contact.email}`} class="footer-link">{profileData.contact.email}</a>
               </div>
               <div class="footer-status-row">
                 <span class="status-dot"></span>
                 STATION QRV
               </div>
-              <p class="footer-sig-text">73 de VU35KB • Rajapalayam</p>
+              <p class="footer-sig-text">73 de {profileData.callsign} • {profileData.location.split(',')[0]}</p>
           </div>
         </div>
 
@@ -228,27 +210,25 @@ const recentBlogs = blogs.slice(0, 3);
         <footer class="desktop-footer">
           <div class="footer-container">
             <div class="footer-info">
-               <Radio size={20} /> <span class="logo-text">VU35KB</span>
-                <p class="footer-desc">Curious newcomer to Amateur Radio & QRP operations.</p>
+               <Radio size={20} /> <span class="logo-text">{profileData.callsign}</span>
+                <p class="footer-desc">{profileData.subtitle}</p>
             </div>
             <div class="footer-links-grid">
               <div class="footer-group">
                 <h4>Explore</h4>
-                <a href="/">Home</a>
-                <a href="/station">Station Details</a>
-                <a href="/blog">Radio Journal</a>
-                <a href="/resources">Resource Library</a>
-                <a href="/grid">Grid Explorer</a>
+                {navData.map(item => (
+                  <a href={item.path}>{item.name}</a>
+                ))}
               </div>
               <div class="footer-group">
                 <h4>Connect</h4>
-                <a href="mailto:VU35KB@qsl.net">Email</a>
+                <a href={`mailto:${profileData.contact.email}`}>Email</a>
                 <a href="/blog/rss.xml">RSS Feed</a>
               </div>
             </div>
           </div>
           <div class="footer-bottom">
-            <p>73 de VU35KB • Rajapalayam, IN • <a href="https://srinivasan.online/" target="_blank" style="color: inherit; text-decoration: none; opacity: 0.6;">Professional Profile</a></p>
+            <p>73 de {profileData.callsign} • {profileData.location} • <a href={profileData.social.professional} target="_blank" style="color: inherit; text-decoration: none; opacity: 0.6;">Professional Profile</a></p>
           </div>
         </footer>
 

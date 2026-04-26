@@ -1,0 +1,13 @@
+{
+    "primary": {
+        "name": "Baofeng M13 Pro",
+        "category": "Handheld Transceiver",
+        "specs": [
+            "2m/70cm",
+            "QRP Operation",
+            "Mobile Ready"
+        ],
+        "status": "Active"
+    },
+    "accessories": []
+}

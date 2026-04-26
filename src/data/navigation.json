@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Home",
+        "path": "/",
+        "icon": "Home"
+    },
+    {
+        "name": "Station",
+        "path": "/station",
+        "icon": "MapPin"
+    },
+    {
+        "name": "Journal",
+        "path": "/blog",
+        "icon": "BookText"
+    },
+    {
+        "name": "Resources",
+        "path": "/resources",
+        "icon": "Library"
+    },
+    {
+        "name": "Grid Explorer",
+        "path": "/grid",
+        "icon": "Compass"
+    }
+]

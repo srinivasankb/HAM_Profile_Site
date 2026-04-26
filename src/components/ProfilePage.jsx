@@ -17,6 +17,9 @@ import {
 import { STATIONS, getSunTimes, getEcholinkStatus } from '../lib/ham-utils';
 import EcholinkStatus from './EcholinkStatus';
 import netsData from '../data/nets.json';
+import profileData from '../data/profile.json';
+import clubsData from '../data/clubs.json';
+import hardwareData from '../data/hardware.json';
 
 
 
@@ -175,11 +178,11 @@ export default function ProfilePage() {
             <header className="profile-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>
                 <div className="callsign-pill" style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ opacity: 0.6, fontWeight: 400, fontSize: '0.7rem' }}>CALL SIGN:</span>
-                    <span>VU35KB</span>
+                    <span>{profileData.callsign}</span>
                 </div>
                 <h1 className="name-heading" style={{ fontSize: '2.5rem' }}>Operating Stations</h1>
                 <p style={{ color: 'var(--muted-foreground)', marginTop: '0.5rem' }}>
-                    Real-time telemetry and schedule for active stations.
+                    Real-time telemetry and schedule for {profileData.name}'s active stations.
                 </p>
             </header>
 
@@ -313,8 +316,8 @@ export default function ProfilePage() {
                 <div className="modern-card">
                     <div className="card-label"><Award size={14} /> Global License</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <div className="card-value">ASOC Restricted Grade</div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Valid till: 2075 • Govt. of India</p>
+                        <div className="card-value">{profileData.license.grade}</div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Valid till: {profileData.license.validThru} • {profileData.license.authority}</p>
                     </div>
                 </div>
 
@@ -334,9 +337,19 @@ export default function ProfilePage() {
 
                 <div className="modern-card">
                     <div className="card-label"><Radio size={14} /> Rig Details</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '0.95rem', fontWeight: 600 }}>Baofeng M13 Pro</p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>2m/70cm • QRP Operation • Mobile Ready</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{hardwareData.primary.name}</p>
+                                <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>{hardwareData.primary.status}</span>
+                            </div>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>{hardwareData.primary.category}</p>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {hardwareData.primary.specs.map(spec => (
+                                <span key={spec} style={{ fontSize: '0.7rem', background: 'var(--secondary)', padding: '2px 8px', borderRadius: '4px' }}>{spec}</span>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -344,12 +357,12 @@ export default function ProfilePage() {
                     <div className="card-label"><Award size={14} /> QSL Policy</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
                         <div style={{ flex: 1, minWidth: '300px' }}>
-                            <p style={{ fontSize: '0.95rem', color: 'var(--foreground)', marginBottom: '0.5rem', fontWeight: 600 }}>Confirmed via QRZ.com logbook.</p>
+                            <p style={{ fontSize: '0.95rem', color: 'var(--foreground)', marginBottom: '0.5rem', fontWeight: 600 }}>{profileData.qsl.policy}</p>
                             <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: '1.5' }}>
-                                I value technical confirmation of all my contacts. Please log our QSO on QRZ.com for immediate confirmation. For paper QSLs or other methods, please reach out via email.
+                                {profileData.qsl.description}
                             </p>
                         </div>
-                        <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" className="qrz-button"
+                        <a href={profileData.qsl.qrzUrl} target="_blank" rel="noopener noreferrer" className="qrz-button"
                             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--primary)', color: 'var(--primary-foreground)', padding: '0.75rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
                             View QRZ Profile <ExternalLink size={16} />
                         </a>

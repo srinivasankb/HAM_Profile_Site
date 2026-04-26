@@ -1,0 +1,43 @@
+{
+    "callsign": "VU35KB",
+    "name": "Srinivasan KB",
+    "location": "Rajapalayam, IN",
+    "subtitle": "Amateur Radio Operator • Technical Explorer",
+    "description": "A curious newcomer exploring the world of Amateur Radio and QRP operations from Rajapalayam and Bangalore, IN. Discovering the magic of radio waves and documenting the journey.",
+    "license": {
+        "grade": "ASOC Restricted Grade",
+        "validThru": "2075",
+        "authority": "Govt. of India"
+    },
+    "qsl": {
+        "policy": "Confirmed via QRZ.com logbook.",
+        "description": "I value technical confirmation of all my contacts. Please log our QSO on QRZ.com for immediate confirmation. For paper QSLs or other methods, please reach out via email.",
+        "qrzUrl": "https://www.qrz.com/db/VU35KB"
+    },
+    "contact": {
+        "email": "VU35KB@qsl.net"
+    },
+    "images": {
+        "profile": "/avatar.png"
+    },
+    "social": {
+        "twitter": "srinikb",
+        "github": "srinivasankb",
+        "professional": "https://srinivasan.online/",
+        "qslEmail": "VU35KB@qsl.net"
+    },
+    "seo": {
+        "keywords": [
+            "Amateur Radio",
+            "QRP Operations",
+            "Maidenhead Grid Squares",
+            "Antenna Design",
+            "VHF/UHF Communication"
+        ],
+        "jobTitle": "Amateur Radio Explorer"
+    },
+    "analytics": {
+        "domain": "ham.srinikb.in",
+        "scriptUrl": "https://analytics.srinikb.in/js/script.file-downloads.hash.outbound-links.pageview-props.tagged-events.js"
+    }
+}

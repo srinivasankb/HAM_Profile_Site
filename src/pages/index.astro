@@ -4,6 +4,10 @@ import { getCollection } from 'astro:content';
 import { STATIONS } from '../lib/ham-utils';
 import EcholinkStatus from '../components/EcholinkStatus';
 import EventsSection from '../components/EventsSection';
+import profileData from '../data/profile.json';
+import clubsData from '../data/clubs.json';
+import hardwareData from '../data/hardware.json';
+import navData from '../data/navigation.json';
 import { 
   Radio, 
   MapPin, 
@@ -28,20 +32,18 @@ const recentBlogs = allBlogs.slice(0, 3);
     <section class="home-hero">
       <div class="hero-main">
         <div class="hero-left">
-          <div class="callsign-badge"><span class="label">CALL SIGN:</span> VU35KB</div>
-          <h1 class="hero-title">Srinivasan KB</h1>
-          <p class="hero-subtitle">Amateur Radio Operator • technical explorer</p>
+          <div class="callsign-badge"><span class="label">CALL SIGN:</span> {profileData.callsign}</div>
+          <h1 class="hero-title">{profileData.name}</h1>
+          <p class="hero-subtitle">{profileData.subtitle}</p>
           <div class="hero-bio-container">
             <p class="hero-description">
-              A curious newcomer exploring the world of Amateur Radio and QRP operations 
-              from <strong>Rajapalayam</strong> and <strong>Bangalore</strong>, IN. 
-              Discovering the magic of radio waves and documenting the journey.
+              {profileData.description}
             </p>
           </div>
         </div>
         <div class="hero-right">
           <div class="avatar-container">
-            <img src="/avatar.png" alt="Srinivasan KB" class="avatar-large" />
+            <img src={profileData.images.profile} alt={profileData.name} class="avatar-large" />
           </div>
         </div>
       </div>
@@ -52,16 +54,16 @@ const recentBlogs = allBlogs.slice(0, 3);
     <div class="modern-grid grid-3" style="margin-top: 2rem;">
       <div class="modern-card highlight-card">
         <div class="card-label"><Award size={14} /> License</div>
-        <div class="card-value">ASOC Restricted</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Valid thru 2075</p>
+        <div class="card-value">{profileData.license.grade.split(' Grade')[0]}</div>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Valid thru {profileData.license.validThru}</p>
       </div>
       <div class="modern-card highlight-card">
         <EcholinkStatus client:load variant="minimal" />
       </div>
       <div class="modern-card highlight-card">
         <div class="card-label"><Radio size={14} /> Primary Rig</div>
-        <div class="card-value">Baofeng M13 Pro</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">Focusing on QRP</p>
+        <div class="card-value">{hardwareData.primary.name}</div>
+        <p style="font-size: 0.8rem; color: var(--muted-foreground);">{hardwareData.primary.specs[0]}</p>
       </div>
     </div>
 
@@ -81,11 +83,13 @@ const recentBlogs = allBlogs.slice(0, 3);
     <section style="margin-top: 4rem;">
        <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 2rem;">Radio Clubs</h2>
        <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-         <div class="modern-card club-card">
-           <div class="card-label"><Users size={14} /> Member</div>
-           <div class="card-value" style="font-size: 1.1rem; line-height: 1.4;">Rajapalayam International Radio Communicators Club – RIRCOM</div>
-           <p style="font-size: 0.85rem; color: var(--muted-foreground);">Engaging with the local and international HAM community.</p>
-         </div>
+         {clubsData.map(club => (
+           <div class="modern-card club-card">
+             <div class="card-label"><Users size={14} /> {club.role}</div>
+             <div class="card-value" style="font-size: 1.1rem; line-height: 1.4;">{club.name}</div>
+             <p style="font-size: 0.85rem; color: var(--muted-foreground);">{club.description}</p>
+           </div>
+         ))}
        </div>
     </section>
 

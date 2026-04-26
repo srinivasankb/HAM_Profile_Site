@@ -29,6 +29,88 @@ A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasa
 - **Analytics**: Plausible Analytics (Privacy-focused tracking)
 - **RSS**: @astrojs/rss
 
+## 📊 Data Management & Configuration
+
+The portal uses a **JSON-driven architecture**, allowing you to update almost all site content without editing code. All data files are located in `src/data/`.
+
+### 🪪 Global Profile (`profile.json`)
+Managed your identity, social links, and SEO metadata.
+```json
+{
+  "callsign": "VU35KB",
+  "name": "Srinivasan KB",
+  "social": { "twitter": "srinikb", "github": "srinivasankb" },
+  "analytics": { "domain": "ham.srinikb.in" }
+}
+```
+
+### 🗺️ Operating Stations (`stations.json`)
+Configure your home stations and portable locations.
+```json
+{
+  "id": "rajapalayam",
+  "name": "Rajapalayam",
+  "lat": 9.4503, "lon": 77.5516,
+  "grid": "MJ89sk"
+}
+```
+
+### 🛠️ Hardware & Rigs (`hardware.json`)
+Manage your primary radio and your accessories collection.
+```json
+{
+  "primary": {
+    "name": "Baofeng M13 Pro",
+    "category": "Handheld Transceiver",
+    "specs": ["2m/70cm", "QRP Operation", "Mobile Ready"],
+    "status": "Active"
+  },
+  "accessories": [
+    { "name": "Nagoya NA-771", "details": "High Gain Whip Antenna" },
+    { "name": "UV-K5 Battery", "details": "1600mAh Spares" }
+  ]
+}
+```
+
+### 🗓️ Event Roadmap (`events.json`)
+The dashboard automatically calculates the status based on `startDate` and `endDate`.
+```json
+[
+  {
+    "id": "hamfest-2026",
+    "name": "Hamfest India 2026",
+    "location": "Mangaluru, India",
+    "countryId": "in",
+    "venue": "NITK Surathkal",
+    "startDate": "2026-11-28",
+    "endDate": "2026-11-29",
+    "url": "https://hfi2026.nitk.ac.in/"
+  }
+]
+```
+
+### 📔 Radio Journal (Blog Posts)
+Journal entries are managed as Markdown files in `src/content/blogs/`.
+```markdown
+---
+title: "Understanding Maidenhead Grid Squares"
+description: "A deep dive into how radio operators locate themselves globally."
+date: 2026-03-05
+unlisted: false
+---
+Your technical notes or journal content goes here...
+```
+
+### 🧭 Navigation & Icons (`navigation.json`)
+You can add new menu items by providing a name, path, and icon.
+```json
+[
+  { "name": "New Page", "path": "/new", "icon": "PlusCircle" }
+]
+```
+> [!TIP]
+> Icon names must match [Lucide React](https://lucide.dev/icons) keys (e.g., `MapPin`, `Activity`, `HardDrive`).
+
 ## ⚡ Development
 
 1. **Install dependencies**:
