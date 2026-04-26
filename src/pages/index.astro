@@ -20,6 +20,9 @@ import {
   Users
 } from 'lucide-react';
 
+import { Image } from 'astro:assets';
+import avatarImg from '../assets/avatar.png';
+
 const allBlogs = (await getCollection('blogs'))
   .filter(blog => !blog.data.unlisted)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -43,7 +46,7 @@ const recentBlogs = allBlogs.slice(0, 3);
         </div>
         <div class="hero-right">
           <div class="avatar-container">
-            <img src={profileData.images.profile} alt={profileData.name} class="avatar-large" />
+            <Image src={avatarImg} alt={profileData.name} class="avatar-large" width={220} height={220} quality="high" />
           </div>
         </div>
       </div>
@@ -107,7 +110,7 @@ const recentBlogs = allBlogs.slice(0, 3);
 
       <div class="blog-preview-grid">
         {recentBlogs.map(blog => (
-          <a href={`/blog/${blog.id}`} class="modern-card blog-preview-card" aria-label={`Read journal entry: ${blog.data.title}`}>
+          <a href={`/blog/${blog.id}`} class="modern-card blog-preview-card" aria-label={`Read journal entry: ${blog.data.title}`} data-astro-prefetch>
             <div class="card-label">{blog.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
             <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0.5rem 0;">{blog.data.title}</h3>
             <p style="font-size: 0.85rem; color: var(--muted-foreground); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
@@ -123,7 +126,7 @@ const recentBlogs = allBlogs.slice(0, 3);
 
     <!-- Tools CTA Section -->
     <section style="margin-top: 4rem; margin-bottom: 4rem;">
-      <a href="/grid" class="modern-card tool-cta-card" aria-label="Open Maidenhead Grid Explorer tool">
+      <a href="/grid" class="modern-card tool-cta-card" aria-label="Open Maidenhead Grid Explorer tool" data-astro-prefetch>
         <div class="tool-content">
           <div class="tool-icon">
             <Compass size={32} />

@@ -37,11 +37,8 @@
     }
   },
   "required": [
-    "unlisted",
     "title",
     "description",
-    "category",
-    "pinned"
-  ],
-  "additionalProperties": false
+    "category"
+  ]
 }

@@ -29,6 +29,7 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-display: swap;
   background-color: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
@@ -1111,8 +1112,8 @@ body {
   }
 
   .modern-container {
-    padding: 0;
-    margin: 0;
+    padding: 0 1rem;
+    margin: 0 auto;
     width: 100%;
     max-width: 100%;
   }
@@ -1274,4 +1275,26 @@ body {
   color: #2563eb;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/* Accessibility & Performance */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+img {
+  content-visibility: auto;
 }

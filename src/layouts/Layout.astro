@@ -140,7 +140,7 @@ const recentBlogs = blogs.slice(0, 3);
         <!-- Desktop Top Nav -->
         <header class="desktop-nav">
           <div class="nav-container">
-            <a href="/" class="nav-logo" transition:name="site-logo">
+            <a href="/" class="nav-logo" transition:name="site-logo" data-astro-prefetch>
               <Radio size={24} /> <span class="logo-text">{profileData.callsign}</span>
             </a>
             
@@ -148,7 +148,7 @@ const recentBlogs = blogs.slice(0, 3);
               {navData.map(item => {
                 const Icon = IconMap[item.icon];
                 return (
-                  <a href={item.path} class={`nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`}>
+                  <a href={item.path} class={`nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`} data-astro-prefetch>
                     {Icon && <Icon size={18} />} {item.name}
                   </a>
                 );
@@ -211,13 +211,13 @@ const recentBlogs = blogs.slice(0, 3);
           <div class="footer-container">
             <div class="footer-info">
                <Radio size={20} /> <span class="logo-text">{profileData.callsign}</span>
-                <p class="footer-desc">{profileData.subtitle}</p>
+                <p class="footer-desc" data-astro-prefetch>{profileData.subtitle}</p>
             </div>
             <div class="footer-links-grid">
               <div class="footer-group">
                 <h4>Explore</h4>
                 {navData.map(item => (
-                  <a href={item.path}>{item.name}</a>
+                  <a href={item.path} data-astro-prefetch>{item.name}</a>
                 ))}
               </div>
               <div class="footer-group">

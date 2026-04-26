@@ -33,12 +33,10 @@
     }
   },
   "required": [
-    "unlisted",
     "title",
     "date",
     "author",
     "description",
     "tags"
-  ],
-  "additionalProperties": false
+  ]
 }
