@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import profileData from '../data/profile.json';
 import navData from '../data/navigation.json';
+import ogImageDefault from '../assets/vu35kb_og.png';
 
 const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, RSS: Rss, Radio };
 
@@ -16,8 +17,8 @@ interface Props {
 
 const { 
   title, 
-  description = profileData.description, 
-  image = profileData.images.profile,
+  description = profileData.seo.description, 
+  image = ogImageDefault.src,
   article = false
 } = Astro.props;
 
@@ -86,7 +87,7 @@ const recentBlogs = blogs.slice(0, 3);
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "ProfilePage",
-      "description": `Amateur Radio Operator Station ${profileData.callsign} - Technical explorer and QRP enthusiast.`,
+      "description": profileData.seo.description,
       "name": `${profileData.callsign} Station`,
       "url": "https://ham.srinikb.in",
       "mainEntity": {

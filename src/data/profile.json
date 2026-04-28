@@ -18,7 +18,8 @@
         "email": "VU35KB@qsl.net"
     },
     "images": {
-        "profile": "/avatar.png"
+        "profile": "/avatar.png",
+        "og": "/src/assets/vu35kb_og.png"
     },
     "social": {
         "twitter": "SRINIVASAN_KB",
@@ -27,6 +28,7 @@
         "qslEmail": "VU35KB@qsl.net"
     },
     "seo": {
+        "description": "The official station profile and technical journal for Amateur Radio operator VU35KB.",
         "keywords": [
             "Amateur Radio",
             "QRP Operations",
