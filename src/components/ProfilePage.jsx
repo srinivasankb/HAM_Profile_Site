@@ -14,7 +14,7 @@ import {
     History,
     Users
 } from 'lucide-react';
-import { STATIONS, getSunTimes, getEcholinkStatus } from '../lib/ham-utils';
+import { STATIONS, getSunTimes } from '../lib/ham-utils';
 import EcholinkStatus from './EcholinkStatus';
 import netsData from '../data/nets.json';
 import profileData from '../data/profile.json';

@@ -1,23 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Wifi, WifiOff, MapPin, Clock, Info, Radio } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Users, Wifi, WifiOff, MapPin, Clock, Info, Radio, RefreshCw } from 'lucide-react';
 import { getEcholinkStatus } from '../lib/ham-utils';
 
 export default function EcholinkStatus({ variant = 'minimal', showLabel = true }) {
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showRefresh, setShowRefresh] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const timerRef = useRef(null);
+
+    const REFRESH_DELAY = 120000; // 2 minutes
+
+    const fetchStatus = async (force = false) => {
+        if (force) setIsRefreshing(true);
+
+        const { data, timestamp } = await getEcholinkStatus("VU35KB", force);
+
+        setStatus(data);
+        setLoading(false);
+        setIsRefreshing(false);
+        setShowRefresh(false);
+
+        // Clear existing timer
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        // Calculate when to show the refresh button
+        const now = Date.now();
+        const age = now - timestamp;
+
+        if (age >= REFRESH_DELAY) {
+            setShowRefresh(true);
+        } else {
+            timerRef.current = setTimeout(() => {
+                setShowRefresh(true);
+            }, REFRESH_DELAY - age);
+        }
+    };
 
     useEffect(() => {
-        const fetchStatus = async () => {
-            const data = await getEcholinkStatus("VU35KB");
-            setStatus(data);
-            setLoading(false);
-        };
-        fetchStatus();
+        // Only run on client side
+        if (typeof window === 'undefined') return;
 
-        // Refresh every minute to respect the cache/update cycle
-        const interval = setInterval(fetchStatus, 60000);
-        return () => clearInterval(interval);
+        fetchStatus(false);
+
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
     }, []);
+
+    const handleManualRefresh = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isRefreshing) {
+            fetchStatus(true);
+        }
+    };
 
     if (loading) {
         return (
@@ -37,8 +74,30 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Users size={14} /> Echolink {isOnline ? 'Online' : ''}
                     </div>
-                    <div title="Real-time data synced with Echolink online status" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', cursor: 'help' }}>
-                        <Info size={12} style={{ opacity: 0.4 }} />
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {showRefresh && (
+                            <button
+                                onClick={handleManualRefresh}
+                                className={`refresh-btn ${isRefreshing ? 'spinning' : ''}`}
+                                title="Refresh status"
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    color: 'inherit',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    opacity: 0.6,
+                                    transition: 'opacity 0.2s'
+                                }}
+                            >
+                                <RefreshCw size={12} />
+                            </button>
+                        )}
+                        <div title="Real-time data synced with Echolink online status" style={{ display: 'flex', alignItems: 'center', cursor: 'help' }}>
+                            <Info size={12} style={{ opacity: 0.4 }} />
+                        </div>
                     </div>
                 </div>
                 {isOnline ? (
@@ -68,6 +127,15 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                         <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>VU35KB is currently disconnected.</p>
                     </div>
                 )}
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                .refresh-btn:hover { opacity: 1 !important; }
+                .spinning { animation: spin 1s linear infinite; }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}} />
             </div>
         );
     }
@@ -80,8 +148,29 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Users size={14} /> Echolink
                     </div>
-                    <div title="Real-time data synced with Echolink online status" style={{ display: 'flex', alignItems: 'center', cursor: 'help' }}>
-                        <Info size={12} style={{ opacity: 0.4 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {showRefresh && (
+                            <button
+                                onClick={handleManualRefresh}
+                                className={`refresh-btn ${isRefreshing ? 'spinning' : ''}`}
+                                title="Refresh status"
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    color: 'inherit',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    opacity: 0.6
+                                }}
+                            >
+                                <RefreshCw size={12} />
+                            </button>
+                        )}
+                        <div title="Real-time data synced with Echolink online status" style={{ display: 'flex', alignItems: 'center', cursor: 'help' }}>
+                            <Info size={12} style={{ opacity: 0.4 }} />
+                        </div>
                     </div>
                 </div>
             )}
@@ -115,6 +204,12 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                 @keyframes ripple {
                     0% { transform: scale(1); opacity: 0.8; }
                     100% { transform: scale(3); opacity: 0; }
+                }
+                .refresh-btn:hover { opacity: 1 !important; }
+                .spinning { animation: spin 1s linear infinite; }
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
                 }
             `}} />
         </div>

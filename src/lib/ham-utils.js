@@ -93,32 +93,39 @@ let echolinkCache = {
     timestamp: 0
 };
 
-export async function getEcholinkStatus(callsign = "VU35KB") {
+export async function getEcholinkStatus(callsign = "VU35KB", force = false) {
     const now = Date.now();
     const CACHE_KEY = `echolink_status_${callsign}`;
+    const CACHE_DURATION = 120000; // 2 minutes
 
-    // 1. Check in-memory module cache (fastest, survives component remounts)
-    if (echolinkCache.data && (now - echolinkCache.timestamp < 60000)) {
-        return echolinkCache.data;
+    // 1. Avoid fetching on server to prevent build-time/SSR API abuse
+    if (typeof window === 'undefined') {
+        if (echolinkCache.data) return { data: echolinkCache.data, timestamp: echolinkCache.timestamp };
+        return { data: { status: 'OFF', node: '--', location: 'Offline' }, timestamp: 0 };
     }
 
-    // 2. Check sessionStorage (survives page transitions/refreshes in same tab)
-    if (typeof window !== 'undefined' && window.sessionStorage) {
+    // 2. Check in-memory module cache (survives component remounts in same page session)
+    if (!force && echolinkCache.data && (now - echolinkCache.timestamp < CACHE_DURATION)) {
+        return { data: echolinkCache.data, timestamp: echolinkCache.timestamp };
+    }
+
+    // 3. Check localStorage (survives page refreshes/switching pages in Astro)
+    if (!force && window.localStorage) {
         try {
-            const stored = sessionStorage.getItem(CACHE_KEY);
+            const stored = localStorage.getItem(CACHE_KEY);
             if (stored) {
                 const { data, timestamp } = JSON.parse(stored);
-                if (now - timestamp < 60000) {
+                if (now - timestamp < CACHE_DURATION) {
                     echolinkCache = { data, timestamp }; // Sync to memory cache
-                    return data;
+                    return { data, timestamp };
                 }
             }
         } catch (e) {
-            console.warn("Session storage access error:", e);
+            console.warn("Storage access error:", e);
         }
     }
 
-    // 3. Fetch fresh data from API
+    // 4. Fetch fresh data from API
     try {
         const response = await fetch(`https://n8n.srinikb.in/webhook/echolink-status?callsign=${callsign}`);
         const data = await response.json();
@@ -126,15 +133,14 @@ export async function getEcholinkStatus(callsign = "VU35KB") {
         const newCache = { data, timestamp: now };
         echolinkCache = newCache;
 
-        if (typeof window !== 'undefined' && window.sessionStorage) {
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
+        if (window.localStorage) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
         }
 
-        return data;
+        return { data, timestamp: now };
     } catch (error) {
         console.error("Echolink status fetch error:", error);
-        // If API fails, try to return stale data if available as fallback
-        if (echolinkCache.data) return echolinkCache.data;
-        return { error: "Service unavailable" };
+        if (echolinkCache.data) return { data: echolinkCache.data, timestamp: echolinkCache.timestamp };
+        return { data: { error: "Service unavailable" }, timestamp: 0 };
     }
 }
