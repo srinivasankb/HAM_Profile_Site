@@ -48,18 +48,28 @@ export default function ProfilePage() {
 
 
 
-    const getDisplayTime = () => {
-        if (tzMode === 'utc') {
-            const d = time.getUTCDate().toString().padStart(2, '0');
-            const m = time.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
-            const y = time.getUTCFullYear();
-            const t = time.toISOString().slice(11, 16);
-            return { label: 'UTC Time', value: `${m} ${d}, ${y} • ${t} Z` };
-        } else {
-            const datePart = time.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
-            const timePart = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
-            return { label: 'Station Local Time', value: `${datePart} • ${timePart} IST` };
-        }
+    const getTemporalDetails = () => {
+        const d = new Date(time);
+        const start = new Date(d.getFullYear(), 0, 0);
+        const diff = d - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const day = Math.floor(diff / oneDay);
+        const week = Math.ceil(day / 7);
+        return { day, week };
+    };
+
+    const getTimes = () => {
+        const utc_d = time.getUTCDate().toString().padStart(2, '0');
+        const utc_m = time.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+        const utc_y = time.getUTCFullYear();
+        const utc_t = time.toISOString().slice(11, 16);
+        const utcValue = `${utc_m} ${utc_d}, ${utc_y} • ${utc_t} Z`;
+
+        const istDatePart = time.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+        const istTimePart = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+        const istValue = `${istDatePart} • ${istTimePart} IST`;
+
+        return { utcValue, istValue };
     };
 
     const formatSunTime = (d) => {
@@ -325,14 +335,36 @@ export default function ProfilePage() {
 
                 <div className="modern-card">
                     <div className="card-label-row">
-                        <span className="card-label"><Clock size={14} /> {getDisplayTime().label}</span>
-                        <button className="unit-toggle" onClick={toggleTz} title="Toggle timezone">
-                            <span className={tzMode === 'utc' ? 'active' : ''}>UTC</span>
-                            <span className="toggle-sep">|</span>
-                            <span className={tzMode === 'ist' ? 'active' : ''}>IST</span>
-                        </button>
+                        <span className="card-label"><Clock size={14} /> Station Time</span>
                     </div>
-                    <div className="card-value" style={{ fontSize: '0.95rem' }}>{getDisplayTime().value}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted-foreground)', letterSpacing: '0.05em', marginBottom: '2px' }}>STATION LOCAL TIME</div>
+                            <div className="card-value" style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {getTimes().istValue}
+                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--muted-foreground)', background: 'var(--secondary)', padding: '2px 6px', borderRadius: '4px' }}>
+                                    (UTC +05:30)
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted-foreground)', letterSpacing: '0.05em', marginBottom: '2px' }}>UTC TIME</div>
+                            <div className="card-value" style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {getTimes().utcValue}
+                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--muted-foreground)', background: 'var(--secondary)', padding: '2px 6px', borderRadius: '4px' }}>
+                                    (UTC +00:00)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)', background: 'rgba(37, 99, 235, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                            Day {getTemporalDetails().day}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)', background: 'rgba(37, 99, 235, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
+                            Week {getTemporalDetails().week}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="modern-card">
@@ -350,6 +382,23 @@ export default function ProfilePage() {
                                 <span key={spec} style={{ fontSize: '0.7rem', background: 'var(--secondary)', padding: '2px 8px', borderRadius: '4px' }}>{spec}</span>
                             ))}
                         </div>
+                        {hardwareData.handheld && (
+                            <>
+                                <div style={{ borderTop: '1px dashed var(--border)', margin: '0.5rem 0' }}></div>
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                        <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{hardwareData.handheld.name}</p>
+                                        <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>{hardwareData.handheld.status}</span>
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>{hardwareData.handheld.category}</p>
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {hardwareData.handheld.specs.map(spec => (
+                                        <span key={spec} style={{ fontSize: '0.7rem', background: 'var(--secondary)', padding: '2px 8px', borderRadius: '4px' }}>{spec}</span>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 

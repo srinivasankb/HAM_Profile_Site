@@ -1,6 +1,6 @@
 # VU35KB | Amateur Radio Explorer
 
-A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasan KB), a newcomer exploring the world of Amateur Radio and QRP operations from Rajapalayam, IN.
+A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasan KB), a newcomer exploring the world of Amateur Radio and QRP operations from Bangalore, IN.
 
 🌐 **Live at**: [https://ham.srinikb.in/](https://ham.srinikb.in/)
 
@@ -48,10 +48,10 @@ Managed your identity, social links, and SEO metadata.
 Configure your home stations and portable locations.
 ```json
 {
-  "id": "rajapalayam",
-  "name": "Rajapalayam",
-  "lat": 9.4503, "lon": 77.5516,
-  "grid": "MJ89sk"
+  "id": "bangalore",
+  "name": "Bangalore",
+  "lat": 12.8720, "lon": 77.6734,
+  "grid": "MK82uu"
 }
 ```
 
@@ -60,6 +60,12 @@ Manage your primary radio and your accessories collection.
 ```json
 {
   "primary": {
+    "name": "Alinco DR 735T",
+    "category": "Dual Band VHF/UHF Transceiver",
+    "specs": ["2m/70cm", "Dual Band J Pole Antenna", "Base Station"],
+    "status": "Active"
+  },
+  "handheld": {
     "name": "Baofeng M13 Pro",
     "category": "Handheld Transceiver",
     "specs": ["2m/70cm", "QRP Operation", "Mobile Ready"],

@@ -1,5 +1,15 @@
 {
     "primary": {
+        "name": "Alinco DR 735T",
+        "category": "Dual Band VHF/UHF Transceiver",
+        "specs": [
+            "2m/70cm",
+            "Dual Band J Pole Antenna",
+            "Base Station"
+        ],
+        "status": "Active"
+    },
+    "handheld": {
         "name": "Baofeng M13 Pro",
         "category": "Handheld Transceiver",
         "specs": [

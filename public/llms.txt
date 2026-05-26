@@ -12,12 +12,12 @@
 ## Core Knowledge Areas
 
 - **Operating Standards**: NATO Phonetic Alphabet, Voice Q-Codes, RST reporting, and standard contact procedures.
-- **Station Infrastructure**: QRP rig setup (Baofeng M13 Pro), license grades (ASOC Restricted), and multi-location setups (Rajapalayam & Bangalore).
+- **Station Infrastructure**: Base rig setup (Alinco DR 735T), Handheld rig (Baofeng M13 Pro), license grades (ASOC Restricted), and multi-location setups (Bangalore & Rajapalayam).
 - **Tech Explorations**: Grid Square mathematics, station automation, and HAM radio digital tools.
 
 ## Meta
 - **Callsign**: VU35KB
-- **Location**: Rajapalayam, Tamil Nadu & Bangalore, Karnataka, IN
-- **Grid Squares**: MJ89sk, MK82uu
+- **Location**: Bangalore, Karnataka & Rajapalayam, Tamil Nadu, IN
+- **Grid Squares**: MK82uu, MJ89sk
 - **Primary Domain**: https://ham.srinikb.in
 - **Full Index**: https://ham.srinikb.in/llms-full.txt

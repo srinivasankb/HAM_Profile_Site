@@ -51,7 +51,7 @@ While many Q-codes are used in CW (Morse Code), several are standard in phone (v
 | **QSL** | I acknowledge | "QSL, I copy everything." |
 | **QSO** | A conversation | "Thanks for the nice QSO!" |
 | **QSY** | Changing frequency | "QSY to 14.300 MHz." |
-| **QTH** | Location/Home | "My QTH is Rajapalayam." |
+| **QTH** | Location/Home | "My QTH is Bangalore." |
 
 ---
 
@@ -61,7 +61,7 @@ In voice (Phone) communication, we typically only use the **R** and the **S** of
 *   **R (Readability):** Scale of 1 to 5. (5 = Perfectly readable)
 *   **S (Signal Strength):** Scale of 1 to 9. (9 = Extremely strong)
 
-*Example:* "You are **5 and 9** (or 59) into Rajapalayam."
+*Example:* "You are **5 and 9** (or 59) into Bangalore."
 
 ---
 
