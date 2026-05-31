@@ -111,6 +111,16 @@ import avatarImg from '../assets/avatar.png';
 
     <!-- Latest Blogs Section Hidden Temporarily -->
 
+    <!-- Latest Contacts Logbook Section -->
+    <section style="margin-top: 4rem;">
+       <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 2rem;">Latest Contacts (Logbook)</h2>
+       <div class="modern-card" style="padding: 0; overflow: hidden; border-radius: 12px; background: white;">
+         <div class="iframe-container">
+           <iframe align="top" frameborder="0" height="500" scrolling="yes" src="https://logbook.qrz.com/lbstat/VU35KB/" width="100%"></iframe>
+         </div>
+       </div>
+    </section>
+
     <!-- Events Section -->
     <EventsSection client:visible />
 
@@ -366,5 +376,20 @@ import avatarImg from '../assets/avatar.png';
     .tool-arrow {
       margin-left: 0;
     }
+  }
+
+  .iframe-container {
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--background);
+  }
+  
+  .iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
 </style>
