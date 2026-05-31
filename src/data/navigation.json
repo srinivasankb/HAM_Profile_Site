@@ -10,11 +10,6 @@
         "icon": "MapPin"
     },
     {
-        "name": "Journal",
-        "path": "/blog",
-        "icon": "BookText"
-    },
-    {
         "name": "Resources",
         "path": "/resources",
         "icon": "Library"

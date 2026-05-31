@@ -155,28 +155,38 @@ export default function ProfilePage() {
                     <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem' }}>
                         <History size={14} /> FULL SCHEDULE
                     </div>
-                    <div className="table-container" style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>TIME (IST)</th>
-                                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>NET NAME</th>
-                                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>FREQ (MHz)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {nets.map(n => (
-                                    <tr key={n.id} style={{ borderBottom: '1px solid var(--border)', opacity: parseTimeToMinutes(n.end) < currentMins ? 0.4 : 1 }}>
-                                        <td style={{ padding: '0.5rem', whiteSpace: 'nowrap' }}>{n.start} - {n.end}</td>
-                                        <td style={{ padding: '0.5rem' }}>
-                                            <div style={{ fontWeight: 600 }}>{n.name}</div>
-                                            <div style={{ fontSize: '0.65rem', opacity: 0.6 }}>Offset: {n.offset} | TX: {n.tx}</div>
-                                        </td>
-                                        <td style={{ padding: '0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>{n.rx}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {nets.map(n => {
+                            const isPast = parseTimeToMinutes(n.end) < currentMins;
+                            const isOngoing = currentMins >= parseTimeToMinutes(n.start) && currentMins < parseTimeToMinutes(n.end);
+                            
+                            return (
+                                <div key={n.id} style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center',
+                                    padding: '0.75rem', 
+                                    borderRadius: '8px',
+                                    background: isOngoing ? 'rgba(239, 68, 68, 0.05)' : 'var(--secondary)',
+                                    border: isOngoing ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid transparent',
+                                    opacity: isPast ? 0.5 : 1,
+                                    transition: 'all 0.2s'
+                                }}>
+                                    <div style={{ flex: '0 0 85px' }}>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: isOngoing ? '#ef4444' : 'var(--primary)' }}>{n.start}</div>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)' }}>to {n.end}</div>
+                                    </div>
+                                    <div style={{ flex: '1 1 auto', padding: '0 10px' }}>
+                                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isOngoing ? '#ef4444' : 'var(--foreground)' }}>{n.name}</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)' }}>TX: {n.tx} • Offset: {n.offset}</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right', flex: '0 0 auto' }}>
+                                        <div style={{ fontWeight: 800, fontSize: '1rem', fontFamily: 'monospace', color: isOngoing ? '#ef4444' : 'var(--foreground)' }}>{n.rx}</div>
+                                        <div style={{ fontSize: '0.6rem', fontWeight: 600, background: 'rgba(128,128,128,0.1)', padding: '2px 4px', borderRadius: '4px', display: 'inline-block', marginTop: '2px', color: 'var(--muted-foreground)' }}>MHz</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -421,8 +431,8 @@ export default function ProfilePage() {
 
             { /* Net Schedule Section */}
             <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted-foreground)', maxWidth: '600px', margin: '0 auto' }}>
-                    I regularly monitor these local nets to stay connected with the amateur radio community and occasionally participate to practice my operating skills.
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted-foreground)', margin: '0 auto' }}>
+                    Schedule of local VHF/UHF nets I regularly monitor and participate in to stay connected with the community.
                 </p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>

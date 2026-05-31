@@ -1,5 +1,6 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library, Mail } from 'lucide-react';
+import InstagramIcon from '../components/InstagramIcon.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import profileData from '../data/profile.json';
@@ -215,6 +216,19 @@ const recentBlogs = blogs.slice(0, 3);
             <div class="footer-info">
                <Radio size={20} /> <span class="logo-text">{profileData.callsign}</span>
                 <p class="footer-desc" data-astro-prefetch>{profileData.subtitle}</p>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                  <a href={`mailto:${profileData.contact.email}`} class="social-icon-link" aria-label="Email Contact">
+                    <Mail size={20} />
+                  </a>
+                  <a href="/blog/rss.xml" class="social-icon-link" aria-label="RSS Feed">
+                    <Rss size={20} />
+                  </a>
+                  {profileData.social.instagram && (
+                    <a href={profileData.social.instagram} target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Instagram Profile">
+                      <InstagramIcon size={20} />
+                    </a>
+                  )}
+                </div>
             </div>
             <div class="footer-links-grid">
               <div class="footer-group">
@@ -222,11 +236,6 @@ const recentBlogs = blogs.slice(0, 3);
                 {navData.map(item => (
                   <a href={item.path} data-astro-prefetch>{item.name}</a>
                 ))}
-              </div>
-              <div class="footer-group">
-                <h2 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--foreground);">Connect</h2>
-                <a href={`mailto:${profileData.contact.email}`}>Email</a>
-                <a href="/blog/rss.xml">RSS Feed</a>
               </div>
             </div>
           </div>
@@ -243,5 +252,12 @@ const recentBlogs = blogs.slice(0, 3);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+  }
+  .social-icon-link {
+    color: var(--muted-foreground);
+    transition: color 0.2s;
+  }
+  .social-icon-link:hover {
+    color: var(--primary);
   }
 </style>
