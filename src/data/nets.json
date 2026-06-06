@@ -41,20 +41,10 @@
             "days": "Daily"
         },
         {
-            "id": "blr_05",
-            "name": "NAMMA BENGALURU DMR",
-            "start": "20:00",
-            "end": "20:15",
-            "rx": "145.275",
-            "tx": "144.675",
-            "offset": "-0.6",
-            "days": "Daily"
-        },
-        {
             "id": "blr_06",
-            "name": "UHF GE NET",
-            "start": "20:30",
-            "end": "20:45",
+            "name": "GB UHF NET",
+            "start": "20:15",
+            "end": "21:00",
             "rx": "434.050",
             "tx": "437.650",
             "offset": "+3.6",
