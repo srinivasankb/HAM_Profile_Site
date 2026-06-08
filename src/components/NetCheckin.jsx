@@ -194,6 +194,14 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
 
                 <div style={{ padding: '1.5rem' }}>
                     <div style={{ marginBottom: '1.5rem', fontSize: '0.85rem', color: 'var(--muted-foreground)', display: 'grid', gap: '0.5rem', background: 'var(--secondary)', padding: '1rem', borderRadius: '8px' }}>
+                        {(() => {
+                            const activeNet = allNets.find(n => n.id === selectedNet);
+                            return activeNet && (
+                                <div style={{ marginBottom: '0.25rem', paddingBottom: '0.5rem', borderBottom: '1px dashed var(--border)' }}>
+                                    <span style={{ display: 'inline-block', width: '100px' }}>Active Net:</span> <strong style={{ color: 'var(--primary)', fontSize: '0.95rem' }}>{activeNet.name}</strong>
+                                </div>
+                            );
+                        })()}
                         <div><span style={{ display: 'inline-block', width: '100px' }}>Your Phonetic:</span> <strong style={{ color: 'var(--foreground)' }}>{getPhonetic(profileData.callsign)}</strong></div>
                         {suffix && (
                             <div><span style={{ display: 'inline-block', width: '100px' }}>Controller:</span> <strong style={{ color: 'var(--foreground)' }}>{getPhonetic(`${prefix}${suffix}`)}</strong></div>
