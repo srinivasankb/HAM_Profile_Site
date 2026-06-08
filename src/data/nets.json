@@ -11,8 +11,8 @@
             "days": "Daily"
         },
         {
-            "id": "blr_08",
-            "name": "R3 Net on VU2TWO",
+            "id": "blr_02",
+            "name": "R3 NET",
             "start": "07:00",
             "end": "07:30",
             "rx": "145.650",
@@ -22,37 +22,17 @@
         },
         {
             "id": "blr_03",
-            "name": "KREIS NET",
-            "start": "16:30",
-            "end": "17:00",
-            "rx": "145.275",
-            "tx": "144.675",
-            "offset": "-0.6",
-            "days": "Daily"
-        },
-        {
-            "id": "blr_04",
-            "name": "EVENING NET",
-            "start": "17:00",
-            "end": "17:15",
-            "rx": "145.800",
-            "tx": "145.200",
-            "offset": "-0.6",
-            "days": "Daily"
-        },
-        {
-            "id": "blr_06",
-            "name": "GB UHF NET",
-            "start": "20:15",
-            "end": "21:00",
+            "name": "GREATER BENGALURU UHF NET",
+            "start": "20:30",
+            "end": "20:45",
             "rx": "434.050",
             "tx": "437.650",
             "offset": "+3.6",
             "days": "Daily"
         },
         {
-            "id": "blr_09",
-            "name": "R3 Evening Net on VU2TWO",
+            "id": "blr_04",
+            "name": "R3 EVENING NET",
             "start": "20:30",
             "end": "21:00",
             "rx": "145.650",
@@ -61,8 +41,8 @@
             "days": "Daily"
         },
         {
-            "id": "blr_07",
-            "name": "SILICON CITY NET (VHF)",
+            "id": "blr_05",
+            "name": "SILICON CITY NET",
             "start": "21:00",
             "end": "21:30",
             "rx": "145.800",
@@ -71,8 +51,8 @@
             "days": "Daily"
         },
         {
-            "id": "blr_10",
-            "name": "UHF Net on VU2RQB",
+            "id": "blr_06",
+            "name": "UHF NET",
             "start": "21:00",
             "end": "21:15",
             "rx": "435.200",

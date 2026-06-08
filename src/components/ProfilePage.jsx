@@ -118,11 +118,11 @@ export default function ProfilePage() {
                     {ongoing.length > 0 ? (
                         ongoing.map(n => (
                             <div key={n.id} className="net-item ongoing" style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.05)' }}>
-                                <div>
-                                    <div style={{ fontWeight: 800, fontSize: '1rem', color: '#b91c1c' }}>{n.name}</div>
+                                <div style={{ minWidth: 0, flex: '1 1 auto', paddingRight: '1rem' }}>
+                                    <div style={{ fontWeight: 800, fontSize: '1rem', color: '#b91c1c', lineHeight: 1.2, marginBottom: '2px' }} title={n.name}>{n.name}</div>
                                     <div style={{ fontSize: '0.8rem', opacity: 0.8, color: '#b91c1c' }}>Ends at {n.end} IST</div>
                                 </div>
-                                <div style={{ textAlign: 'right' }}>
+                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                     <div style={{ fontWeight: 800, color: '#ef4444', fontSize: '1.1rem' }}>{n.rx}</div>
                                     <div style={{ fontSize: '0.7rem', opacity: 0.7, color: '#b91c1c' }}>Offset: {n.offset}</div>
                                 </div>
@@ -142,9 +142,9 @@ export default function ProfilePage() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {upcoming.slice(0, 2).map(n => (
-                                <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px dashed var(--border)' }}>
-                                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{n.name}</span>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700 }}>{n.start} IST</span>
+                                <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.5rem 0', borderBottom: '1px dashed var(--border)', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3 }}>{n.name}</span>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700, flexShrink: 0, marginTop: '2px' }}>{n.start} IST</span>
                                 </div>
                             ))}
                         </div>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                     <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.75rem' }}>
                         <History size={14} /> FULL SCHEDULE
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '0.75rem' }}>
                         {nets.map(n => {
                             const isPast = parseTimeToMinutes(n.end) < currentMins;
                             const isOngoing = currentMins >= parseTimeToMinutes(n.start) && currentMins < parseTimeToMinutes(n.end);
@@ -176,8 +176,8 @@ export default function ProfilePage() {
                                         <div style={{ fontSize: '0.8rem', fontWeight: 800, color: isOngoing ? '#ef4444' : 'var(--primary)' }}>{n.start}</div>
                                         <div style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)' }}>to {n.end}</div>
                                     </div>
-                                    <div style={{ flex: '1 1 auto', padding: '0 10px' }}>
-                                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isOngoing ? '#ef4444' : 'var(--foreground)' }}>{n.name}</div>
+                                    <div style={{ flex: '1 1 auto', padding: '0 10px', minWidth: 0 }}>
+                                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isOngoing ? '#ef4444' : 'var(--foreground)', lineHeight: 1.2, marginBottom: '2px' }} title={n.name}>{n.name}</div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)' }}>TX: {n.tx} • Offset: {n.offset}</div>
                                     </div>
                                     <div style={{ textAlign: 'right', flex: '0 0 auto' }}>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                     Schedule of local VHF/UHF nets I regularly monitor and participate in to stay connected with the community.
                 </p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '3rem' }}>
                 {STATIONS.map(station => (
                     <div key={`nets-${station.id}`} className="modern-card">
                         <div className="card-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
