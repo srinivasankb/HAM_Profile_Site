@@ -8,6 +8,7 @@ import profileData from '../data/profile.json';
 import clubsData from '../data/clubs.json';
 import hardwareData from '../data/hardware.json';
 import navData from '../data/navigation.json';
+import galleryData from '../data/gallery.json';
 import { 
   Radio, 
   MapPin, 
@@ -17,8 +18,14 @@ import {
   Cloud,
   Sun,
   Users,
-  ExternalLink
+  ExternalLink,
+  Camera
 } from 'lucide-react';
+
+// Get latest 2 gallery images
+const latestPhotos = [...galleryData]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 2);
 
 import InstagramIcon from '../components/InstagramIcon.astro';
 
@@ -123,6 +130,39 @@ import avatarImg from '../assets/avatar.png';
 
     <!-- Events Section -->
     <EventsSection client:visible />
+
+    <!-- Gallery Preview Section -->
+    <section style="margin-top: 4rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+        <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 0;">Photo Gallery</h2>
+        <a href="/gallery" class="gallery-view-all" data-astro-prefetch>
+          View All <ArrowRight size={16} />
+        </a>
+      </div>
+      <div class="gallery-preview-grid">
+        {latestPhotos.map((item) => (
+          <a href="/gallery" class="gallery-preview-card modern-card" data-astro-prefetch>
+            <div class="gallery-preview-img-wrap">
+              <img
+                src={`/gallery_images/${item.filename}`}
+                alt={item.title}
+                loading="lazy"
+                decoding="async"
+                width="600"
+                height="400"
+                class="gallery-preview-img"
+              />
+            </div>
+            <div class="gallery-preview-info">
+              <h3 class="gallery-preview-title">{item.title}</h3>
+              <time class="gallery-preview-date" datetime={item.date}>
+                {new Date(item.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
 
     <!-- Tools CTA Section -->
     <section style="margin-top: 4rem; margin-bottom: 4rem;">
@@ -391,5 +431,83 @@ import avatarImg from '../assets/avatar.png';
     height: 100%;
     border: none;
     display: block;
+  }
+
+  /* Gallery Preview */
+  .gallery-view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .gallery-view-all:hover {
+    color: var(--primary);
+  }
+
+  .gallery-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .gallery-preview-card {
+    text-decoration: none;
+    color: inherit;
+    padding: 0 !important;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gallery-preview-card:hover {
+    border-color: #d4d4d8;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .gallery-preview-img-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--secondary);
+  }
+
+  .gallery-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .gallery-preview-card:hover .gallery-preview-img {
+    transform: scale(1.05);
+  }
+
+  .gallery-preview-info {
+    padding: 1rem 1.25rem;
+  }
+
+  .gallery-preview-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+
+  .gallery-preview-date {
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  @media (max-width: 1100px) {
+    .gallery-preview-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
