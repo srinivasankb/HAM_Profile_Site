@@ -123,7 +123,13 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--muted-foreground)' }}>Offline</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div className="signal-waves-offline" style={{ width: '16px', height: '16px' }}>
+                                <div className="wave-offline" style={{ width: '8px', height: '8px', background: 'var(--muted-foreground)', animation: 'none', opacity: 0.5 }}></div>
+                                <div className="wave-offline delay-1" style={{ width: '8px', height: '8px' }}></div>
+                            </div>
+                            <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--muted-foreground)' }}>Offline</p>
+                        </div>
                         <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>VU35KB is currently disconnected.</p>
                     </div>
                 )}
@@ -134,6 +140,23 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                 @keyframes spin {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
+                }
+                .signal-waves-offline {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .wave-offline {
+                    position: absolute;
+                    border: 1px solid var(--muted-foreground);
+                    border-radius: 50%;
+                    animation: ripple-offline 3s infinite;
+                    opacity: 0;
+                }
+                @keyframes ripple-offline {
+                    0% { transform: scale(1); opacity: 0.4; }
+                    100% { transform: scale(3); opacity: 0; }
                 }
             `}} />
             </div>
@@ -174,8 +197,13 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                     </div>
                 </div>
             )}
-            <div className="card-value" style={{ color: isOnline ? '#10b981' : 'inherit', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {isOnline ? <Wifi size={18} /> : <WifiOff size={18} style={{ opacity: 0.7 }} />}
+            <div className="card-value" style={{ color: isOnline ? '#10b981' : 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {isOnline ? <Wifi size={18} /> : (
+                    <div className="signal-waves-offline" style={{ width: '18px', height: '18px' }}>
+                        <div className="wave-offline" style={{ width: '8px', height: '8px', background: 'currentColor', animation: 'none', opacity: 0.5 }}></div>
+                        <div className="wave-offline delay-1" style={{ width: '8px', height: '8px' }}></div>
+                    </div>
+                )}
                 <span>{isOnline ? 'Online' : 'Offline'}</span>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>
@@ -203,6 +231,23 @@ export default function EcholinkStatus({ variant = 'minimal', showLabel = true }
                 .delay-1 { animation-delay: 1s; }
                 @keyframes ripple {
                     0% { transform: scale(1); opacity: 0.8; }
+                    100% { transform: scale(3); opacity: 0; }
+                }
+                .signal-waves-offline {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .wave-offline {
+                    position: absolute;
+                    border: 1px solid currentColor;
+                    border-radius: 50%;
+                    animation: ripple-offline 3s infinite;
+                    opacity: 0;
+                }
+                @keyframes ripple-offline {
+                    0% { transform: scale(1); opacity: 0.4; }
                     100% { transform: scale(3); opacity: 0; }
                 }
                 .refresh-btn:hover { opacity: 1 !important; }

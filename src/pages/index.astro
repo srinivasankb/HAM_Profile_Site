@@ -88,7 +88,9 @@ import avatarImg from '../assets/avatar.png';
         <div class="modern-card highlight-card">
           <div class="card-label"><MapPin size={14} /> {station.isPrimary ? 'Primary Station' : 'Secondary Station'}</div>
           <div class="card-value">{station.name}</div>
-          <p style="font-size: 0.8rem; color: var(--muted-foreground);">Grid: {station.grid}</p>
+          <p style="font-size: 0.8rem; color: var(--muted-foreground);">
+            Grid: <a href={`/grid?q=${station.grid}`} class="club-link" data-astro-prefetch>{station.grid}</a>
+          </p>
         </div>
       ))}
     </div>
@@ -120,11 +122,17 @@ import avatarImg from '../assets/avatar.png';
 
     <!-- Latest Contacts Logbook Section -->
     <section style="margin-top: 4rem;">
-       <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 2rem;">Latest Contacts (Logbook)</h2>
-       <div class="modern-card" style="padding: 0; overflow: hidden; border-radius: 12px; background: white;">
-         <div class="iframe-container">
+       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+         <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 0;">Latest Contacts</h2>
+         <a href="https://www.qrz.com/db/VU35KB" target="_blank" rel="noopener noreferrer" class="gallery-view-all">
+           View QRZ Profile <ExternalLink size={16} />
+         </a>
+       </div>
+       <div class="modern-card" style="padding: 0; overflow: hidden; border-radius: 12px; background: #ffffff; border: 1px solid var(--border); position: relative;">
+         <div class="iframe-container" style="height: 380px; overflow-y: auto; overflow-x: hidden;">
            <iframe align="top" frameborder="0" height="500" scrolling="yes" src="https://logbook.qrz.com/lbstat/VU35KB/" width="100%"></iframe>
          </div>
+         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1)); pointer-events: none;"></div>
        </div>
     </section>
 
