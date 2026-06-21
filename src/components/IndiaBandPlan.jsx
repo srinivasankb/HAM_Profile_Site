@@ -76,6 +76,17 @@ function parseHash() {
     return { grade, mode };
 }
 
+function getInitialStateFromHash() {
+    if (typeof window === 'undefined') {
+        return { isGeneral: false, modeFilter: 'all' };
+    }
+    const { grade, mode } = parseHash();
+    return {
+        isGeneral: grade === 'general',
+        modeFilter: mode || 'all',
+    };
+}
+
 function buildShareUrl(isGeneral, modeFilter) {
     const grade = isGeneral ? 'general' : 'restricted';
     if (modeFilter === 'all') return `${PAGE_URL}#${grade}`;
@@ -513,9 +524,10 @@ function HelpGuide() {
 }
 
 export default function IndiaBandPlan() {
-    const [isGeneral, setIsGeneral] = useState(true);
+    const [hashInit] = useState(() => getInitialStateFromHash());
+    const [isGeneral, setIsGeneral] = useState(hashInit.isGeneral);
     const [currentFilter, setCurrentFilter] = useState('all');
-    const [modeFilter, setModeFilter] = useState('all');
+    const [modeFilter, setModeFilter] = useState(hashInit.modeFilter);
     const [openCards, setOpenCards] = useState(new Set());
     const [copied, setCopied] = useState(false);
     const [printOptionsOpen, setPrintOptionsOpen] = useState(false);
@@ -540,10 +552,15 @@ export default function IndiaBandPlan() {
     }, []);
 
     useEffect(() => {
-        const { grade, mode } = parseHash();
-        if (grade === 'restricted') setIsGeneral(false);
-        else if (grade === 'general') setIsGeneral(true);
-        if (mode) setModeFilter(mode);
+        const syncFromHash = () => {
+            const { grade, mode } = parseHash();
+            setIsGeneral(grade === 'general');
+            setModeFilter(mode || 'all');
+            setOpenCards(new Set());
+        };
+
+        window.addEventListener('hashchange', syncFromHash);
+        return () => window.removeEventListener('hashchange', syncFromHash);
     }, []);
 
     useEffect(() => {
