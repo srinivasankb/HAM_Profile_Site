@@ -2,6 +2,7 @@ const CACHE_NAME = 'vu35kb-v1';
 const STATIC_ASSETS = [
     '/',
     '/grid',
+    '/india-band-plan',
     '/index.html',
     '/manifest.json',
     '/favicon.png',

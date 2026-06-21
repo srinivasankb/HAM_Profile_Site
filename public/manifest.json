@@ -33,6 +33,18 @@
                     "sizes": "192x192"
                 }
             ]
+        },
+        {
+            "name": "India Band Plan",
+            "short_name": "Bands",
+            "description": "Open the India HAM Radio Band Plan tool",
+            "url": "/india-band-plan",
+            "icons": [
+                {
+                    "src": "/favicon.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ],
     "categories": [

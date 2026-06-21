@@ -1,0 +1,296 @@
+{
+  "meta": {
+    "bandPlanYear": 2025,
+    "planName": "National Frequency Allocation Plan (NFAP-2025)",
+    "regulatoryFramework": "Telecommunications (Amateur Services) Rules, 2024",
+    "authority": "Department of Telecommunications (DoT) / WPC",
+    "lastReviewed": "2025-06-21",
+    "sources": [
+      {
+        "label": "NFAP-2025 (DoT)",
+        "url": "https://www.dot.gov.in/static/uploads/2026/02/b110cdc386d3a4e41c8483d7ffd7c410.pdf"
+      },
+      {
+        "label": "Telecommunications (Amateur Services) Rules, 2024",
+        "url": "https://eservices.dot.gov.in/amateur-station-operator-certificate-asoc"
+      },
+      {
+        "label": "NIAR: Authorised Bands Reference",
+        "url": "https://qsl.net/vu2jos/Frequencies.pdf"
+      }
+    ]
+  },
+  "allocationLegend": {
+    "primary": "Primary amateur allocation under Radio Regulations",
+    "primary-shared": "Primary on shared basis. Must not cause harmful interference to other services",
+    "secondary": "Secondary basis. Must not cause harmful interference and cannot claim protection",
+    "nib": "Non-interference, non-protection (NIB) basis",
+    "terrestrial": "Terrestrial amateur service only (no satellite ops on this allocation)"
+  },
+  "licensingReminders": [
+    "Valid ASOC (Restricted or General) issued by DoT/WPC is required before operating.",
+    "Identify with your callsign at least every 15 minutes and at end of contact.",
+    "SACFA site clearance may be required for certain locations and antenna installations.",
+    "Maintain a station log and accurate frequency measuring equipment at the station.",
+    "All operation is subject to the Radio Regulations and applicable Indian telecom rules."
+  ],
+  "modeFilters": [
+    { "id": "all", "label": "All modes" },
+    { "id": "voice", "label": "Voice", "emissions": ["A3E", "J3E", "F3E", "H3E", "R3E"] },
+    { "id": "cw", "label": "CW", "emissions": ["A1A", "A2A", "F1A"] },
+    { "id": "digital", "label": "Digital / Data", "emissions": ["F1B", "F2B", "F3C", "A3C", "A3X", "A3F"] }
+  ],
+  "commonModeMap": {
+    "A1A": "CW",
+    "A2A": "CW",
+    "F1A": "CW (FM)",
+    "A3E": "AM voice",
+    "J3E": "SSB voice",
+    "H3E": "SSB (full carrier)",
+    "R3E": "SSB (reduced carrier)",
+    "F3E": "FM voice",
+    "F1B": "RTTY / digital",
+    "F2B": "Digital (subcarrier)",
+    "F3C": "Facsimile",
+    "A3C": "AM facsimile",
+    "A3X": "AM data",
+    "A3F": "AM video/test"
+  },
+  "bands": [
+    {
+      "band": "160 m",
+      "freq": "1.800 to 1.825 MHz",
+      "type": "MF",
+      "allocation": "primary",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "A3C", "A3F"] },
+      "commonModes": ["AM voice (A3E)", "SSB voice (J3E)", "CW (A1A, General)"],
+      "usage": "Nighttime regional. High static noise in summer.",
+      "subBands": [
+        { "range": "1.800 to 1.810 MHz", "usage": "CW and narrowband digital (conventional)" },
+        { "range": "1.810 to 1.825 MHz", "usage": "SSB and AM voice segments" }
+      ]
+    },
+    {
+      "band": "80 m",
+      "freq": "3.500 to 3.700 MHz",
+      "type": "HF",
+      "allocation": "primary-shared",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "FT8 / digital (F1B)"],
+      "notes": "Primary shared basis per Radio Regulations",
+      "usage": "Reliable nighttime regional, daytime local NVIS.",
+      "subBands": [
+        { "range": "3.500 to 3.600 MHz", "usage": "CW and digital (IARU R3 convention)" },
+        { "range": "3.600 to 3.700 MHz", "usage": "SSB voice and general phone" }
+      ]
+    },
+    {
+      "band": "80 m (Upper)",
+      "freq": "3.890 to 3.900 MHz",
+      "type": "HF",
+      "allocation": "primary-shared",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "Digital (F1B)"],
+      "notes": "Primary shared basis per Radio Regulations",
+      "usage": "Reliable nighttime regional, daytime local NVIS."
+    },
+    {
+      "band": "40 m",
+      "freq": "7.000 to 7.200 MHz",
+      "type": "HF",
+      "allocation": "primary",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "FT8 / WSJT (F1B)", "AM (A3E, Restricted)"],
+      "usage": "Most popular band. Reliable regional daytime, global nighttime.",
+      "subBands": [
+        { "range": "7.000 to 7.040 MHz", "usage": "CW" },
+        { "range": "7.040 to 7.060 MHz", "usage": "Digital modes (FT8, PSK, RTTY)" },
+        { "range": "7.060 to 7.200 MHz", "usage": "SSB voice and general phone" }
+      ]
+    },
+    {
+      "band": "30 m",
+      "freq": "10.100 to 10.150 MHz",
+      "type": "HF",
+      "allocation": "nib",
+      "restricted": null,
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "F1B", "F2B"] },
+      "commonModes": ["CW (A1A)", "FT8 / digital (F1B)"],
+      "notes": "General Grade only. Non-interference and non-protection basis.",
+      "usage": "Good day/night DX. Digital modes and CW only; no phone.",
+      "subBands": [
+        { "range": "10.100 to 10.140 MHz", "usage": "CW" },
+        { "range": "10.140 to 10.150 MHz", "usage": "Digital modes only (no phone)" }
+      ]
+    },
+    {
+      "band": "20 m",
+      "freq": "14.000 to 14.350 MHz",
+      "type": "HF",
+      "allocation": "primary",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "FT8 (F1B)"],
+      "usage": "The classic DX band. Open worldwide during the day.",
+      "subBands": [
+        { "range": "14.000 to 14.070 MHz", "usage": "CW and digital" },
+        { "range": "14.070 to 14.350 MHz", "usage": "SSB voice and general phone" }
+      ]
+    },
+    {
+      "band": "17 m",
+      "freq": "18.068 to 18.168 MHz",
+      "type": "HF",
+      "allocation": "nib",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "Digital (F1B)"],
+      "notes": "Non-interference and non-protection basis",
+      "usage": "Daytime DX. Highly sensitive to solar cycle.",
+      "subBands": [
+        { "range": "18.068 to 18.110 MHz", "usage": "CW and digital" },
+        { "range": "18.110 to 18.168 MHz", "usage": "SSB voice" }
+      ]
+    },
+    {
+      "band": "15 m",
+      "freq": "21.000 to 21.450 MHz",
+      "type": "HF",
+      "allocation": "nib",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "Digital (F1B)"],
+      "notes": "Non-interference and non-protection basis",
+      "usage": "Great daytime DX during solar maximum years.",
+      "subBands": [
+        { "range": "21.000 to 21.200 MHz", "usage": "CW and digital" },
+        { "range": "21.200 to 21.450 MHz", "usage": "SSB voice" }
+      ]
+    },
+    {
+      "band": "12 m",
+      "freq": "24.890 to 24.990 MHz",
+      "type": "HF",
+      "allocation": "primary",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "Digital (F1B)"],
+      "usage": "Daytime DX, heavily dependent on solar cycle peaks.",
+      "subBands": [
+        { "range": "24.890 to 24.930 MHz", "usage": "CW and digital" },
+        { "range": "24.930 to 24.990 MHz", "usage": "SSB voice" }
+      ]
+    },
+    {
+      "band": "10 m",
+      "freq": "28.000 to 29.700 MHz",
+      "type": "HF",
+      "allocation": "primary",
+      "restricted": { "power": "50 W", "emission": ["A3E", "H3E", "J3E", "R3E"] },
+      "general": { "power": "400 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3C", "A3F"] },
+      "commonModes": ["SSB voice (J3E)", "CW (A1A)", "FM (F3E)", "Digital (F1B)"],
+      "usage": "Local normally, incredible global DX during solar peaks.",
+      "subBands": [
+        { "range": "28.000 to 28.300 MHz", "usage": "CW and beacons" },
+        { "range": "28.300 to 29.700 MHz", "usage": "SSB, FM, and digital segments" }
+      ]
+    },
+    {
+      "band": "6 m",
+      "freq": "50.000 to 54.000 MHz",
+      "type": "VHF",
+      "allocation": "terrestrial",
+      "restricted": { "power": "10 W", "emission": ["F1B", "F2B", "F3C", "F3E"] },
+      "general": { "power": "25 W", "emission": ["F1A", "F2B", "F3C", "F3E"] },
+      "commonModes": ["FM voice (F3E)", "Digital (F1B)", "CW (F1A, General)"],
+      "notes": "Terrestrial service only",
+      "usage": "The 'Magic Band'. Known for summer Sporadic-E propagation.",
+      "subBands": [
+        { "range": "50.000 to 50.500 MHz", "usage": "CW, SSB weak signal (conventional)" },
+        { "range": "52.000 to 54.000 MHz", "usage": "FM and local activity segments" }
+      ]
+    },
+    {
+      "band": "2 m",
+      "freq": "144 to 146 MHz",
+      "type": "VHF",
+      "allocation": "terrestrial",
+      "restricted": { "power": "10 W", "emission": ["F1B", "F2B", "F3C", "F3E"] },
+      "general": { "power": "25 W", "emission": ["F1A", "F2B", "F3C", "F3E"] },
+      "commonModes": ["FM voice (F3E)", "Digital (F1B)", "CW (F1A, General)"],
+      "notes": "Terrestrial service only",
+      "usage": "Local line-of-sight, FM repeaters, SSB/CW weak signal.",
+      "subBands": [
+        { "range": "144.000 to 145.500 MHz", "usage": "SSB/CW weak signal, satellite uplinks (General)" },
+        { "range": "145.500 to 146.000 MHz", "usage": "FM simplex and repeater activity" }
+      ]
+    },
+    {
+      "band": "70 cm",
+      "freq": "434 to 438 MHz",
+      "type": "UHF",
+      "allocation": "secondary",
+      "restricted": { "power": "10 W", "emission": ["F1B", "F2B", "F3C", "F3E"] },
+      "general": { "power": "25 W", "emission": ["F1A", "F2B", "F3C", "F3E"] },
+      "commonModes": ["FM voice (F3E)", "Digital (F1B)", "CW (F1A, General)"],
+      "notes": "Secondary basis. Terrestrial service only.",
+      "usage": "Local line-of-sight, repeaters, satellite comms.",
+      "subBands": [
+        { "range": "434.000 to 438.000 MHz", "usage": "FM repeaters and digital links (local coordination)" }
+      ]
+    },
+    {
+      "band": "23 cm",
+      "freq": "1240 to 1300 MHz",
+      "type": "UHF",
+      "allocation": "secondary",
+      "restricted": null,
+      "general": { "power": "25 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3X", "A3F"] },
+      "commonModes": ["CW (A1A)", "SSB (J3E)", "Digital (F1B)", "Microwave ATV (A3F, test only)"],
+      "notes": "General Grade only. Secondary basis. Verify current WPC status for your area.",
+      "usage": "Microwave, highly directional, experimental."
+    },
+    {
+      "band": "9 cm",
+      "freq": "3300 to 3400 MHz",
+      "type": "SHF",
+      "allocation": "secondary",
+      "restricted": null,
+      "general": { "power": "25 W", "emission": ["A1A", "A2A", "A3E", "H3E", "R3E", "J3E", "F1B", "F2B", "F3E", "F3C", "A3X", "A3F"] },
+      "commonModes": ["CW (A1A)", "Digital (F1B)", "Microwave weak signal"],
+      "notes": "General Grade only. Secondary basis. Verify current WPC status for your area.",
+      "usage": "Microwave, experimental."
+    },
+    {
+      "band": "5 cm",
+      "freq": "5725 to 5840 MHz",
+      "type": "SHF",
+      "allocation": "secondary",
+      "restricted": null,
+      "general": { "power": "25 W", "emission": ["F1A", "F2B", "F3C", "F3E"] },
+      "commonModes": ["FM voice (F3E)", "Digital (F2B)", "CW (F1A)"],
+      "notes": "General Grade only. Secondary basis. Terrestrial service only.",
+      "usage": "Microwave, experimental."
+    }
+  ],
+  "emissionsLegend": {
+    "A1A": "CW (Morse code), decoded by ear",
+    "A2A": "CW with subcarrier, decoded by ear",
+    "A3E": "AM (Amplitude Modulation), voice",
+    "A3X": "AM, other analogue information",
+    "A3F": "AM, video / television",
+    "F1A": "FM (Frequency Modulation), CW",
+    "F1B": "FM, RTTY/digital (decoded by machine)",
+    "F2B": "FM, RTTY/digital with subcarrier",
+    "F3E": "FM, voice (telephony)",
+    "F3C": "FM, facsimile (still images)",
+    "H3E": "SSB (full carrier), voice",
+    "J3E": "SSB (suppressed carrier), voice",
+    "R3E": "SSB (reduced carrier), voice",
+    "A3C": "AM, facsimile"
+  }
+}

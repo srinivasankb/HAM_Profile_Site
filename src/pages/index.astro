@@ -12,7 +12,9 @@ import galleryData from '../data/gallery.json';
 import { 
   Radio, 
   MapPin, 
-  Compass, 
+  Compass,
+  Antenna,
+  RadioTower,
   ArrowRight, 
   Award,
   Cloud,
@@ -174,22 +176,40 @@ import avatarImg from '../assets/avatar.png';
 
     <!-- Tools CTA Section -->
     <section style="margin-top: 4rem; margin-bottom: 4rem;">
-      <a href="/grid" class="modern-card tool-cta-card" aria-label="Open Maidenhead Grid Explorer tool" data-astro-prefetch>
-        <div class="tool-content">
-          <div class="tool-icon">
-            <Compass size={32} />
+      <div class="tools-grid">
+        <a href="/grid" class="modern-card tool-cta-card" aria-label="Open Maidenhead Grid Explorer tool" data-astro-prefetch>
+          <div class="tool-content">
+            <div class="tool-icon">
+              <Compass size={32} />
+            </div>
+            <div>
+              <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Maidenhead Grid Explorer</h2>
+              <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5;">
+                Discover your grid square boundaries, locate station coordinates, and visualize the globe's radio grid.
+              </p>
+            </div>
+            <div class="tool-arrow">
+              <ArrowRight size={24} />
+            </div>
           </div>
-          <div>
-            <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Maidenhead Grid Explorer</h2>
-            <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5;">
-              Discover your grid square boundaries, locate station coordinates, and visualize the globe’s radio grid.
-            </p>
+        </a>
+        <a href="/india-band-plan" class="modern-card tool-cta-card tool-cta-card-alt" aria-label="Open India HAM Radio Band Plan tool" data-astro-prefetch>
+          <div class="tool-content">
+            <div class="tool-icon">
+              <RadioTower size={32} />
+            </div>
+            <div>
+              <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">India Band Plan</h2>
+              <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5;">
+                Explore NFAP frequency allocations, emission designators, and power limits for Indian amateur bands.
+              </p>
+            </div>
+            <div class="tool-arrow">
+              <ArrowRight size={24} />
+            </div>
           </div>
-          <div class="tool-arrow">
-            <ArrowRight size={24} />
-          </div>
-        </div>
-      </a>
+        </a>
+      </div>
     </section>
   </div>
 </Layout>
@@ -330,6 +350,33 @@ import avatarImg from '../assets/avatar.png';
     padding: 2.5rem;
     transition: all 0.2s ease;
     border: none;
+  }
+
+  .tool-cta-card-alt {
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+  }
+
+  .tool-cta-card-alt .tool-icon {
+    background: var(--secondary);
+    color: var(--foreground);
+  }
+
+  .tool-cta-card-alt:hover {
+    border-color: var(--primary);
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .tools-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .tool-cta-card:hover {

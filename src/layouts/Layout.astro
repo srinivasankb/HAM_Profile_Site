@@ -1,5 +1,5 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Menu, Home, Library, Mail } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Antenna, RadioTower, Menu, Home, Library, Mail } from 'lucide-react';
 import InstagramIcon from '../components/InstagramIcon.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
@@ -7,7 +7,7 @@ import profileData from '../data/profile.json';
 import navData from '../data/navigation.json';
 import ogImageDefault from '../assets/vu35kb_og.png';
 
-const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, RSS: Rss, Radio };
+const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, Antenna, RadioTower, RSS: Rss, Radio };
 
 interface Props {
 	title: string;

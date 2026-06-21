@@ -8,12 +8,13 @@
 - [Resource Library](https://ham.srinikb.in/resources): A knowledge base of technical manuals, operating procedures, and curated tools for radio communication.
 - [Station Details](https://ham.srinikb.in/station): Technical specifications of the station, including current rig, license status, and grid locations.
 - [Grid Explorer](https://ham.srinikb.in/grid): Interactive maidenhead grid square visualization for radio propagation analysis.
+- [India Band Plan](https://ham.srinikb.in/india-band-plan): NFAP-2025 interactive band chart with allocation status, mode filters, grade comparison, sub-bands, and printable shack charts.
 
 ## Core Knowledge Areas
 
 - **Operating Standards**: NATO Phonetic Alphabet, Voice Q-Codes, RST reporting, and standard contact procedures.
 - **Station Infrastructure**: Base rig setup (Alinco DR 735T), Handheld rig (Baofeng M13 Pro), license grades (ASOC Restricted), and multi-location setups (Bangalore & Rajapalayam).
-- **Tech Explorations**: Grid Square mathematics, station automation, and HAM radio digital tools.
+- **Tech Explorations**: Grid Square mathematics, India NFAP band plan reference, station automation, and HAM radio digital tools.
 
 ## Meta
 - **Callsign**: VU35KB

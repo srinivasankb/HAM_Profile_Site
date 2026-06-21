@@ -36,6 +36,13 @@ A technical tool for visualizing radio grids:
 - Visualizes grid boundaries on an interactive map.
 - Essential for propagation analysis and station locating.
 
+### [India HAM Radio Band Plan](https://ham.srinikb.in/india-band-plan)
+An interactive reference aligned to NFAP-2025 and Telecommunications (Amateur Services) Rules, 2024:
+- MF, HF, VHF, UHF, and SHF band coverage with allocation status (Primary, Shared, Secondary, NIB, Terrestrial).
+- Restricted vs General grade comparison, power limits, and allowed emission designators.
+- Filter by Voice, CW, and Digital modes; IARU Region 3 sub-band segments on HF/VHF.
+- Printable shack chart (compact/detailed) with QR code linking to ham.srinikb.in/india-band-plan#general or #restricted.
+
 ## Contact & QSL Info
 - **Email**: VU35KB@qsl.net
 - **QRZ**: [VU35KB Profile](https://www.qrz.com/db/VU35KB)
