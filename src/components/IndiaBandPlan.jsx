@@ -14,6 +14,8 @@ import {
     ChevronDown,
     ChevronUp,
     Zap,
+    Search,
+    X,
 } from 'lucide-react';
 import bandData from '../data/india-bands.json';
 import '../styles/india-band-plan.css';
@@ -64,6 +66,13 @@ const ALLOCATION_LABELS = {
     terrestrial: 'Terrestrial',
 };
 
+const MODE_CHIP_SHORT = {
+    all: 'All',
+    voice: 'Voice',
+    cw: 'CW',
+    digital: 'Data',
+};
+
 function parseHash() {
     const raw = window.location.hash.replace('#', '').toLowerCase();
     if (!raw) return { grade: null, mode: 'all' };
@@ -74,6 +83,376 @@ function parseHash() {
     if (parts[1] && modeFilters.some(m => m.id === parts[1])) mode = parts[1];
     else if (!grade && modeFilters.some(m => m.id === parts[0])) mode = parts[0];
     return { grade, mode };
+}
+
+function getBandKey(band) {
+    return `${band.band}-${band.freq}`;
+}
+
+function parseFrequencyRange(rangeStr) {
+    if (!rangeStr) return null;
+    const match = rangeStr.trim().match(/([\d.]+)\s+to\s+([\d.]+)\s*(ghz|mhz|khz)?/i);
+    if (!match) return null;
+
+    let min = parseFloat(match[1]);
+    let max = parseFloat(match[2]);
+    if (Number.isNaN(min) || Number.isNaN(max)) return null;
+
+    const unit = (match[3] || 'mhz').toLowerCase();
+    if (unit === 'ghz') {
+        min *= 1000;
+        max *= 1000;
+    } else if (unit === 'khz') {
+        min /= 1000;
+        max /= 1000;
+    }
+
+    return { minMHz: Math.min(min, max), maxMHz: Math.max(min, max) };
+}
+
+const FREQ_UNIT_ALIASES = {
+    ghz: ['ghz', 'g'],
+    mhz: ['mhz', 'm', 'mc', 'meg', 'megs', 'megahz'],
+    khz: ['khz', 'k', 'kc', 'kcs', 'kilohz'],
+    hz: ['hz'],
+};
+
+const SPECTRUM_TYPE_ALIASES = {
+    mf: 'MF',
+    hf: 'HF',
+    vhf: 'VHF',
+    uhf: 'UHF',
+    shf: 'SHF',
+};
+
+const SPECTRUM_TYPE_NAME_ALIASES = {
+    'medium frequency': 'MF',
+    'high frequency': 'HF',
+    'very high frequency': 'VHF',
+    'ultra high frequency': 'UHF',
+    'super high frequency': 'SHF',
+};
+
+function parseSpectrumTypeSearch(cleaned) {
+    const shortMatch = cleaned.match(/^(mf|hf|vhf|uhf|shf)(?:\s+bands?)?$/);
+    if (shortMatch) {
+        return SPECTRUM_TYPE_ALIASES[shortMatch[1]];
+    }
+
+    const longType = SPECTRUM_TYPE_NAME_ALIASES[cleaned.replace(/\s+bands?$/, '')];
+    if (longType) return longType;
+
+    return null;
+}
+
+function formatSpectrumTypeHint(spectrumType, bandCount) {
+    const countLabel = `${bandCount} band${bandCount === 1 ? '' : 's'}`;
+    const description = TYPE_DESCRIPTIONS[spectrumType];
+    return description
+        ? `${spectrumType} · ${countLabel} · ${description}`
+        : `${spectrumType} · ${countLabel}`;
+}
+
+function normalizeFreqUnit(token) {
+    if (!token) return null;
+    const lower = token.toLowerCase();
+    for (const [unit, aliases] of Object.entries(FREQ_UNIT_ALIASES)) {
+        if (aliases.includes(lower)) return unit;
+    }
+    return null;
+}
+
+function preprocessFrequencyInput(input) {
+    let value = input.trim().replace(/,/g, '');
+    value = value.replace(/^[a-z]{1,6}\s*:\s*/i, '');
+
+    const rigMatch = value.match(/^(\d{1,3})\.(\d{3})\.(\d{2,3})$/);
+    if (rigMatch) {
+        return `${parseInt(rigMatch[1], 10)}.${rigMatch[2]}`;
+    }
+
+    return value;
+}
+
+function parseFrequencyCandidates(input) {
+    const preprocessed = preprocessFrequencyInput(input);
+    const trimmed = preprocessed.trim().toLowerCase();
+    if (!trimmed) return [];
+
+    if (/^[\d.]+e[+-]?\d+$/i.test(trimmed)) {
+        const sci = parseFloat(trimmed);
+        if (!Number.isNaN(sci)) {
+            return expandFrequencyCandidates(sci);
+        }
+    }
+
+    const unitPattern = Object.values(FREQ_UNIT_ALIASES).flat().join('|');
+    const match = trimmed.match(new RegExp(`^([\\d.]+)\\s*(${unitPattern})?$`, 'i'));
+    if (!match) return [];
+
+    const value = parseFloat(match[1]);
+    if (Number.isNaN(value)) return [];
+
+    const unit = normalizeFreqUnit(match[2]);
+    if (unit === 'ghz') return [value * 1000];
+    if (unit === 'mhz') return [value];
+    if (unit === 'khz') return [value / 1000];
+    if (unit === 'hz') return [value / 1e6];
+
+    return expandFrequencyCandidates(value);
+}
+
+function expandFrequencyCandidates(value) {
+    const candidates = new Set([value, value / 1000]);
+    if (value >= 1e6) candidates.add(value / 1e6);
+    if (value < 100) candidates.add(value * 1000);
+    return [...candidates].filter(mhz => mhz >= 0.1 && mhz <= 100000);
+}
+
+function parseBandNameSearch(lowerInput) {
+    const cleaned = lowerInput
+        .replace(/\bband\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (!cleaned) return null;
+
+    const spectrumType = parseSpectrumTypeSearch(cleaned);
+    if (spectrumType) {
+        return { kind: 'type', spectrumType };
+    }
+
+    const unitPattern = '(m|cm|mm|metre|meter|meters|metres)';
+    const upperSuffix = '(?:\\s*\\(upper\\)|\\s+upper|-upper|upper)';
+
+    const upperMatch = cleaned.match(new RegExp(`^(\\d+)\\s*${unitPattern}${upperSuffix}$`, 'i'));
+    if (upperMatch) {
+        return {
+            kind: 'band-name',
+            value: upperMatch[1],
+            unit: normalizeBandUnit(upperMatch[2]),
+            upperOnly: true,
+        };
+    }
+
+    const basicMatch = cleaned.match(new RegExp(`^(\\d+)\\s*${unitPattern}$`, 'i'));
+    if (basicMatch) {
+        return {
+            kind: 'band-name',
+            value: basicMatch[1],
+            unit: normalizeBandUnit(basicMatch[2]),
+            upperOnly: false,
+        };
+    }
+
+    return null;
+}
+
+function normalizeBandUnit(unit) {
+    const lower = unit.toLowerCase();
+    if (['metre', 'meter', 'meters', 'metres'].includes(lower)) return 'm';
+    return lower;
+}
+
+function bandNameParts(band) {
+    const label = band.band.toLowerCase();
+    const match = label.match(/^(\d+)\s*(m|cm|mm)/);
+    if (!match) return null;
+    return {
+        value: match[1],
+        unit: match[2],
+        upper: label.includes('upper'),
+    };
+}
+
+function bandMatchesBandNameSearch(band, search) {
+    const parts = bandNameParts(band);
+    if (!parts) return false;
+    if (parts.value !== search.value || parts.unit !== search.unit) return false;
+    if (search.upperOnly) return parts.upper;
+    return true;
+}
+
+function parseBandPlanSearch(input) {
+    const trimmed = input.trim();
+    if (!trimmed) return null;
+
+    const lower = trimmed.toLowerCase();
+    const bandName = parseBandNameSearch(lower);
+    if (bandName) return bandName;
+
+    const candidatesMHz = parseFrequencyCandidates(trimmed);
+    if (candidatesMHz.length > 0) {
+        return { kind: 'frequency', candidatesMHz };
+    }
+
+    return null;
+}
+
+function bandMatchesCandidates(band, candidatesMHz) {
+    return candidatesMHz.some(mhz => frequencyInBand(band, mhz));
+}
+
+function matchingMHzForBand(band, candidatesMHz) {
+    return candidatesMHz.find(mhz => frequencyInBand(band, mhz)) ?? null;
+}
+
+function formatMHz(mhz) {
+    return `${parseFloat(mhz.toFixed(6))} MHz`;
+}
+
+function pickBestCandidateMHz(candidatesMHz) {
+    if (candidatesMHz.length === 1) return candidatesMHz[0];
+
+    let best = candidatesMHz[0];
+    let bestDist = Infinity;
+    for (const mhz of candidatesMHz) {
+        const nearest = findNearestBand(mhz);
+        const dist = nearest?.dist ?? Infinity;
+        if (dist < bestDist) {
+            bestDist = dist;
+            best = mhz;
+        }
+    }
+    return best;
+}
+
+function findNearestBand(mhz) {
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const band of bandsData) {
+        const range = getBandRange(band);
+        if (!range) continue;
+
+        let dist;
+        if (mhz < range.minMHz) dist = range.minMHz - mhz;
+        else if (mhz > range.maxMHz) dist = mhz - range.maxMHz;
+        else dist = 0;
+
+        if (dist < minDist) {
+            minDist = dist;
+            nearest = { band, dist, range };
+        }
+    }
+
+    return nearest;
+}
+
+function formatNearestBandHint(nearest, mhz) {
+    const { band, dist, range } = nearest;
+    if (dist === 0) return null;
+
+    const edge = mhz < range.minMHz
+        ? `starts at ${formatMHz(range.minMHz)}`
+        : `ends at ${formatMHz(range.maxMHz)}`;
+    return `Not in an allocation · nearest ${band.band} (${edge})`;
+}
+
+function resolveBandPlanSearch(rawInput) {
+    const query = rawInput.trim();
+    if (!query) {
+        return {
+            active: false,
+            invalid: false,
+            kind: null,
+            bands: null,
+            hint: null,
+            candidatesMHz: [],
+        };
+    }
+
+    const parsed = parseBandPlanSearch(query);
+    if (!parsed) {
+        return {
+            active: false,
+            invalid: true,
+            kind: null,
+            bands: [],
+            hint: null,
+            candidatesMHz: [],
+            query,
+        };
+    }
+
+    if (parsed.kind === 'type') {
+        const bands = bandsData.filter(band => band.type === parsed.spectrumType);
+        return {
+            active: true,
+            invalid: false,
+            kind: 'type',
+            spectrumType: parsed.spectrumType,
+            bands,
+            hint: bands.length ? formatSpectrumTypeHint(parsed.spectrumType, bands.length) : null,
+            candidatesMHz: [],
+            query,
+        };
+    }
+
+    if (parsed.kind === 'band-name') {
+        const bands = bandsData.filter(band => bandMatchesBandNameSearch(band, parsed));
+        return {
+            active: true,
+            invalid: false,
+            kind: 'band-name',
+            bands,
+            hint: bands.length
+                ? `Band name · ${bands.map(band => band.band).join(', ')}`
+                : null,
+            candidatesMHz: [],
+            query,
+        };
+    }
+
+    const bands = bandsData.filter(band => bandMatchesCandidates(band, parsed.candidatesMHz));
+    let hint = null;
+
+    if (bands.length > 0) {
+        const matchMHz = matchingMHzForBand(bands[0], parsed.candidatesMHz);
+        if (matchMHz !== null) hint = `Matched as ${formatMHz(matchMHz)}`;
+    } else {
+        const primaryMHz = pickBestCandidateMHz(parsed.candidatesMHz);
+        const nearest = findNearestBand(primaryMHz);
+        if (nearest) hint = formatNearestBandHint(nearest, primaryMHz);
+    }
+
+    return {
+        active: true,
+        invalid: false,
+        kind: 'frequency',
+        bands,
+        hint,
+        candidatesMHz: parsed.candidatesMHz,
+        query,
+    };
+}
+
+function getInitialFreqFromUrl() {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('f') || '';
+}
+
+const bandRangeCache = new Map();
+
+function getBandRange(band) {
+    const key = getBandKey(band);
+    if (!bandRangeCache.has(key)) {
+        bandRangeCache.set(key, parseFrequencyRange(band.freq));
+    }
+    return bandRangeCache.get(key);
+}
+
+function frequencyInBand(band, mhz) {
+    const range = getBandRange(band);
+    if (!range || mhz === null) return false;
+    return mhz >= range.minMHz && mhz <= range.maxMHz;
+}
+
+function findSubBand(band, mhz) {
+    if (!band.subBands?.length) return null;
+    return band.subBands.find(sb => {
+        const range = parseFrequencyRange(sb.range);
+        return range && mhz >= range.minMHz && mhz <= range.maxMHz;
+    }) || null;
 }
 
 function getInitialStateFromHash() {
@@ -87,10 +466,14 @@ function getInitialStateFromHash() {
     };
 }
 
-function buildShareUrl(isGeneral, modeFilter) {
+function buildShareUrl(isGeneral, modeFilter, freqQuery = '') {
     const grade = isGeneral ? 'general' : 'restricted';
-    if (modeFilter === 'all') return `${PAGE_URL}#${grade}`;
-    return `${PAGE_URL}#${grade}-${modeFilter}`;
+    const hash = modeFilter === 'all' ? grade : `${grade}-${modeFilter}`;
+    const trimmed = freqQuery.trim();
+    if (trimmed) {
+        return `${PAGE_URL}?f=${encodeURIComponent(trimmed)}#${hash}`;
+    }
+    return `${PAGE_URL}#${hash}`;
 }
 
 function bandSupportsMode(emissions, modeId) {
@@ -160,19 +543,19 @@ function BandCard({ band, data, altData, isGeneral, isOpen, onToggle }) {
 
     if (!data) {
         return (
-            <div className={`band-plan-card type-${band.type} band-plan-card--blocked`}>
+            <div
+                className={`band-plan-card type-${band.type} band-plan-card--blocked`}
+            >
                 <div className="band-plan-unauthorized">
-                    <div className="band-plan-card-summary">
-                        <div className="band-plan-card-top">
-                            <div className="band-plan-card-header-left">
-                                <span className={`band-plan-type-badge type-${band.type}`}>{band.type}</span>
-                                <h3 className="band-plan-card-title" style={{ color: 'var(--muted-foreground)' }}>{band.band}</h3>
-                            </div>
-                            <span className="band-plan-unauthorized-label">Not Authorized</span>
+                    <div className="band-card-header">
+                        <div className="band-card-title-group">
+                            <span className={`band-type-pill type-${band.type}`}>{band.type}</span>
+                            <h3 className="band-card-title" style={{ color: 'var(--muted-foreground)' }}>{band.band}</h3>
                         </div>
-                        <div className="band-plan-freq-row">
-                            <span className="band-plan-freq">{band.freq}</span>
-                        </div>
+                        <span className="band-plan-unauthorized-label">Not Authorized</span>
+                    </div>
+                    <div className="band-card-freq">
+                        {band.freq}
                     </div>
                 </div>
                 {!isGeneral && band.general && (
@@ -198,54 +581,46 @@ function BandCard({ band, data, altData, isGeneral, isOpen, onToggle }) {
                 }
             }}
         >
-            <div className="band-plan-card-body">
-                <div className="band-plan-card-summary">
-                    <div className="band-plan-card-top">
-                        <div className="band-plan-card-header-left">
-                            <span className={`band-plan-type-badge type-${band.type}`}>{band.type}</span>
-                            <h3 className="band-plan-card-title">{band.band}</h3>
-                        </div>
-                        <div className="band-plan-power">
-                            <Zap size={12} aria-hidden="true" />
-                            {data.power}
-                        </div>
+            <div className="band-card-inner">
+                <div className="band-card-header">
+                    <div className="band-card-title-group">
+                        <span className={`band-type-pill type-${band.type}`}>{band.type}</span>
+                        <h3 className="band-card-title">{band.band}</h3>
                     </div>
-
-                    <div className="band-plan-freq-row">
-                        <span className="band-plan-freq">{band.freq}</span>
+                    <div className="band-power-pill">
+                        <Zap size={12} aria-hidden="true" />
+                        {data.power}
                     </div>
-
-                    <div className="band-plan-card-meta">
-                        <div className="band-plan-card-alloc-tags">
-                            <AllocationBadge allocation={band.allocation} />
-                        </div>
-                        {modeBadges.length > 0 && (
-                            <div className="band-plan-card-mode-tags">
-                                {modeBadges.map(({ key, label, icon: Icon }) => (
-                                    <span key={key} className={`band-plan-mode-badge ${key}`}>
-                                        <Icon size={11} aria-hidden="true" /> {label}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {!isGeneral && gradeDiff?.type === 'diff' && (
-                        <div className="band-plan-grade-diff">
-                            <strong>On General:</strong> {gradeDiff.parts.join(' · ')}
-                        </div>
-                    )}
                 </div>
 
-                <div className="band-plan-details">
+                <div className="band-card-freq">
+                    {band.freq}
+                </div>
+
+                <div className="band-card-tags">
+                    <AllocationBadge allocation={band.allocation} />
+                    {modeBadges.map(({ key, label, icon: Icon }) => (
+                        <span key={key} className={`mode-badge ${key}`}>
+                            <Icon size={12} aria-hidden="true" /> {label}
+                        </span>
+                    ))}
+                </div>
+
+                {!isGeneral && gradeDiff?.type === 'diff' && (
+                    <div className="band-diff-notice">
+                        <strong>On General:</strong> {gradeDiff.parts.join(' · ')}
+                    </div>
+                )}
+
+                <div className="band-card-details">
                     {band.subBands && band.subBands.length > 0 && (
-                        <div className="band-plan-subbands">
-                            <div className="band-plan-usage-label">Sub-bands (IARU R3 convention)</div>
-                            <ul>
+                        <div className="detail-section">
+                            <div className="detail-label">Sub-bands (IARU R3)</div>
+                            <ul className="subband-list">
                                 {band.subBands.map(sb => (
                                     <li key={sb.range}>
-                                        <span className="band-plan-subband-range">{sb.range}</span>
-                                        <span>{sb.usage}</span>
+                                        <span className="subband-range">{sb.range}</span>
+                                        <span className="subband-usage">{sb.usage}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -253,38 +628,34 @@ function BandCard({ band, data, altData, isGeneral, isOpen, onToggle }) {
                     )}
 
                     {band.usage && (
-                        <div className="band-plan-usage">
-                            <div className="band-plan-usage-label">Propagation / Usage</div>
-                            <div className="band-plan-usage-text">{band.usage}</div>
+                        <div className="detail-section">
+                            <div className="detail-label">Propagation / Usage</div>
+                            <div className="usage-text">{band.usage}</div>
                         </div>
                     )}
 
-                    <div className="band-plan-emissions-label">
-                        Allowed Emissions ({data.emission.length})
-                    </div>
-                    <div>
-                        {data.emission.map(e => (
-                            <span
-                                key={e}
-                                className="band-plan-emission-badge"
-                                title={`${emissionsLegend[e] || e}${commonModeMap[e] ? ` (${commonModeMap[e]})` : ''}${altData && !altData.emission.includes(e) ? ', not on other grade' : ''}`}
-                            >
-                                {e}
-                            </span>
-                        ))}
+                    <div className="detail-section">
+                        <div className="detail-label">Allowed Emissions</div>
+                        <div className="emissions-list">
+                            {data.emission.map(e => (
+                                <span
+                                    key={e}
+                                    className="emission-badge"
+                                    title={`${emissionsLegend[e] || e}${commonModeMap[e] ? ` (${commonModeMap[e]})` : ''}${altData && !altData.emission.includes(e) ? ', not on other grade' : ''}`}
+                                >
+                                    {e}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     {band.notes && (
-                        <div className="band-plan-note">
-                            <Info size={14} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
-                            <span><strong style={{ color: 'var(--foreground)' }}>Note:</strong> {band.notes}</span>
+                        <div className="band-note">
+                            <Info size={14} className="note-icon" />
+                            <span><strong>Note:</strong> {band.notes}</span>
                         </div>
                     )}
                 </div>
-
-                {!isOpen && (
-                    <p className="band-plan-tap-hint">Tap for details</p>
-                )}
             </div>
         </div>
     );
@@ -295,36 +666,38 @@ function GradeComparison({ isGeneral }) {
     const summary = useMemo(() => computeGradeSummary(isGeneral), [isGeneral]);
 
     return (
-        <div className="modern-card band-plan-grade-compare no-print">
+        <div className="band-plan-callout no-print">
             <button
                 type="button"
-                className="band-plan-grade-compare-toggle"
+                className="callout-toggle"
                 onClick={() => setExpanded(v => !v)}
                 aria-expanded={expanded}
             >
-                <Shield size={16} />
-                <span>
-                    Viewing <strong>{isGeneral ? 'General' : 'Restricted'}</strong> Grade
-                    {!expanded && ', tap to compare'}
-                </span>
+                <div className="callout-toggle-left">
+                    <Shield size={16} />
+                    <span>
+                        Viewing <strong>{isGeneral ? 'General' : 'Restricted'}</strong> Grade Limits
+                    </span>
+                    <span className="callout-hint">— Tap to compare</span>
+                </div>
                 {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
             {expanded && (
-                <div className="band-plan-grade-compare-body">
-                    <div className="band-plan-grade-compare-grid">
-                        <div>
+                <div className="callout-body">
+                    <div className="callout-grid">
+                        <div className="callout-item">
                             <h4>General Grade only</h4>
                             <p>{summary.generalOnly.length ? summary.generalOnly.join(', ') : 'N/A'}</p>
                         </div>
-                        <div>
+                        <div className="callout-item">
                             <h4>HF power limits</h4>
                             <p>Restricted {summary.hfPowerRestricted} · General {summary.hfPowerGeneral}</p>
                         </div>
-                        <div>
+                        <div className="callout-item">
                             <h4>VHF / UHF power</h4>
                             <p>Restricted {summary.vhfPowerRestricted} · General {summary.vhfPowerGeneral}</p>
                         </div>
-                        <div>
+                        <div className="callout-item">
                             <h4>Restricted HF modes</h4>
                             <p>Phone emissions (SSB/AM) only; no CW or digital on HF</p>
                         </div>
@@ -337,7 +710,7 @@ function GradeComparison({ isGeneral }) {
 
 function LegendSection({ printIncludeLegend }) {
     return (
-        <div className={`modern-card band-plan-legend-card no-print${printIncludeLegend ? '' : ' band-plan-legend-screen-only'}`}>
+        <div className={`band-plan-legend-card no-print${printIncludeLegend ? '' : ' band-plan-legend-screen-only'}`}>
             <div className="band-plan-legend-title">
                 <Info size={18} style={{ color: 'var(--muted-foreground)' }} />
                 Legend & Regulatory Notes
@@ -497,6 +870,7 @@ function HelpGuide() {
             <ol className="band-plan-help-list">
                 <li>Select your license grade (<strong>Restricted</strong> or <strong>General</strong>) at the top right.</li>
                 <li>Filter by mode (<strong>Voice</strong>, <strong>CW</strong>, <strong>Digital</strong>) or tap the spectrum map.</li>
+                <li>Enter a frequency with or without units; matching band cards are shown (e.g. 7.100, 7100, 5750, 5.725 GHz).</li>
                 <li>Tap any band card to expand sub-bands, emissions, and regulatory notes.</li>
                 <li>Compare grades using the <strong>Grade comparison</strong> panel below the header.</li>
                 <li>Use <strong>Print</strong> options for compact/detailed shack charts with QR link.</li>
@@ -533,23 +907,26 @@ export default function IndiaBandPlan() {
     const [printOptionsOpen, setPrintOptionsOpen] = useState(false);
     const [printLayout, setPrintLayout] = useState('detailed');
     const [printIncludeLegend, setPrintIncludeLegend] = useState(true);
+    const [freqQuery, setFreqQuery] = useState(() => getInitialFreqFromUrl());
     const stickyRef = useRef(null);
     const listAnchorRef = useRef(null);
     const skipListScrollRef = useRef(true);
 
-    const scrollToBandList = useCallback(() => {
-        requestAnimationFrame(() => {
-            const anchor = listAnchorRef.current;
-            const sticky = stickyRef.current;
-            if (!anchor || !sticky) return;
+    const scrollBelowSticky = useCallback((element, behavior = 'smooth') => {
+        if (!element || !stickyRef.current) return false;
 
-            const gap = 8;
-            const delta = anchor.getBoundingClientRect().top - sticky.getBoundingClientRect().bottom - gap;
-            if (Math.abs(delta) > 4) {
-                window.scrollBy({ top: delta, behavior: 'smooth' });
-            }
-        });
+        const gap = 8;
+        const delta = element.getBoundingClientRect().top - stickyRef.current.getBoundingClientRect().bottom - gap;
+        if (Math.abs(delta) > 2) {
+            window.scrollBy({ top: delta, behavior });
+            return true;
+        }
+        return false;
     }, []);
+
+    const scrollToBandList = useCallback(() => {
+        scrollBelowSticky(listAnchorRef.current);
+    }, [scrollBelowSticky]);
 
     useEffect(() => {
         const syncFromHash = () => {
@@ -567,16 +944,21 @@ export default function IndiaBandPlan() {
         const hash = modeFilter === 'all'
             ? (isGeneral ? 'general' : 'restricted')
             : `${isGeneral ? 'general' : 'restricted'}-${modeFilter}`;
-        window.history.replaceState(null, '', `${window.location.pathname}#${hash}`);
-    }, [isGeneral, modeFilter]);
+        const url = new URL(window.location.href);
+        const trimmed = freqQuery.trim();
+        if (trimmed) url.searchParams.set('f', trimmed);
+        else url.searchParams.delete('f');
+        window.history.replaceState(null, '', `${url.pathname}${url.search}#${hash}`);
+    }, [isGeneral, modeFilter, freqQuery]);
 
     useEffect(() => {
         if (skipListScrollRef.current) {
             skipListScrollRef.current = false;
             return;
         }
+        if (freqQuery.trim()) return;
         scrollToBandList();
-    }, [currentFilter, modeFilter, isGeneral, scrollToBandList]);
+    }, [currentFilter, modeFilter, isGeneral, scrollToBandList, freqQuery]);
 
     const filteredBands = useMemo(() => {
         return bandsData.filter(band => {
@@ -587,10 +969,95 @@ export default function IndiaBandPlan() {
         });
     }, [currentFilter, isGeneral, modeFilter]);
 
+    const searchResult = useMemo(() => resolveBandPlanSearch(freqQuery), [freqQuery]);
+    const isFreqSearchActive = searchResult.active;
+    const isFreqSearchInvalid = searchResult.invalid;
+    const freqCandidatesMHz = searchResult.candidatesMHz;
+
+    const displayBands = useMemo(() => {
+        if (!isFreqSearchActive) return filteredBands;
+        return searchResult.bands;
+    }, [isFreqSearchActive, searchResult.bands, filteredBands]);
+
+    const freqLookup = useMemo(() => {
+        if (!isFreqSearchActive) return null;
+        if (displayBands.length === 0) {
+            return { status: 'none', query: searchResult.query };
+        }
+
+        const band = displayBands[0];
+        const matchMHz = searchResult.kind === 'frequency'
+            ? matchingMHzForBand(band, freqCandidatesMHz)
+            : null;
+        const subBand = matchMHz !== null ? findSubBand(band, matchMHz) : null;
+        const gradeData = isGeneral ? band.general : band.restricted;
+
+        return {
+            status: 'match',
+            band,
+            subBand,
+            gradeData,
+            matchMHz,
+            matchCount: displayBands.length,
+        };
+    }, [isFreqSearchActive, displayBands, freqCandidatesMHz, isGeneral, searchResult]);
+
+    const clearFreqSearch = useCallback(() => {
+        setFreqQuery('');
+    }, []);
+
+    const handleFreqKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') {
+            clearFreqSearch();
+        }
+    }, [clearFreqSearch]);
+
+    useEffect(() => {
+        if (!isFreqSearchActive || displayBands.length === 0) return;
+        requestAnimationFrame(() => scrollToBandList());
+    }, [isFreqSearchActive, displayBands.length, scrollToBandList]);
+
+    useEffect(() => {
+        setOpenCards(new Set());
+    }, [freqCandidatesMHz.join(',')]);
+
     const filterLabel = currentFilter === 'all' ? 'All bands' : `${currentFilter} bands`;
     const modeLabel = modeFilters.find(m => m.id === modeFilter)?.label || 'All modes';
     const gradeLabel = isGeneral ? 'General' : 'Restricted';
-    const shareUrl = buildShareUrl(isGeneral, modeFilter);
+    const freqSearchLabel = searchResult.spectrumType || freqQuery.trim();
+    const listMetaShort = useMemo(() => {
+        if (isFreqSearchActive) {
+            return `${displayBands.length} bands · ${freqSearchLabel}`;
+        }
+        const bits = [`${filteredBands.length} bands`];
+        if (currentFilter !== 'all') bits.push(currentFilter);
+        bits.push(isGeneral ? 'Gen' : 'Rst');
+        if (modeFilter !== 'all') {
+            const short = { voice: 'Voice', cw: 'CW', digital: 'Digital' }[modeFilter];
+            if (short) bits.push(short);
+        }
+        return bits.join(' · ');
+    }, [
+        isFreqSearchActive,
+        displayBands.length,
+        freqSearchLabel,
+        filteredBands.length,
+        currentFilter,
+        isGeneral,
+        modeFilter,
+    ]);
+
+    const showSearchStatus = freqQuery && (
+        isFreqSearchInvalid
+        || searchResult.hint
+        || freqLookup?.status === 'none'
+        || (freqLookup?.status === 'match' && !freqLookup.gradeData)
+    );
+
+    const listMetaLabel = isFreqSearchActive
+        ? `${displayBands.length} band${displayBands.length === 1 ? '' : 's'} · ${freqSearchLabel}`
+        : `${filteredBands.length} bands · ${filterLabel} · ${modeLabel} · ${gradeLabel}`;
+    const shareUrl = buildShareUrl(isGeneral, modeFilter, freqQuery);
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${encodeURIComponent(shareUrl)}`;
 
     const updateFilter = useCallback((filterValue) => {
@@ -641,9 +1108,9 @@ export default function IndiaBandPlan() {
     }, [printLayout, printIncludeLegend]);
 
     return (
-        <div className="modern-container band-plan-container compact-view">
+        <div className="band-plan-container">
             <header className="band-plan-header no-print">
-                <div className="modern-card band-plan-header-card">
+                <div className="band-plan-header-inner">
                     <div className="band-plan-title-wrap">
                         <div className="band-plan-title-row">
                             <div className="band-plan-icon">
@@ -651,90 +1118,93 @@ export default function IndiaBandPlan() {
                             </div>
                             <span className="band-plan-year-badge">NFAP-{meta.bandPlanYear}</span>
                         </div>
-                        <h2 className="name-heading" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                        <h2 className="band-plan-page-title">
                             India HAM Radio Band Plan
                         </h2>
-                        <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', maxWidth: '36rem' }}>
+                        <p className="band-plan-page-desc">
                             Interactive spectrum chart for amateur operations in India. Based on {meta.planName} and {meta.regulatoryFramework}.
                         </p>
                     </div>
                     <div className="band-plan-actions">
-                        <HelpGuide />
-                        <div className="band-plan-toolbar">
-                            <div className="band-plan-print-group">
+                        <div className="band-plan-action-row">
+                            <HelpGuide />
+                            <div className="band-plan-toolbar">
+                                <div className="band-plan-print-group">
+                                    <button
+                                        type="button"
+                                        className="band-plan-btn"
+                                        onClick={handlePrint}
+                                    >
+                                        <Printer size={16} aria-hidden="true" />
+                                        <span className="band-plan-btn-text">Print</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="band-plan-btn band-plan-btn-icon"
+                                        onClick={() => setPrintOptionsOpen(v => !v)}
+                                        aria-expanded={printOptionsOpen}
+                                        aria-label="Print options"
+                                    >
+                                        {printOptionsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </button>
+                                </div>
                                 <button
                                     type="button"
-                                    className="band-plan-print-btn"
-                                    onClick={handlePrint}
+                                    className="band-plan-btn"
+                                    onClick={sharePage}
                                 >
-                                    <Printer size={16} /> Print Shack Chart
-                                </button>
-                                <button
-                                    type="button"
-                                    className="band-plan-print-btn band-plan-print-options-toggle"
-                                    onClick={() => setPrintOptionsOpen(v => !v)}
-                                    aria-expanded={printOptionsOpen}
-                                    aria-label="Print options"
-                                >
-                                    {printOptionsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    {copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}
+                                    <span className="band-plan-btn-text">{copied ? 'Copied' : 'Share'}</span>
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                className="band-plan-print-btn"
-                                onClick={sharePage}
-                            >
-                                {copied ? <Check size={16} /> : <Share2 size={16} />}
-                                {copied ? 'Link Copied!' : 'Share'}
-                            </button>
                         </div>
                         {printOptionsOpen && (
                             <div className="band-plan-print-options">
                                 <div className="band-plan-print-option-row">
                                     <span className="card-label">Layout</span>
-                                    <div className="tabs-header band-plan-mini-tabs" role="group">
+                                    <div className="band-plan-segmented" role="group">
                                         <button
                                             type="button"
-                                            className={`tab-btn${printLayout === 'compact' ? ' active' : ''}`}
+                                            className={`segment-btn${printLayout === 'compact' ? ' active' : ''}`}
                                             onClick={() => setPrintLayout('compact')}
                                         >
                                             Compact
                                         </button>
                                         <button
                                             type="button"
-                                            className={`tab-btn${printLayout === 'detailed' ? ' active' : ''}`}
+                                            className={`segment-btn${printLayout === 'detailed' ? ' active' : ''}`}
                                             onClick={() => setPrintLayout('detailed')}
                                         >
                                             Detailed
                                         </button>
                                     </div>
                                 </div>
-                                <label className="band-plan-print-checkbox">
+                                <label className="band-plan-checkbox">
                                     <input
                                         type="checkbox"
                                         checked={printIncludeLegend}
                                         onChange={e => setPrintIncludeLegend(e.target.checked)}
                                     />
-                                    Include legend & allocation key in print
+                                    Include legend in print
                                 </label>
                             </div>
                         )}
-                        <div className="tabs-header band-plan-grade-tabs" role="group" aria-label="License grade">
+                        <div className="band-plan-grade-selector" role="group" aria-label="License grade">
                             <button
                                 type="button"
-                                className={`tab-btn${!isGeneral ? ' active' : ''}`}
+                                className={`grade-btn${!isGeneral ? ' active' : ''}`}
                                 aria-pressed={!isGeneral}
                                 onClick={() => setGrade(false)}
                             >
-                                Restricted Grade
+                                Restricted
                             </button>
                             <button
                                 type="button"
-                                className={`tab-btn${isGeneral ? ' active' : ''}`}
+                                className={`grade-btn${isGeneral ? ' active' : ''}`}
                                 aria-pressed={isGeneral}
                                 onClick={() => setGrade(true)}
                             >
-                                General Grade
+                                General
                             </button>
                         </div>
                     </div>
@@ -744,86 +1214,133 @@ export default function IndiaBandPlan() {
             <GradeComparison isGeneral={isGeneral} />
 
             <div className="band-plan-main">
-                <div className="band-plan-spectrum-sticky no-print" ref={stickyRef}>
-                    <div className="modern-card">
-                        <div className="band-plan-spectrum-header">
-                            <div className="band-plan-spectrum-title">
-                                <span className="card-label">Spectrum Map</span>
-                            </div>
-                            <div className="band-plan-spectrum-meta">
-                                <span className="band-plan-spectrum-meta-full" aria-live="polite">
-                                    {filteredBands.length} bands · {filterLabel} · {modeLabel} · {gradeLabel}
-                                </span>
-                                <span className="band-plan-spectrum-meta-short" aria-live="polite">
-                                    {filteredBands.length} bands
-                                </span>
-                                {(currentFilter !== 'all' || modeFilter !== 'all') && (
+                <div className="band-plan-toolbar-glass no-print" ref={stickyRef}>
+                    <div className="toolbar-glass-inner">
+                        <div className="toolbar-top-controls">
+                            <div className="toolbar-search">
+                                <Search size={14} className="search-icon" aria-hidden="true" />
+                                <input
+                                    id="band-plan-freq-input"
+                                    type="text"
+                                    inputMode="text"
+                                    className="search-input"
+                                    placeholder="Search freq or band (e.g. 7.100, 40m)"
+                                    value={freqQuery}
+                                    onChange={e => setFreqQuery(e.target.value)}
+                                    onKeyDown={handleFreqKeyDown}
+                                    aria-describedby={showSearchStatus ? 'band-plan-freq-search-status' : undefined}
+                                />
+                                {freqQuery && (
                                     <button
                                         type="button"
-                                        className="band-plan-reset-btn"
-                                        onClick={() => { updateFilter('all'); setModeFilter('all'); }}
+                                        className="search-clear"
+                                        onClick={clearFreqSearch}
+                                        aria-label="Clear frequency search"
                                     >
-                                        Reset
+                                        <X size={14} />
                                     </button>
                                 )}
                             </div>
-                        </div>
 
-                        <div className="band-plan-spectrum-bar" role="group" aria-label="Filter by frequency type">
-                            {SPECTRUM_SEGMENTS.map(segment => (
-                                <button
-                                    key={segment.filter}
-                                    type="button"
-                                    className={`band-plan-spectrum-segment${
-                                        currentFilter === 'all' ? '' :
-                                        currentFilter === segment.filter ? ' active' : ' inactive'
-                                    }`}
-                                    style={{ backgroundColor: TYPE_COLORS[segment.filter] }}
-                                    aria-label={`Filter ${segment.filter} bands`}
-                                    aria-pressed={currentFilter === segment.filter}
-                                    onClick={() => toggleFilter(segment.filter)}
-                                >
-                                    <div className="band-plan-spectrum-segment-inner">
-                                        <span>{segment.label}</span>
-                                        <span>{segment.range}</span>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="band-plan-mode-filters" role="group" aria-label="Filter by mode">
-                            <span className="card-label">Mode</span>
-                            <div className="band-plan-mode-filter-chips">
+                            <div className="toolbar-mode-segments" role="group" aria-label="Filter by mode">
                                 {modeFilters.map(m => (
                                     <button
                                         key={m.id}
                                         type="button"
-                                        className={`band-plan-mode-chip${modeFilter === m.id ? ' active' : ''}`}
+                                        className={`mode-segment${modeFilter === m.id ? ' active' : ''}`}
                                         aria-pressed={modeFilter === m.id}
+                                        aria-label={m.label}
                                         onClick={() => { setModeFilter(m.id); setOpenCards(new Set()); }}
                                     >
-                                        {m.label}
+                                        <span className="mode-segment-long">{m.label}</span>
+                                        <span className="mode-segment-short">{MODE_CHIP_SHORT[m.id]}</span>
                                     </button>
                                 ))}
                             </div>
+                            
+                            {(currentFilter !== 'all' || modeFilter !== 'all' || freqQuery) && (
+                                <button
+                                    type="button"
+                                    className="toolbar-reset-btn"
+                                    onClick={() => { updateFilter('all'); setModeFilter('all'); clearFreqSearch(); }}
+                                >
+                                    Reset
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="toolbar-spectrum-scale" role="group" aria-label="Filter by frequency type">
+                            {SPECTRUM_SEGMENTS.map(segment => (
+                                <button
+                                    key={segment.filter}
+                                    type="button"
+                                    className={`spectrum-scale-segment${
+                                        currentFilter === 'all' ? '' :
+                                        currentFilter === segment.filter ? ' active' : ' inactive'
+                                    }`}
+                                    style={{ '--segment-color': TYPE_COLORS[segment.filter] }}
+                                    aria-label={`Filter ${segment.filter} bands`}
+                                    aria-pressed={currentFilter === segment.filter}
+                                    onClick={() => toggleFilter(segment.filter)}
+                                >
+                                    <span className="scale-label">{segment.label}</span>
+                                    <span className="scale-range">{segment.range}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="band-plan-spectrum-meta">
+                            <span className="band-plan-spectrum-meta-full" aria-live="polite">
+                                {listMetaLabel}
+                            </span>
+                            <span className="band-plan-spectrum-meta-short" aria-live="polite">
+                                {listMetaShort}
+                            </span>
                         </div>
                     </div>
                 </div>
 
+                {showSearchStatus && (
+                    <p
+                        id="band-plan-freq-search-status"
+                        className="band-plan-search-status no-print"
+                        aria-live="polite"
+                        title={searchResult.hint || undefined}
+                    >
+                        {isFreqSearchInvalid && <>Invalid frequency or band name</>}
+                        {isFreqSearchActive && searchResult.hint && !isFreqSearchInvalid && (
+                            <>{searchResult.hint}</>
+                        )}
+                        {isFreqSearchActive && freqLookup?.status === 'none' && !searchResult.hint && (
+                            <>No amateur band matches {freqSearchLabel}</>
+                        )}
+                        {freqLookup?.status === 'match' && !freqLookup.gradeData && (
+                            <>Not authorized on {gradeLabel} Grade</>
+                        )}
+                    </p>
+                )}
+
                 <div ref={listAnchorRef} className="band-plan-list-anchor" aria-hidden="true" />
 
-                {filteredBands.length === 0 ? (
-                    <div className="band-plan-empty no-print">
-                        <p style={{ fontWeight: 600 }}>No bands match this filter for {gradeLabel} Grade.</p>
-                    </div>
+                {displayBands.length === 0 ? (
+                    !(isFreqSearchActive && showSearchStatus) ? (
+                        <div className="band-plan-empty no-print">
+                            <p style={{ fontWeight: 600 }}>
+                                {isFreqSearchActive
+                                    ? `No amateur band matches ${freqSearchLabel}.`
+                                    : `No bands match this filter for ${gradeLabel} Grade.`}
+                            </p>
+                        </div>
+                    ) : null
                 ) : (
                     <div className="band-plan-cards no-print">
-                        {filteredBands.map((band, index) => {
+                        {displayBands.map((band, index) => {
                             const data = isGeneral ? band.general : band.restricted;
                             const altData = isGeneral ? band.restricted : band.general;
+                            const bandKey = getBandKey(band);
                             return (
                                 <BandCard
-                                    key={`${band.band}-${band.freq}`}
+                                    key={bandKey}
                                     band={band}
                                     data={data}
                                     altData={altData}

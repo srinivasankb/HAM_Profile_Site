@@ -9,6 +9,7 @@ A high-performance, static-site generated (SSG) portal for **VU35KB** (Srinivasa
 - **Personal Portal**: High-level introduction and bio on the homepage.
 - **Radio Journal**: A lightweight blog system using Markdown and Astro Content Collections.
 - **Station Dashboard**: Real-time telemetry for operating locations including local/UTC times, solar countdowns (sunrise/sunset), and dynamic status indicators.
+- **India Band Plan Tool**: A fully interactive, modern visualization of the National Frequency Allocation Plan (NFAP). Includes visual spectrum scaling, Voice/CW/Digital mode filters, side-by-side Restricted vs. General grade comparison, and beautiful printable shack charts.
 - **Echolink Live Status**: Integrated realtime status for **VU35KB** (Node: 526521) with signal animations and session-level caching for performance.
 - **Event Roadmap**: Automated event tracker with distance-to-event countdowns, country flags, and "Happening Now" status badges for upcoming HAM meets.
 - **Resource Library**: A curated collection of HAM radio guides, frequency charts, and technical resources.
@@ -93,6 +94,27 @@ The dashboard automatically calculates the status based on `startDate` and `endD
     "url": "https://hfi2026.nitk.ac.in/"
   }
 ]
+```
+
+### 📡 India Band Plan (`india-bands.json`)
+The core data source for the interactive India Amateur Radio Band Plan tool. Contains the NFAP metadata, comprehensive spectrum allocations, mode usage (Voice, Digital, CW), and specific license grade privileges (Restricted vs. General).
+
+```json
+{
+  "meta": {
+    "planName": "National Frequency Allocation Plan",
+    "bandPlanYear": "2025"
+  },
+  "bands": [
+    {
+      "band": "20 Meters",
+      "type": "HF",
+      "freq": "14.000 to 14.350 MHz",
+      "usage": "Primary global DX band. Good daytime and evening propagation.",
+      "allocation": "Primary"
+    }
+  ]
+}
 ```
 
 ### 📔 Radio Journal (Blog Posts)

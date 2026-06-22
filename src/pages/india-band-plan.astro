@@ -2,8 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import IndiaBandPlan from '../components/IndiaBandPlan';
 
-const title = 'India Band Plan | VU35KB';
-const description = 'Interactive India amateur radio band plan (NFAP-2025) with WPC allocations, allocation status, sub-bands, mode filters, grade comparison, and printable shack charts for Restricted and General grade licenses.';
+const title = 'India Amateur Radio Band Plan | VU35KB';
+const description = 'Interactive modern India amateur radio band plan (NFAP) with visual spectrum scale, live search, mode filters, General vs Restricted grade comparison, and beautiful printable shack charts.';
 const siteUrl = 'https://ham.srinikb.in';
 ---
 
@@ -32,12 +32,13 @@ const siteUrl = 'https://ham.srinikb.in';
       "description": "National Frequency Allocation Plan (NFAP-2025) band allocations for Indian amateur radio operators"
     },
     "featureList": [
-      "Interactive MF/HF/VHF/UHF/SHF spectrum map",
-      "Restricted and General grade comparison",
+      "Modern interactive MF/HF/VHF/UHF/SHF spectrum visual scale",
+      "Restricted and General grade privilege comparison with diff views",
+      "Live frequency search with smart unit conversion (MHz, kHz, GHz)",
       "Filter by Voice, CW, and Digital modes",
-      "Allocation status badges and sub-band segments",
-      "NFAP-2025 regulatory reference",
-      "Printable shack chart with QR code and layout options"
+      "Detailed band cards with sub-band segments and IARU notes",
+      "National Frequency Allocation Plan (NFAP) regulatory reference",
+      "Beautiful printable shack charts with layout options"
     ]
   })} />
   <IndiaBandPlan client:only="react" />
