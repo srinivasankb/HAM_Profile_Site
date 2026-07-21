@@ -1,5 +1,5 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Antenna, RadioTower, Menu, Home, Library, Mail } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Antenna, RadioTower, Menu, Home, Library, Mail, Wrench, ChevronDown } from 'lucide-react';
 import InstagramIcon from '../components/InstagramIcon.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
@@ -7,7 +7,7 @@ import profileData from '../data/profile.json';
 import navData from '../data/navigation.json';
 import ogImageDefault from '../assets/vu35kb_og.png';
 
-const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, Antenna, RadioTower, RSS: Rss, Radio };
+const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, Antenna, RadioTower, RSS: Rss, Radio, Wrench };
 
 interface Props {
 	title: string;
@@ -153,9 +153,30 @@ const recentBlogs = blogs.slice(0, 3);
             
             <nav class="nav-links">
               {navData.map(item => {
+                if (item.subItems) {
+                  const Icon = IconMap[item.icon];
+                  const isActiveGroup = item.subItems.some(sub => pathname === sub.path || (sub.path !== '/' && pathname.startsWith(sub.path)));
+                  return (
+                    <div class="nav-dropdown">
+                      <button class={`nav-item ${isActiveGroup ? 'active' : ''}`} aria-haspopup="true" aria-expanded="false">
+                        {Icon && <Icon size={18} />} {item.name} <ChevronDown size={14} class="dropdown-chevron" />
+                      </button>
+                      <div class="dropdown-content">
+                        {item.subItems.map(subItem => {
+                          const SubIcon = IconMap[subItem.icon];
+                          return (
+                            <a href={subItem.path} class={`dropdown-item ${pathname === subItem.path || (subItem.path !== '/' && pathname.startsWith(subItem.path)) ? 'active' : ''}`} aria-current={pathname === subItem.path || (subItem.path !== '/' && pathname.startsWith(subItem.path)) ? 'page' : undefined} data-astro-prefetch>
+                              {SubIcon && <SubIcon size={16} />} {subItem.name}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
                 const Icon = IconMap[item.icon];
                 return (
-                  <a href={item.path} class={`nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`} data-astro-prefetch>
+                  <a href={item.path} class={`nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`} aria-current={pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'page' : undefined} data-astro-prefetch>
                     {Icon && <Icon size={18} />} {item.name}
                   </a>
                 );
@@ -185,9 +206,29 @@ const recentBlogs = blogs.slice(0, 3);
             <div class="mobile-menu-section">
               <div class="sidebar-heading">Navigation</div>
               {navData.map(item => {
+                if (item.subItems) {
+                  const Icon = IconMap[item.icon];
+                  return (
+                    <div class="mobile-nav-group">
+                      <div class="mobile-nav-item" style="color: var(--muted-foreground); pointer-events: none; margin-bottom: 0.25rem;">
+                        {Icon && <Icon size={20} />} {item.name}
+                      </div>
+                      <div class="mobile-sub-items" style="padding-left: 2rem; display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.5rem;">
+                        {item.subItems.map(subItem => {
+                          const SubIcon = IconMap[subItem.icon];
+                          return (
+                            <a href={subItem.path} class={`mobile-nav-item ${pathname === subItem.path || (subItem.path !== '/' && pathname.startsWith(subItem.path)) ? 'active' : ''}`} aria-current={pathname === subItem.path || (subItem.path !== '/' && pathname.startsWith(subItem.path)) ? 'page' : undefined}>
+                              {SubIcon && <SubIcon size={20} />} {subItem.name}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
                 const Icon = IconMap[item.icon];
                 return (
-                  <a href={item.path} class={`mobile-nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`}>
+                  <a href={item.path} class={`mobile-nav-item ${pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'active' : ''}`} aria-current={pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path)) ? 'page' : undefined}>
                     {Icon && <Icon size={20} />} {item.name}
                   </a>
                 );
@@ -236,7 +277,7 @@ const recentBlogs = blogs.slice(0, 3);
             <div class="footer-links-grid">
               <div class="footer-group">
                 <h2 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--foreground);">Explore</h2>
-                {navData.map(item => (
+                {navData.flatMap(item => item.subItems ? item.subItems : item).map(item => (
                   <a href={item.path} data-astro-prefetch>{item.name}</a>
                 ))}
               </div>

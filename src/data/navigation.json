@@ -15,13 +15,19 @@
         "icon": "Library"
     },
     {
-        "name": "Grid Explorer",
-        "path": "/grid",
-        "icon": "Compass"
-    },
-    {
-        "name": "India Band Plan",
-        "path": "/india-band-plan",
-        "icon": "RadioTower"
+        "name": "Tools",
+        "icon": "Wrench",
+        "subItems": [
+            {
+                "name": "Grid Explorer",
+                "path": "/grid",
+                "icon": "Compass"
+            },
+            {
+                "name": "India Band Plan",
+                "path": "/india-band-plan",
+                "icon": "RadioTower"
+            }
+        ]
     }
 ]

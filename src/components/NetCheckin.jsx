@@ -17,6 +17,21 @@ const getPhonetic = (callsign) => {
     return callsign.toUpperCase().split('').map(c => PHONETICS[c] || c).join(' ');
 };
 
+const NET_CONTROLLERS = {
+    'VU3ITI': 'Varadan',
+    'VU2YVK': 'Vijay Kumar',
+    'VU3CTA': 'Anto',
+    'VU2JXM': 'Rajan',
+    'VU2FI': 'Satyapal',
+    'VU2KNE': 'Karunakar',
+    'VU2BRT': 'Balwant',
+    'VU3UAR': 'Lakshmikanth',
+    'VU2RAB': 'Aravind',
+    'VU2IIM': 'Venkat',
+    'VU3DUG': 'Suganya',
+    'VU2JEI': 'Nandu'
+};
+
 /* Shared input style constants */
 const INPUT_BASE = {
     padding: '0.85rem',
@@ -74,8 +89,10 @@ const QUICK_BTN = {
 
 export default function NetCheckin() {
     const [selectedNet, setSelectedNet] = useState('');
+    const [controllerMode, setControllerMode] = useState('');
     const [prefix, setPrefix] = useState('VU2');
     const [suffix, setSuffix] = useState('');
+    const [customName, setCustomName] = useState('');
     const [updates, setUpdates] = useState('');
     const [includeHandle, setIncludeHandle] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -91,12 +108,29 @@ export default function NetCheckin() {
         });
         setAllNets(combined);
         if (combined.length > 0) {
-            setSelectedNet(combined[0].id);
+            const now = new Date();
+            const currentTotalMins = now.getHours() * 60 + now.getMinutes();
+            
+            let active = combined.find(n => {
+                if (!n.start || !n.end) return false;
+                const [sh, sm] = n.start.split(':').map(Number);
+                const [eh, em] = n.end.split(':').map(Number);
+                const startMins = sh * 60 + sm;
+                let endMins = eh * 60 + em;
+                if (endMins < startMins) endMins += 24 * 60;
+                
+                // Buffer of 30 mins before start to select upcoming nets
+                return currentTotalMins >= (startMins - 30) && currentTotalMins <= endMins;
+            });
+            
+            setSelectedNet(active ? active.id : combined[0].id);
         }
     }, []);
 
     const getTimeBasedGreetings = (startTime) => {
         let hour = new Date().getHours();
+        const day = new Date().getDay(); // 0 is Sunday, 5 is Friday
+
         if (startTime) {
             const [h] = startTime.split(':');
             hour = parseInt(h, 10);
@@ -107,10 +141,13 @@ export default function NetCheckin() {
 
         if (hour >= 5 && hour < 12) {
             greeting = 'Good morning';
-            signoff = 'Good day today';
+            signoff = day === 5 ? 'Have a great weekend ahead' : (day === 0 ? 'Have a great week ahead' : 'Have a great day today');
         } else if (hour >= 12 && hour < 17) {
             greeting = 'Good afternoon';
-            signoff = 'Good evening ahead';
+            signoff = day === 5 ? 'Have a great weekend ahead' : (day === 0 ? 'Have a great week ahead' : 'Have a great evening ahead');
+        } else {
+            // Evening
+            signoff = day === 5 ? 'Have a great weekend ahead' : (day === 0 ? 'Have a great week ahead' : 'Good night and good day tomorrow');
         }
 
         return { greeting, signoff };
@@ -118,19 +155,33 @@ export default function NetCheckin() {
 
     const generateScript = () => {
         const netObj = allNets.find(n => n.id === selectedNet);
-        const controllerCallsign = suffix ? `${prefix}${suffix.toUpperCase()}` : '[NET CONTROLLER]';
+        const controllerCallsign = controllerMode && controllerMode !== 'CUSTOM' 
+            ? controllerMode 
+            : (suffix ? `${prefix}${suffix.toUpperCase()}` : '[NET CONTROLLER]');
+            
         const myCallsign = profileData.callsign;
         const netName = netObj ? netObj.name : 'the NET';
         const { greeting, signoff } = getTimeBasedGreetings(netObj?.start);
+        
+        const knownName = NET_CONTROLLERS[controllerCallsign] || '';
+        const controllerName = knownName || customName;
 
         const hasCustomUpdates = updates.trim().length > 0;
 
         const trafficSection = hasCustomUpdates ? updates.trim() : `QRU for the NET / No traffic`;
-        const handleText = includeHandle ? `\n\nHandle is Srinivas. QTH is Rayasandra` : '';
+        
+        const handleName = profileData.handle || 'Srinivas';
+        const qthName = profileData.qth || 'Rayasandra';
+        const handleText = includeHandle ? `\n\nHandle is ${handleName}. QTH is ${qthName}` : '';
+        
+        let greetingLine = `${greeting} everyone on the frequency`;
+        if (controllerName) {
+            greetingLine = `${greeting} ${controllerName} and everyone on the frequency`;
+        }
 
         return `${controllerCallsign} this is ${myCallsign}${handleText}
 
-${greeting} everyone on the frequency
+${greetingLine}
 
 ${trafficSection}
 
@@ -151,7 +202,9 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
     };
 
     const handleLogQSO = () => {
-        const callsign = `${prefix}${suffix.toUpperCase()}`;
+        const callsign = controllerMode && controllerMode !== 'CUSTOM' 
+            ? controllerMode 
+            : `${prefix}${suffix.toUpperCase()}`;
         const netObj = allNets.find(n => n.id === selectedNet);
         const netName = netObj ? netObj.name : '';
         if (netName) {
@@ -239,8 +292,9 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
 
                         {/* Net Select */}
                         <div>
-                            <label style={LABEL_STYLE}>Select Net</label>
+                            <label htmlFor="nc-select-net" style={LABEL_STYLE}>Select Net</label>
                             <select
+                                id="nc-select-net"
                                 className="nc-select"
                                 value={selectedNet}
                                 onChange={(e) => setSelectedNet(e.target.value)}
@@ -277,31 +331,61 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
 
                         {/* Net Controller */}
                         <div>
-                            <label style={LABEL_STYLE}>Net Controller Callsign</label>
-                            <div className="nc-callsign-row" style={{ display: 'flex', gap: '0' }}>
-                                <select
-                                    className="nc-select"
-                                    value={prefix}
-                                    onChange={(e) => setPrefix(e.target.value)}
-                                    style={{
-                                        ...INPUT_BASE,
-                                        borderRadius: '8px 0 0 8px',
-                                        borderRight: 'none',
-                                        cursor: 'pointer',
-                                        flexShrink: 0,
-                                        minWidth: '72px',
-                                    }}
-                                >
-                                    <option value="VU2">VU2</option>
-                                    <option value="VU3">VU3</option>
-                                </select>
+                            <label htmlFor="nc-select-controller" style={LABEL_STYLE}>Net Controller</label>
+                            <select
+                                id="nc-select-controller"
+                                className="nc-select"
+                                value={controllerMode}
+                                onChange={(e) => {
+                                    setControllerMode(e.target.value);
+                                    if (e.target.value && e.target.value !== 'CUSTOM') {
+                                        setSuffix('');
+                                        setCustomName('');
+                                    }
+                                }}
+                                style={{
+                                    ...INPUT_BASE,
+                                    width: '100%',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    marginBottom: (!controllerMode || controllerMode === 'CUSTOM') ? '0.75rem' : '0',
+                                }}
+                            >
+                                <option value="">-- Type Custom Callsign --</option>
+                                {Object.entries(NET_CONTROLLERS).map(([call, name]) => (
+                                    <option key={call} value={call}>{name} ({call})</option>
+                                ))}
+                            </select>
 
-                                <div className="nc-callsign-input-wrap" style={{ position: 'relative', flex: '1 1 auto', display: 'flex', minWidth: '100px' }}>
-                                    <input
-                                        ref={suffixRef}
-                                        className="nc-input"
-                                        type="text"
-                                        value={suffix}
+                            {(!controllerMode || controllerMode === 'CUSTOM') && (
+                                <div className="nc-callsign-row" style={{ display: 'flex', gap: '0' }}>
+                                    <select
+                                        id="nc-prefix"
+                                        aria-label="Callsign Prefix"
+                                        className="nc-select"
+                                        value={prefix}
+                                        onChange={(e) => setPrefix(e.target.value)}
+                                        style={{
+                                            ...INPUT_BASE,
+                                            borderRadius: '8px 0 0 8px',
+                                            borderRight: 'none',
+                                            cursor: 'pointer',
+                                            flexShrink: 0,
+                                            minWidth: '72px',
+                                        }}
+                                    >
+                                        <option value="VU2">VU2</option>
+                                        <option value="VU3">VU3</option>
+                                    </select>
+
+                                    <div className="nc-callsign-input-wrap" style={{ position: 'relative', flex: '1 1 auto', display: 'flex', minWidth: '100px' }}>
+                                        <input
+                                            id="nc-suffix"
+                                            aria-label="Callsign Suffix"
+                                            ref={suffixRef}
+                                            className="nc-input"
+                                            type="text"
+                                            value={suffix}
                                         onChange={(e) => setSuffix(e.target.value)}
                                         placeholder="Suffix"
                                         autoCapitalize="characters"
@@ -368,8 +452,25 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
                                     </button>
                                 )}
                             </div>
+                            )}
+                            
+                            {(!controllerMode || controllerMode === 'CUSTOM') && suffix && !NET_CONTROLLERS[`${prefix}${suffix.toUpperCase()}`] && (
+                                <div style={{ marginTop: '0.75rem' }}>
+                                    <label htmlFor="nc-custom-name" className="sr-only" style={{ display: 'none' }}>Controller Name</label>
+                                    <input 
+                                        id="nc-custom-name"
+                                        type="text" 
+                                        placeholder="Controller Name (Optional)" 
+                                        value={customName}
+                                        onChange={(e) => setCustomName(e.target.value)}
+                                        className="nc-input"
+                                        style={{ ...INPUT_BASE, width: '100%', borderRadius: '8px' }}
+                                    />
+                                </div>
+                            )}
 
-                            <label style={{
+
+                            <label htmlFor="nc-include-handle" style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
@@ -381,6 +482,7 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
                                 padding: '0.25rem 0',
                             }}>
                                 <input
+                                    id="nc-include-handle"
                                     type="checkbox"
                                     checked={includeHandle}
                                     onChange={(e) => setIncludeHandle(e.target.checked)}
@@ -393,11 +495,14 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
 
                     {/* Card 2: Traffic / Updates */}
                     <div className="modern-card" style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div className="card-label">2. Traffic / Updates</div>
+                        <div className="card-label">
+                            <label htmlFor="nc-updates">2. Traffic / Updates</label>
+                        </div>
 
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                 <textarea
+                                    id="nc-updates"
                                     ref={updatesRef}
                                     className="nc-textarea"
                                     value={updates}
@@ -494,8 +599,14 @@ ${controllerCallsign} this is ${myCallsign} Clear.`;
                                 </div>
                             )}
                             <div><span style={{ display: 'inline-block', width: '100px' }}>Your Phonetic:</span> <strong style={{ color: 'var(--foreground)' }}>{getPhonetic(profileData.callsign)}</strong></div>
-                            {suffix && (
-                                <div><span style={{ display: 'inline-block', width: '100px' }}>Controller:</span> <strong style={{ color: 'var(--foreground)' }}>{getPhonetic(`${prefix}${suffix}`)}</strong></div>
+                            
+                            {((controllerMode && controllerMode !== 'CUSTOM') || suffix) && (
+                                <div>
+                                    <span style={{ display: 'inline-block', width: '100px' }}>Controller:</span> 
+                                    <strong style={{ color: 'var(--foreground)' }}>
+                                        {getPhonetic(controllerMode && controllerMode !== 'CUSTOM' ? controllerMode : `${prefix}${suffix}`)}
+                                    </strong>
+                                </div>
                             )}
                         </div>
 
