@@ -357,9 +357,9 @@ export default function AprsBeacon() {
         addLog(`Connecting to rotate.aprs2.net:8080 as ${fullCall}...`, 'info');
 
         try {
-            const res = await fetch('https://rotate.aprs2.net:8080/', {
+            const res = await fetch('/api/aprs-proxy', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/octet-stream' },
+                // No need for CORS headers when calling same-origin proxy
                 body: fullPayload
             });
 
