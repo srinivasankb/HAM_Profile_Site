@@ -27,11 +27,6 @@
                 "name": "India Band Plan",
                 "path": "/india-band-plan",
                 "icon": "RadioTower"
-            },
-            {
-                "name": "APRS Beacon Pro",
-                "path": "/aprs-beacon",
-                "icon": "Radio"
             }
         ]
     }
