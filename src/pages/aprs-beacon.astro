@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AprsBeacon from '../components/AprsBeacon';
+
+const title = 'APRS-IS Web Beacon Pro | VU35KB';
+const description = 'Acquire live device position telemetry and transmit APRS position frames over IP directly to the global APRS-IS network with safe test simulation mode.';
+const siteUrl = 'https://ham.srinikb.in';
+---
+
+<Layout {title} {description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "APRS-IS Web Beacon Pro",
+    "description": description,
+    "url": `${siteUrl}/aprs-beacon`,
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Srinivasan KB",
+      "alternateName": "VU35KB"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "Automatic Packet Reporting System (APRS)",
+      "description": "Real-time position reporting and telemetry for amateur radio operators over APRS-IS IP network"
+    },
+    "featureList": [
+      "Live GPS device telemetry acquisition using HTML5 Geolocation API",
+      "Interactive Leaflet location picker map",
+      "Automatic APRS standard coordinate formatting (DDMM.mmN / DDDMM.mmW)",
+      "APRS Callsign passcode calculation hash algorithm",
+      "SSID extension selector (-1 to -14)",
+      "APRS icon symbol selector",
+      "Safe READ-ONLY test mode & LIVE APRS-IS network transmission",
+      "Live terminal console log monitor"
+    ]
+  })} />
+  <AprsBeacon client:only="react" />
+</Layout>

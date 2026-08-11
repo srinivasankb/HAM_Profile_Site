@@ -176,37 +176,50 @@ import avatarImg from '../assets/avatar.png';
 
     <!-- Tools CTA Section -->
     <section style="margin-top: 4rem; margin-bottom: 4rem;">
+      <h2 class="name-heading" style="text-align: left; font-size: 1.5rem; margin-bottom: 2rem;">Radio Tools & Utilities</h2>
       <div class="tools-grid">
         <a href="/grid" class="modern-card tool-cta-card" aria-label="Open Maidenhead Grid Explorer tool" data-astro-prefetch>
-          <div class="tool-content">
+          <div class="tool-card-header">
             <div class="tool-icon">
-              <Compass size={32} />
+              <Compass size={24} />
             </div>
-            <div>
-              <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Maidenhead Grid Explorer</h2>
-              <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5;">
-                Discover your grid square boundaries, locate station coordinates, and visualize the globe's radio grid.
-              </p>
-            </div>
-            <div class="tool-arrow">
-              <ArrowRight size={24} />
-            </div>
+            <ArrowRight size={20} class="tool-arrow" />
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.4rem; color: var(--foreground);">Maidenhead Grid Explorer</h3>
+            <p style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
+              Discover your grid square boundaries, locate station coordinates, and visualize the globe's radio grid.
+            </p>
           </div>
         </a>
-        <a href="/india-band-plan" class="modern-card tool-cta-card tool-cta-card-alt" aria-label="Open India HAM Radio Band Plan tool" data-astro-prefetch>
-          <div class="tool-content">
+
+        <a href="/india-band-plan" class="modern-card tool-cta-card" aria-label="Open India HAM Radio Band Plan tool" data-astro-prefetch>
+          <div class="tool-card-header">
             <div class="tool-icon">
-              <RadioTower size={32} />
+              <RadioTower size={24} />
             </div>
-            <div>
-              <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">India Band Plan</h2>
-              <p style="font-size: 0.9rem; opacity: 0.9; line-height: 1.5;">
-                Explore NFAP frequency allocations, emission designators, and power limits for Indian amateur bands.
-              </p>
+            <ArrowRight size={20} class="tool-arrow" />
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.4rem; color: var(--foreground);">India Band Plan</h3>
+            <p style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
+              Explore NFAP frequency allocations, emission designators, and power limits for Indian amateur bands.
+            </p>
+          </div>
+        </a>
+
+        <a href="/aprs-beacon" class="modern-card tool-cta-card" aria-label="Open APRS-IS Beacon Pro tool" data-astro-prefetch>
+          <div class="tool-card-header">
+            <div class="tool-icon">
+              <Radio size={24} />
             </div>
-            <div class="tool-arrow">
-              <ArrowRight size={24} />
-            </div>
+            <ArrowRight size={20} class="tool-arrow" />
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.4rem; color: var(--foreground);">APRS-IS Beacon Pro</h3>
+            <p style="font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5;">
+              Acquire device telemetry and transmit APRS position frames over IP directly to the global APRS-IS network.
+            </p>
           </div>
         </a>
       </div>
@@ -342,67 +355,56 @@ import avatarImg from '../assets/avatar.png';
     transform: translateY(-2px);
   }
 
-  .tool-cta-card {
-    display: flex;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    text-decoration: none;
-    padding: 2.5rem;
-    transition: all 0.2s ease;
-    border: none;
-  }
-
-  .tool-cta-card-alt {
-    background: var(--card);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-  }
-
-  .tool-cta-card-alt .tool-icon {
-    background: var(--secondary);
-    color: var(--foreground);
-  }
-
-  .tool-cta-card-alt:hover {
-    border-color: var(--primary);
-  }
-
   .tools-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
   }
 
-  @media (min-width: 768px) {
-    .tools-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .tool-cta-card {
+    text-decoration: none;
+    color: inherit;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .tool-cta-card:hover {
-    transform: scale(1.01);
-    box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
   }
 
-  .tool-content {
+  .tool-card-header {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    justify-content: space-between;
     width: 100%;
   }
 
   .tool-icon {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 12px;
+    background: var(--secondary);
+    color: var(--foreground);
+    padding: 0.75rem;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .tool-arrow {
-    margin-left: auto;
-    opacity: 0.5;
+    color: var(--muted-foreground);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .tool-cta-card:hover .tool-arrow {
+    color: var(--primary);
+    transform: translateX(4px);
   }
 
   .social-hero-link {
