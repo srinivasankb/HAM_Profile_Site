@@ -5,7 +5,9 @@
         "lat": 12.872044601068696,
         "lon": 77.67335959965526,
         "grid": "MK82uu",
-        "isPrimary": true
+        "isPrimary": true,
+        "weatherBeacon": true,
+        "altitudeM": 920
     },
     {
         "id": "rajapalayam",

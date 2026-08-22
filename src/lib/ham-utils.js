@@ -144,3 +144,38 @@ export async function getEcholinkStatus(callsign = "VU35KB", force = false) {
         return { data: { error: "Service unavailable" }, timestamp: 0 };
     }
 }
+
+const WEATHER_BEACON_URL =
+    import.meta.env.VITE_WEATHER_BEACON_URL ||
+    'https://n8n.srinikb.in/webhook/esp32-geek-wx-recent';
+
+export function formatWeatherBeaconIST(dateStr, short = false) {
+    const d = new Date(dateStr);
+    if (short) {
+        return d.toLocaleTimeString('en-IN', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata',
+        });
+    }
+    return d.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata',
+    }) + ' IST';
+}
+
+export async function getWeatherBeaconData(force = false) {
+    const { fetchWeatherBeacon } = await import('./weather-cache');
+    const result = await fetchWeatherBeacon(force);
+    return {
+        data: result.data,
+        timestamp: result.fetchedAt,
+        error: result.error,
+    };
+}

@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import { STATIONS } from '../lib/ham-utils';
 import EcholinkStatus from '../components/EcholinkStatus';
 import EventsSection from '../components/EventsSection';
+import WeatherPill from '../components/WeatherPill';
 import profileData from '../data/profile.json';
 import clubsData from '../data/clubs.json';
 import hardwareData from '../data/hardware.json';
@@ -65,6 +66,8 @@ import avatarImg from '../assets/avatar.png';
         </div>
       </div>
     </section>
+
+    <WeatherPill client:load />
 
     <!-- Quick Stats / Station Highlight -->
     <!-- Quick Stats / Profile Metrics -->

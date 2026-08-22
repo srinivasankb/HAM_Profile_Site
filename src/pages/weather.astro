@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+import WeatherDashboard from '../components/WeatherDashboard';
+import profileData from '../data/profile.json';
+import stationsData from '../data/stations.json';
+import { weatherPageSchemas } from '../lib/seo-schema';
+import ogImageDefault from '../assets/vu35kb_og.png';
+
+const siteUrl = Astro.site?.href?.replace(/\/$/, '') || Astro.url.origin;
+const pageUrl = `${siteUrl}/weather`;
+const station = stationsData.find((s) => s.weatherBeacon) || stationsData[0];
+
+const title = 'Weather Station | VU35KB';
+const description =
+    `Live indoor ENV III readings inside the ${profileData.callsign} amateur radio shack in ${station.name} (Grid ${station.grid}). Shack temperature, humidity, and pressure. Not outdoor or forecast data.`;
+
+const keywords = [
+    'VU35KB',
+    'amateur radio weather',
+    'HAM radio station weather',
+    'indoor shack weather',
+    'inside shack readings',
+    'Bangalore weather station',
+    station.grid,
+    'M5Stack ENV III',
+    'shack telemetry',
+    'barometric pressure',
+    'weather beacon',
+    ...profileData.seo.keywords,
+];
+
+const ogImage = ogImageDefault.src.startsWith('http')
+    ? ogImageDefault.src
+    : `${siteUrl}${ogImageDefault.src}`;
+
+const jsonLd = weatherPageSchemas({
+    siteUrl,
+    pageUrl,
+    title,
+    description,
+    image: ogImage,
+});
+---
+
+<Layout {title} {description} {keywords} {jsonLd}>
+	<WeatherDashboard client:load />
+</Layout>

@@ -1,7 +1,9 @@
-const CACHE_NAME = 'vu35kb-v1';
+const CACHE_NAME = 'vu35kb-v2';
 const STATIC_ASSETS = [
     '/',
     '/grid',
+    '/weather',
+    '/weather/index.html',
     '/india-band-plan',
     '/index.html',
     '/manifest.json',
@@ -27,12 +29,21 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+function offlineNavigateFallback(url) {
+    if (url.pathname.startsWith('/weather')) {
+        return caches.match('/weather/index.html')
+            || caches.match('/weather')
+            || caches.match('/index.html');
+    }
+    return caches.match('/index.html');
+}
+
 // Fetch strategy: Network-first for API calls, Cache-first for static assets
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
     // Always fetch API calls from network (never cache weather data here)
-    if (url.hostname.includes('openweathermap') || url.hostname.includes('openstreetmap')) {
+    if (url.hostname.includes('openweathermap') || url.hostname.includes('openstreetmap') || url.hostname.includes('n8n.srinikb.in')) {
         event.respondWith(fetch(event.request));
         return;
     }
@@ -49,9 +60,8 @@ self.addEventListener('fetch', (event) => {
                 }
                 return response;
             }).catch(() => {
-                // Offline fallback: return index for HTML navigation requests
                 if (event.request.mode === 'navigate') {
-                    return caches.match('/index.html');
+                    return offlineNavigateFallback(url);
                 }
             });
         })

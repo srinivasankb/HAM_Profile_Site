@@ -1,13 +1,14 @@
 ---
-import { Rss, Radio, MapPin, BookText, Compass, Antenna, RadioTower, Menu, Home, Library, Mail, Wrench, ChevronDown } from 'lucide-react';
+import { Rss, Radio, MapPin, BookText, Compass, Antenna, RadioTower, Menu, Home, Library, Mail, Wrench, ChevronDown, Cloud } from 'lucide-react';
 import InstagramIcon from '../components/InstagramIcon.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import profileData from '../data/profile.json';
 import navData from '../data/navigation.json';
 import ogImageDefault from '../assets/vu35kb_og.png';
+import { siteGraph } from '../lib/seo-schema';
 
-const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, Antenna, RadioTower, RSS: Rss, Radio, Wrench };
+const IconMap: Record<string, any> = { Home, MapPin, BookText, Library, Compass, Antenna, RadioTower, RSS: Rss, Radio, Wrench, Cloud };
 
 interface Props {
 	title: string;
@@ -15,6 +16,8 @@ interface Props {
 	image?: string;
 	article?: boolean;
     noindex?: boolean;
+    keywords?: string[];
+    jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const { 
@@ -22,13 +25,27 @@ const {
   description = profileData.seo.description, 
   image = ogImageDefault.src,
   article = false,
-  noindex = false
+  noindex = false,
+  keywords = profileData.seo.keywords,
+  jsonLd,
 } = Astro.props;
 
-const siteUrl = Astro.url.origin;
+const siteUrl = Astro.site?.href?.replace(/\/$/, '') || Astro.url.origin;
 const currentUrl = Astro.url.href;
 const pathname = Astro.url.pathname;
 const ogImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+
+const extraSchemas = jsonLd
+  ? Array.isArray(jsonLd) ? jsonLd : [jsonLd]
+  : [];
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    ...siteGraph(siteUrl),
+    ...extraSchemas,
+  ],
+};
 
 // We'll need the blog data for the sidebar
 import { getCollection } from 'astro:content';
@@ -50,13 +67,17 @@ const recentBlogs = blogs.slice(0, 3);
 		
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 		<!-- Primary Meta Tags -->
 		<title>{title}</title>
 		<meta name="title" content={title} />
 		<meta name="description" content={description} />
-        {noindex && <meta name="robots" content="noindex, nofollow" />}
+		<meta name="author" content={`${profileData.name} (${profileData.callsign})`} />
+		<meta name="application-name" content={`${profileData.callsign} HAM Station`} />
+		<meta name="keywords" content={keywords.join(', ')} />
+		<meta name="summary" content={description} />
+        <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={article ? "article" : "website"} />
@@ -64,6 +85,8 @@ const recentBlogs = blogs.slice(0, 3);
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:image" content={ogImage} />
+		<meta property="og:site_name" content={`${profileData.callsign} Amateur Radio`} />
+		<meta property="og:locale" content="en_IN" />
 
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary_large_image" />
@@ -88,31 +111,7 @@ const recentBlogs = blogs.slice(0, 3);
     <link rel="canonical" href={currentUrl} />
     
     <!-- JSON-LD / Structured Data -->
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "ProfilePage",
-      "description": profileData.seo.description,
-      "name": `${profileData.callsign} Station`,
-      "url": "https://ham.srinikb.in",
-      "mainEntity": {
-        "@type": "Person",
-        "name": profileData.name,
-        "alternateName": profileData.callsign,
-        "description": "HAM Radio Operator, QRP Enthusiast and Technical Explorer",
-        "jobTitle": profileData.seo.jobTitle,
-        "sameAs": [
-          `https://www.qrz.com/db/${profileData.callsign}`,
-          `https://twitter.com/${profileData.social.twitter}`,
-          `https://github.com/${profileData.social.github}`
-        ],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "email": profileData.contact.email,
-          "contactType": "technical support"
-        }
-      },
-      "knowsAbout": profileData.seo.keywords
-    })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(structuredData)} />
 	</head>
 	<body>
     <div id="app-root" class="app-layout">
