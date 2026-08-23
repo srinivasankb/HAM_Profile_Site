@@ -43,5 +43,14 @@ const jsonLd = weatherPageSchemas({
 ---
 
 <Layout {title} {description} {keywords} {jsonLd}>
-	<WeatherDashboard client:load />
+	<div class="weather-page-shell">
+		<WeatherDashboard client:only="react" />
+	</div>
 </Layout>
+
+<style>
+	.weather-page-shell {
+		width: 100%;
+		max-width: 1200px;
+	}
+</style>

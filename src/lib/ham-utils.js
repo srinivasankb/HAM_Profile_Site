@@ -50,7 +50,8 @@ export function getGridBounds(grid) {
     return [[minLat, minLon], [maxLat, maxLon]];
 }
 
-export function getSunTimes(lat, lon, date = new Date()) {
+export function getSunTimes(lat, lon, dateInput = new Date()) {
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
     const rad = Math.PI / 180;
     const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
 
@@ -84,8 +85,106 @@ export function getSunTimes(lat, lon, date = new Date()) {
 
     return {
         sunrise: minutesToDate(sunriseMin),
-        sunset: minutesToDate(sunsetMin)
+        sunset: minutesToDate(sunsetMin),
     };
+}
+
+/** Sunrise/sunset display — matches station page IST formatting */
+export function formatSunTimeIST(date) {
+    if (!date) return '--';
+    return (
+        date.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Asia/Kolkata',
+        }) + ' IST'
+    );
+}
+
+/** 12-hour IST time for charts and weather dashboard (e.g. 2:30 pm) */
+export function formatTimeIST12(dateInput, { withMinutes = true } = {}) {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (Number.isNaN(d.getTime())) return '--';
+    return d.toLocaleTimeString('en-IN', {
+        hour: 'numeric',
+        minute: withMinutes ? '2-digit' : undefined,
+        hour12: true,
+        timeZone: 'Asia/Kolkata',
+    });
+}
+
+/** 12-hour label for an IST hour bucket (0–23), e.g. 7 am */
+export function formatHour12IST(hour24) {
+    const h = ((hour24 % 24) + 24) % 24;
+    const period = h < 12 ? 'am' : 'pm';
+    const h12 = h % 12 || 12;
+    return `${h12} ${period}`;
+}
+
+/** Solar state for a station — daylight, next event, sunrise/sunset times */
+export function getSolarState(lat, lon, nowInput = new Date()) {
+    const now = nowInput instanceof Date ? nowInput : new Date(nowInput);
+    const sun = getSunTimes(lat, lon, now);
+    if (!sun) return null;
+
+    const isDaylight = now > sun.sunrise && now < sun.sunset;
+    let nextLabel;
+    let nextTime;
+    if (now < sun.sunrise) {
+        nextLabel = 'Sunrise';
+        nextTime = sun.sunrise;
+    } else if (now < sun.sunset) {
+        nextLabel = 'Sunset';
+        nextTime = sun.sunset;
+    } else {
+        nextLabel = 'Sunrise';
+        nextTime = new Date(sun.sunrise.getTime() + 86400000);
+    }
+
+    const diffSec = Math.max(0, Math.floor((nextTime.getTime() - now.getTime()) / 1000));
+    const h = Math.floor(diffSec / 3600);
+    const m = Math.floor((diffSec % 3600) / 60);
+
+    return {
+        sun,
+        isDaylight,
+        nextLabel,
+        nextInLabel: `${h}h ${m}m`,
+    };
+}
+
+/** Dawn/day/dusk/night phase using station sunrise/sunset */
+export function getSolarPhase(lat, lon, nowInput = new Date()) {
+    const now = nowInput instanceof Date ? nowInput : new Date(nowInput);
+    const sun = getSunTimes(lat, lon, now);
+    if (!sun) return null;
+
+    const ms = now.getTime();
+    const dawnEnd = sun.sunrise.getTime() + 30 * 60 * 1000;
+    const duskStart = sun.sunset.getTime() - 30 * 60 * 1000;
+
+    if (ms < sun.sunrise.getTime()) {
+        return { label: 'Night', tone: 'night', isNight: true, sun };
+    }
+    if (ms < dawnEnd) {
+        return { label: 'Dawn', tone: 'dawn', isNight: false, sun };
+    }
+    if (ms < duskStart) {
+        return { label: 'Day', tone: 'day', isNight: false, sun };
+    }
+    if (ms < sun.sunset.getTime()) {
+        return { label: 'Dusk', tone: 'dusk', isNight: false, sun };
+    }
+    return { label: 'Night', tone: 'night', isNight: true, sun };
+}
+
+/** True when timestamp is outside daylight at station coordinates */
+export function isNightAt(lat, lon, dateInput) {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    const sun = getSunTimes(lat, lon, d);
+    if (!sun) return d.getHours() >= 19 || d.getHours() < 5;
+    return d < sun.sunrise || d >= sun.sunset;
 }
 
 let echolinkCache = {
@@ -152,14 +251,9 @@ const WEATHER_BEACON_URL =
 export function formatWeatherBeaconIST(dateStr, short = false) {
     const d = new Date(dateStr);
     if (short) {
-        return d.toLocaleTimeString('en-IN', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Kolkata',
-        });
+        return formatTimeIST12(d);
     }
-    return d.toLocaleString('en-IN', {
+    return `${d.toLocaleString('en-IN', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -167,7 +261,7 @@ export function formatWeatherBeaconIST(dateStr, short = false) {
         minute: '2-digit',
         hour12: true,
         timeZone: 'Asia/Kolkata',
-    }) + ' IST';
+    })} IST`;
 }
 
 export async function getWeatherBeaconData(force = false) {

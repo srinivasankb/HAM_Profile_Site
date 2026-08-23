@@ -9,10 +9,15 @@ import {
 const REFRESH_COOLDOWN_MS = 60000;
 const AUTO_CHECK_MS = 60_000;
 
+function readInitialReadings() {
+    if (typeof window === 'undefined') return [];
+    return getWeatherCacheSnapshot().data ?? [];
+}
+
 export function useWeatherData() {
-    const initial = typeof window !== 'undefined' ? getWeatherCacheSnapshot() : null;
-    const [readings, setReadings] = useState(initial?.data ?? []);
-    const [loading, setLoading] = useState(!initial?.data?.length);
+    const initial = readInitialReadings();
+    const [readings, setReadings] = useState(initial);
+    const [loading, setLoading] = useState(initial.length === 0);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState(false);
     const [cooldownSecs, setCooldownSecs] = useState(0);

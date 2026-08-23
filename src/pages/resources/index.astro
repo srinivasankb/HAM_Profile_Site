@@ -13,6 +13,7 @@ import {
   BookOpen,
   Pin
 } from 'lucide-react';
+import '../../styles/resource-prose.css';
 
 const allResources = (await getCollection('resources'))
   .filter(resource => !resource.data.unlisted)
@@ -47,8 +48,8 @@ const description = "A curated collection of tools, manuals, and learning materi
 ---
 
 <Layout title={title} description={description}>
-  <div class="modern-container">
-    <div class="resources-header">
+  <div class="resource-layout">
+    <div class="resources-index-header">
       <div class="header-badge">Collective Intelligence</div>
       <h1 class="name-heading">Resource Library</h1>
       <p class="resources-intro">
@@ -118,14 +119,6 @@ const description = "A curated collection of tools, manuals, and learning materi
 </Layout>
 
 <style>
-  .resources-header {
-    text-align: center;
-    margin-bottom: 4rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .header-badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -144,19 +137,6 @@ const description = "A curated collection of tools, manuals, and learning materi
     font-size: 1.1rem;
     line-height: 1.6;
     margin-top: 1rem;
-  }
-
-  .resources-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    width: 100%;
-  }
-
-  @media (max-width: 768px) {
-    .resources-grid {
-      grid-template-columns: 1fr;
-    }
   }
 
   .resource-card {

@@ -1349,6 +1349,67 @@ button.nav-item {
   text-underline-offset: 4px;
 }
 
+/* Markdown tables (wrapper from rehype-wrap-tables) */
+.prose .prose-table-wrap {
+  margin: 1.5rem 0 2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.prose .prose-table-wrap table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.prose table th {
+  background: var(--secondary);
+  font-weight: 700;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.prose table td {
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.prose table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.prose table tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--secondary) 35%, transparent);
+}
+
+@media (max-width: 640px) {
+  .prose .prose-table-wrap table {
+    font-size: 0.8rem;
+  }
+
+  .prose table th,
+  .prose table td {
+    padding: 0.5rem 0.6rem;
+  }
+
+  .prose table th {
+    white-space: normal;
+  }
+}
+
 /* Accessibility & Performance */
 @media (prefers-reduced-motion: reduce) {
 
