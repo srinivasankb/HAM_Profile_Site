@@ -29,7 +29,36 @@
 
 .wx-kicker {
   display: block;
+  margin-bottom: 0;
+}
+
+.wx-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.5rem;
+}
+
+.wx-section-head .wx-kicker {
+  margin-bottom: 0;
+}
+
+.wx-window-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--wx-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .wx-num,
@@ -117,6 +146,10 @@
 }
 
 .wx-hero-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
   font-family: var(--wx-font);
   font-size: var(--wx-size-title);
   font-weight: 900;

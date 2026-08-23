@@ -171,7 +171,7 @@ export function weatherPageSchemas({ siteUrl = SITE_URL, pageUrl, title, descrip
             about: { '@id': stationId },
             featureList: [
                 'Indoor shack temperature, humidity, and pressure',
-                '6-hour interactive chart',
+                '24-hour interactive chart (96 readings at 15-minute intervals)',
                 'Derived atmospheric metrics (dew point, heat index, VPD)',
                 'Pressure trend and rate-of-change analytics',
             ],

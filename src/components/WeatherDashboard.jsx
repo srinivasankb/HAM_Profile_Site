@@ -9,6 +9,7 @@ import {
     Minus,
     TrendingUp,
     TrendingDown,
+    Clock,
 } from 'lucide-react';
 import profile from '../data/profile.json';
 import { STATIONS, formatWeatherBeaconIST } from '../lib/ham-utils';
@@ -33,7 +34,9 @@ import {
     formatVpdKPa,
 } from '../lib/weather-math';
 
-const CHART_POINTS = 24;
+const READINGS_INTERVAL_MIN = 15;
+const CHART_HOURS = 24;
+const CHART_POINTS = CHART_HOURS * (60 / READINGS_INTERVAL_MIN); // 96 readings @ 15 min
 const CHART_WIDTH = 800;
 const CHART_HEIGHT = 180;
 const CHART_PAD = 12;
@@ -45,6 +48,24 @@ const SERIES_CONFIG = [
 ];
 
 const station = STATIONS.find((s) => s.weatherBeacon) || STATIONS[0];
+
+function Window24HPill({ title = '24-hour window, readings every 15 minutes' }) {
+    return (
+        <span className="wx-window-pill" title={title}>
+            <Clock size={12} strokeWidth={2.25} aria-hidden="true" />
+            <span>24H</span>
+        </span>
+    );
+}
+
+function SectionHead({ label, showWindowPill = true }) {
+    return (
+        <div className="wx-section-head">
+            <span className="wx-kicker">{label}</span>
+            {showWindowPill && <Window24HPill />}
+        </div>
+    );
+}
 
 function buildSmoothPath(points) {
     if (!points.length) return '';
@@ -235,7 +256,7 @@ export default function WeatherDashboard() {
     const chartData = readings.slice(0, CHART_POINTS).reverse();
     const latest = readings[0];
     const previous = readings[1];
-    const labelInterval = chartData.length > 0 ? Math.max(1, Math.floor(chartData.length / 5)) : 1;
+    const labelInterval = chartData.length > 0 ? Math.max(1, Math.floor(chartData.length / 8)) : 1;
 
     if (loading && !latest) {
         return (
@@ -293,7 +314,10 @@ export default function WeatherDashboard() {
                                 <RefreshCw size={16} />
                             </button>
                         </div>
-                        <h1 className="wx-hero-title">Station weather</h1>
+                        <h1 className="wx-hero-title">
+                            Station weather
+                            <Window24HPill />
+                        </h1>
                         <dl className="wx-station-dl">
                             <div className="wx-station-dl-row">
                                 <dt>Location</dt>
@@ -370,7 +394,7 @@ export default function WeatherDashboard() {
 
             {chartData.length > 1 && (
                 <section className="modern-card wx-chart-section">
-                    <span className="wx-kicker">Last {chartData.length} readings (6 hours)</span>
+                    <SectionHead label="Last 24 hours" />
                     <CombinedChart chartData={chartData} labelInterval={labelInterval} />
                 </section>
             )}
@@ -385,12 +409,12 @@ export default function WeatherDashboard() {
                                 {trend.label}
                             </span>
                             <span className="wx-trend-detail wx-num">
-                                {trend.delta >= 0 ? '+' : ''}{formatCalculated(trend.delta, 2)} hPa since earlier today
+                                {trend.delta >= 0 ? '+' : ''}{formatCalculated(trend.delta, 2)} hPa over 24 hours
                             </span>
                         </div>
                     </div>
                     <div className="wx-trend-block">
-                        <span className="wx-kicker">Rate of change (6h)</span>
+                        <span className="wx-kicker">Rate of change (24h)</span>
                         <div className="wx-rate-line wx-num">
                             <span><Thermometer size={13} /> {tempRate >= 0 ? '+' : ''}{formatCalculated(tempRate, 2)}°C/hr</span>
                             <span><Droplets size={13} /> {humRate >= 0 ? '+' : ''}{formatCalculated(humRate, 2)}%/hr</span>
@@ -407,7 +431,7 @@ export default function WeatherDashboard() {
 
             {statRows.length > 0 && (
                 <section className="wx-stats modern-card">
-                    <span className="wx-kicker">6-hour range</span>
+                    <SectionHead label="24-hour range" />
                     <table className="wx-table">
                         <thead>
                             <tr>
@@ -432,7 +456,7 @@ export default function WeatherDashboard() {
             )}
 
             <p className="wx-footer-note">
-                ENV III sensor inside the {profile.callsign} shack, {station.name}. Not outdoor readings. Updated every 15 minutes. 73
+                ENV III sensor inside the {profile.callsign} shack, {station.name}. 96 readings every 15 minutes (24H window). Not outdoor readings. 73
             </p>
         </div>
     );
