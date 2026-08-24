@@ -237,6 +237,31 @@
   margin-bottom: 0.35rem;
 }
 
+.resource-prose :global(p:has(> img)) {
+  text-align: center;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.resource-prose :global(p:has(> img) img) {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  height: auto;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.resource-prose :global(p:has(> img) + p) {
+  max-width: 36rem;
+  margin: 0 auto 1.75rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  line-height: 1.45;
+}
+
 .resource-prose :global(hr) {
   border: 0;
   height: 1px;

@@ -18,6 +18,10 @@ This project began as a small **ESP32** build acting as an **APRS-IS** node ([VU
 
 ## Hardware
 
+![ESP32-S3 Geek with M5Stack ENV III sensor module. The display shows live shack readings and VU35KB-13 beacon status.](/images/esp32-s3-geek-env-iii-setup.png)
+
+*Waveshare ESP32-S3 Geek with M5Stack ENV III. The onboard screen shows temperature, humidity, pressure, and APRS beacon status.*
+
 | Component | Role |
 |-----------|------|
 | **M5Stack ENV III** | Environmental sensor module |
