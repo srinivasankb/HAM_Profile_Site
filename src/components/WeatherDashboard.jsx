@@ -142,10 +142,28 @@ function RateCell({ icon: Icon, label, rate, unit }) {
 }
 
 function IntroBanner({ collapsed, onToggle }) {
+    const handleSectionKeyDown = (e) => {
+        if (!collapsed) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+        }
+    };
+
+    const handleToggleClick = (e) => {
+        e.stopPropagation();
+        onToggle();
+    };
+
     return (
         <section
             className={`modern-card wx-intro ${collapsed ? 'is-collapsed' : ''}`}
             aria-label="About this dashboard"
+            onClick={collapsed ? onToggle : undefined}
+            onKeyDown={handleSectionKeyDown}
+            role={collapsed ? 'button' : undefined}
+            tabIndex={collapsed ? 0 : undefined}
+            aria-expanded={!collapsed}
         >
             <div className="wx-intro-bar">
                 <Calculator size={18} className="wx-intro-icon" aria-hidden="true" />
@@ -159,14 +177,20 @@ function IntroBanner({ collapsed, onToggle }) {
                         </p>
                     )}
                 </div>
-                <button
-                    type="button"
-                    className="wx-intro-toggle"
-                    onClick={onToggle}
-                    aria-expanded={!collapsed}
-                >
-                    {collapsed ? 'About' : 'Hide'}
-                </button>
+                {collapsed ? (
+                    <span className="wx-intro-toggle wx-intro-toggle-hint" aria-hidden="true">
+                        About
+                    </span>
+                ) : (
+                    <button
+                        type="button"
+                        className="wx-intro-toggle"
+                        onClick={handleToggleClick}
+                        aria-label="Collapse about section"
+                    >
+                        Hide
+                    </button>
+                )}
             </div>
             {!collapsed && (
                 <p className="wx-intro-note">

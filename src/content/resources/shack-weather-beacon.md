@@ -36,10 +36,89 @@ The ESP32 still participates in the APRS ecosystem as **VU35KB-13**. The web das
 
 ## Data pipeline
 
+The weather path is **self-hosted on a private VPS**. No third-party weather API or cloud IoT platform. The static site (`ham.srinikb.in`) and **n8n** workflow run on the same VPS. Formulas run in your browser. APRS-IS and NTP are the only external services in the sensor loop.
+
 1. ESP32 samples ENV III every **15 minutes**.
-2. Readings pass through an **n8n** workflow to a small JSON API (recent readings array).
-3. The dashboard fetches that API in the browser and caches results in memory and `localStorage`.
+2. Readings POST to **n8n** on the VPS. The workflow writes each row to an **n8n Data Table** (full history kept for your own trend analysis). A JSON API returns the recent window the dashboard needs.
+3. The dashboard fetches that API in the browser and caches results in memory and `localStorage`. Charts and cards show the **last 24 hours**; older rows remain in the Data Table on the VPS.
 4. Auto-refresh when cache is older than **10 minutes**, or when the latest reading is older than **20 minutes**. Manual refresh has a **60 second** cooldown.
+
+### End-to-end flow
+
+```text
+                    ┌──────────────────┐
+                    │ Boot: config LCD │
+                    │ WiFi, NTP, web UI│
+                    └────────┬─────────┘
+                             │
+         (background: config web UI, WiFi retry, LCD refresh 1 s)
+                             │
+              ┌──────────────┴──────────────┐
+              │      Every 15 minutes       │
+              └──────────────┬──────────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │ ESP32-S3 Geek    │
+                    │ reads ENV III    │
+                    │ SHT30 + QMP6988  │
+                    └────────┬─────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │ Update LCD       │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │      Beacon enabled?        │
+              └─────┬──────────────────┬────┘
+                 no │                  │ yes
+                    │    ┌─────────────▼──────────────┐
+                    │    │ APRS-IS (external, opt.)   │
+                    │    │ login + WX packet TX       │
+                    │    │ rotate.aprs2.net:14580     │
+                    │    └─────────────┬──────────────┘
+                    │                  │
+                    └────────┬─────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │ n8n webhook      │
+                    │ HTTPS POST JSON  │
+                    └────────┬─────────┘
+                             │
+              ───── Self-hosted VPS ─────
+                             │
+                    ┌────────▼─────────┐
+                    │ Data Table       │
+                    │ full history     │
+                    └────────┬─────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │ JSON API         │
+                    │ last ~24h rows   │
+                    └────────┬─────────┘
+                             │
+              ┌───────────────┴─────────┐
+              │                         │
+   ┌──────────▼──────────┐   ┌──────────▼──────────┐
+   │ ham.srinikb.in      │   │ Browser fetch API   │
+   │ Astro /weather page │   │ dashboard last 24h  │
+   │ static site + JS    │   │ cache + formulas    │
+   └─────────────────────┘   └─────────────────────┘
+```
+
+Self-hosted on a private VPS. No third-party weather API or cloud IoT. The dashboard shows 24 hours; the n8n Data Table retains full history for later analysis. The static site serves the `/weather` page; the browser fetches the JSON API directly.
+
+**Device detail (protocols and background loop):**
+
+| Step | What happens |
+|------|----------------|
+| Background | Config web UI at device IP (`/`, `/save`, `/status`). WiFi retry every 10 s. LCD refresh every 1 s. Runs continuously after boot. |
+| Boot | Load config from flash. Init ENV III (I2C). Connect WiFi. Web server on port 80. NTP sync (external). First cycle if online. |
+| Sensor read | SHT30 temp/RH and QMP6988 pressure over I2C (pins 16/17). |
+| LCD | Callsign, IP, local time, env line, APRS status band. |
+| APRS (if enabled) | TCP to APRS-IS. Login with callsign passcode. Send position + WX comment (`t`/`h`/`b` fields). Disconnect. |
+| Webhook | POST `{"temperature","humidity","pressure"}` to configured URL. Always runs after each cycle when sensors are valid. |
+
+If beacon is turned off in settings, APRS is skipped but sensor read and webhook POST still run every 15 minutes.
 
 ### API record shape
 

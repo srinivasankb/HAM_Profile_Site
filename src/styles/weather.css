@@ -551,6 +551,21 @@
   padding: 0.75rem 1rem !important;
 }
 
+.wx-intro.is-collapsed {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.wx-intro.is-collapsed:hover {
+  border-color: color-mix(in srgb, var(--border) 50%, #6366f1);
+  background: color-mix(in srgb, var(--secondary) 35%, transparent);
+}
+
+.wx-intro.is-collapsed:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
 .wx-intro-bar {
   display: flex;
   align-items: flex-start;
@@ -580,6 +595,11 @@
 .wx-intro-toggle:hover {
   color: var(--foreground);
   border-color: color-mix(in srgb, var(--border) 60%, #6366f1);
+}
+
+.wx-intro-toggle-hint {
+  pointer-events: none;
+  opacity: 0.85;
 }
 
 .wx-intro.is-collapsed .wx-intro-note {

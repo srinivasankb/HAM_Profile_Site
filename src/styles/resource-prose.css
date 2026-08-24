@@ -185,14 +185,14 @@
   }
 }
 
-/* Resource article prose */
+/* Resource article prose (plain CSS — no :global) */
 .resource-prose {
   font-size: 1.0625rem;
   line-height: 1.75;
   color: var(--foreground);
 }
 
-.resource-prose :global(h1) {
+.resource-prose h1 {
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -200,7 +200,7 @@
   line-height: 1.2;
 }
 
-.resource-prose :global(h2) {
+.resource-prose h2 {
   font-size: 1.65rem;
   font-weight: 800;
   margin: 2.75rem 0 1rem;
@@ -210,66 +210,76 @@
   border-bottom: 1px solid var(--border);
 }
 
-.resource-prose :global(h3) {
+.resource-prose h3 {
   font-size: 1.2rem;
   font-weight: 700;
   margin: 2rem 0 0.75rem;
   line-height: 1.35;
 }
 
-.resource-prose :global(p) {
+.resource-prose p {
   margin-bottom: 1.25rem;
 }
 
-.resource-prose :global(ul),
-.resource-prose :global(ol) {
+.resource-prose ul,
+.resource-prose ol {
   margin: 0 0 1.25rem;
   padding-left: 1.35rem;
 }
 
-.resource-prose :global(li) {
+.resource-prose li {
   margin-bottom: 0.45rem;
 }
 
-.resource-prose :global(li > ul),
-.resource-prose :global(li > ol) {
+.resource-prose li > ul,
+.resource-prose li > ol {
   margin-top: 0.35rem;
   margin-bottom: 0.35rem;
 }
 
-.resource-prose :global(p:has(> img)) {
+/* Hardware photo block */
+.resource-prose p:has(> img) {
   text-align: center;
-  margin: 1.5rem 0 0.5rem;
+  margin: 1.25rem 0 0.35rem;
 }
 
-.resource-prose :global(p:has(> img) img) {
+.resource-prose p:has(> img) img,
+.resource-prose.prose img {
   display: block;
-  width: 100%;
-  max-width: 36rem;
+  width: auto;
+  max-width: min(100%, 360px);
   height: auto;
   margin: 0 auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.resource-prose :global(p:has(> img) + p) {
-  max-width: 36rem;
-  margin: 0 auto 1.75rem;
-  font-size: 0.85rem;
+.resource-prose p:has(> img) + p {
+  max-width: 360px;
+  margin: 0 auto 1.5rem;
+  padding: 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 500;
   color: var(--muted-foreground);
   text-align: center;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
-.resource-prose :global(hr) {
+.resource-prose p:has(> img) + p em {
+  font-style: normal;
+  font-size: inherit;
+  color: inherit;
+}
+
+.resource-prose hr {
   border: 0;
   height: 1px;
   background: var(--border);
   margin: 2.5rem 0;
 }
 
-.resource-prose :global(code) {
+.resource-prose code {
   background: var(--secondary);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
@@ -277,7 +287,7 @@
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-.resource-prose :global(pre) {
+.resource-prose pre {
   background: var(--secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -289,29 +299,45 @@
   line-height: 1.55;
 }
 
-.resource-prose :global(pre code) {
+.resource-prose pre:has(> code.language-text) {
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--secondary) 70%, var(--card));
+}
+
+.resource-prose pre > code.language-text {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+  white-space: pre;
+  display: block;
+  background: none;
+  padding: 0;
+}
+
+.resource-prose pre code {
   background: none;
   padding: 0;
   font-size: inherit;
 }
 
-.resource-prose :global(a) {
+.resource-prose a {
   color: #2563eb;
   text-decoration: underline;
   text-underline-offset: 3px;
   font-weight: 500;
 }
 
-.resource-prose :global(a:hover) {
+.resource-prose a:hover {
   color: #1d4ed8;
 }
 
-.resource-prose :global(strong) {
+.resource-prose strong {
   font-weight: 700;
   color: var(--foreground);
 }
 
-.resource-prose :global(blockquote) {
+.resource-prose blockquote {
   border-left: 3px solid color-mix(in srgb, var(--primary) 35%, var(--border));
   padding: 0.25rem 0 0.25rem 1.25rem;
   margin: 1.5rem 0;
@@ -319,7 +345,7 @@
 }
 
 /* Tables — wrapper added by rehype-wrap-tables */
-.resource-prose :global(.prose-table-wrap) {
+.resource-prose .prose-table-wrap {
   margin: 1.5rem 0 2rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -329,7 +355,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.resource-prose :global(.prose-table-wrap table) {
+.resource-prose .prose-table-wrap table {
   width: 100%;
   min-width: 32rem;
   border-collapse: collapse;
@@ -338,7 +364,7 @@
   margin: 0;
 }
 
-.resource-prose :global(table th) {
+.resource-prose table th {
   background: var(--secondary);
   font-weight: 700;
   text-align: left;
@@ -352,48 +378,53 @@
   vertical-align: bottom;
 }
 
-.resource-prose :global(table td) {
+.resource-prose table td {
   padding: 0.65rem 0.9rem;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
   color: var(--foreground);
 }
 
-.resource-prose :global(table tbody tr:last-child td) {
+.resource-prose table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.resource-prose :global(table tbody tr:nth-child(even) td) {
+.resource-prose table tbody tr:nth-child(even) td {
   background: color-mix(in srgb, var(--secondary) 40%, transparent);
 }
 
-.resource-prose :global(table tbody tr:hover td) {
+.resource-prose table tbody tr:hover td {
   background: color-mix(in srgb, var(--secondary) 65%, transparent);
 }
 
-.resource-prose :global(table td code) {
+.resource-prose table td code {
   font-size: 0.82em;
 }
 
 @media (max-width: 640px) {
-  .resource-prose :global(.prose-table-wrap) {
+  .resource-prose .prose-table-wrap {
     border-radius: 8px;
     margin-left: -0.25rem;
     margin-right: -0.25rem;
   }
 
-  .resource-prose :global(.prose-table-wrap table) {
+  .resource-prose .prose-table-wrap table {
     min-width: 28rem;
     font-size: 0.8rem;
   }
 
-  .resource-prose :global(table th),
-  .resource-prose :global(table td) {
+  .resource-prose table th,
+  .resource-prose table td {
     padding: 0.55rem 0.65rem;
   }
 
-  .resource-prose :global(table th) {
+  .resource-prose table th {
     white-space: normal;
     font-size: 0.62rem;
+  }
+
+  .resource-prose p:has(> img) img,
+  .resource-prose.prose img {
+    max-width: min(100%, 320px);
   }
 }
