@@ -66,12 +66,20 @@ Manage your primary radio and your accessories collection.
     "specs": ["2m/70cm", "Dual Band J Pole Antenna", "Base Station"],
     "status": "Active"
   },
-  "handheld": {
-    "name": "Baofeng M13 Pro",
-    "category": "Handheld Transceiver",
-    "specs": ["2m/70cm", "QRP Operation", "Mobile Ready"],
-    "status": "Active"
-  },
+  "handhelds": [
+    {
+      "name": "Baofeng M13 Pro",
+      "category": "Handheld Transceiver",
+      "specs": ["2m/70cm", "QRP Operation", "Mobile Ready"],
+      "status": "Active"
+    },
+    {
+      "name": "Baofeng UV-5R Mini",
+      "category": "Handheld Transceiver",
+      "specs": ["2m/70cm", "Compact Form Factor", "Field Backup"],
+      "status": "Active"
+    }
+  ],
   "accessories": [
     { "name": "Nagoya NA-771", "details": "High Gain Whip Antenna" },
     { "name": "UV-K5 Battery", "details": "1600mAh Spares" }

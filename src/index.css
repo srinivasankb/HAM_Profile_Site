@@ -175,6 +175,8 @@ body {
   color: var(--foreground);
 }
 
+/* Rig logo layout: see src/styles/global.css (loaded by Layout) */
+
 /* Weather & Large Sections */
 .full-width-card {
   grid-column: span 2;

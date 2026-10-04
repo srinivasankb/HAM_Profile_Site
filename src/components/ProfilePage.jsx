@@ -20,6 +20,7 @@ import netsData from '../data/nets.json';
 import profileData from '../data/profile.json';
 import clubsData from '../data/clubs.json';
 import hardwareData from '../data/hardware.json';
+import RigBrandMark from './RigBrandMark';
 
 
 
@@ -379,36 +380,26 @@ export default function ProfilePage() {
 
                 <div className="modern-card">
                     <div className="card-label"><Radio size={14} /> Rig Details</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                                <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{hardwareData.primary.name}</p>
-                                <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>{hardwareData.primary.status}</span>
-                            </div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>{hardwareData.primary.category}</p>
-                        </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                            {hardwareData.primary.specs.map(spec => (
-                                <span key={spec} style={{ fontSize: '0.7rem', background: 'var(--secondary)', padding: '2px 8px', borderRadius: '4px' }}>{spec}</span>
-                            ))}
-                        </div>
-                        {hardwareData.handheld && (
-                            <>
-                                <div style={{ borderTop: '1px dashed var(--border)', margin: '0.5rem 0' }}></div>
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                                        <p style={{ fontSize: '0.95rem', fontWeight: 700 }}>{hardwareData.handheld.name}</p>
-                                        <span style={{ fontSize: '0.65rem', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>{hardwareData.handheld.status}</span>
+                    <div className="rig-list">
+                        {[hardwareData.primary, ...(hardwareData.handhelds ?? [])].map((rig) => (
+                            <article key={rig.name} className="rig-entry">
+                                <div className="rig-entry__top">
+                                    <RigBrandMark rig={rig} size="md" className="rig-entry__brand" />
+                                    <div className="rig-entry__main">
+                                        <div className="rig-entry__header">
+                                            <p className="rig-entry__name">{rig.name}</p>
+                                            <span className="rig-entry__status">{rig.status}</span>
+                                        </div>
+                                        <p className="rig-entry__category">{rig.category}</p>
                                     </div>
-                                    <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)' }}>{hardwareData.handheld.category}</p>
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {hardwareData.handheld.specs.map(spec => (
-                                        <span key={spec} style={{ fontSize: '0.7rem', background: 'var(--secondary)', padding: '2px 8px', borderRadius: '4px' }}>{spec}</span>
+                                <div className="rig-entry__specs">
+                                    {rig.specs.map((spec) => (
+                                        <span key={`${rig.name}-${spec}`} className="rig-entry__spec">{spec}</span>
                                     ))}
                                 </div>
-                            </>
-                        )}
+                            </article>
+                        ))}
                     </div>
                 </div>
 

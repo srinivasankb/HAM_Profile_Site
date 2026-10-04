@@ -8,6 +8,9 @@ import WeatherPill from '../components/WeatherPill';
 import profileData from '../data/profile.json';
 import clubsData from '../data/clubs.json';
 import hardwareData from '../data/hardware.json';
+import { resolveRigBrand } from '../lib/rig-brands';
+
+const primaryRigBrand = resolveRigBrand(hardwareData.primary);
 import navData from '../data/navigation.json';
 import galleryData from '../data/gallery.json';
 import { 
@@ -82,8 +85,17 @@ import avatarImg from '../assets/avatar.png';
       </div>
       <div class="modern-card highlight-card">
         <div class="card-label"><Radio size={14} /> Primary Rig</div>
-        <div class="card-value">{hardwareData.primary.name}</div>
-        <p style="font-size: 0.8rem; color: var(--muted-foreground);">{hardwareData.primary.specs[0]}</p>
+        <div class="rig-highlight">
+          {primaryRigBrand && (
+            <span class="rig-brand-mark rig-brand-mark--sm" title={primaryRigBrand.label}>
+              <img src={primaryRigBrand.src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            </span>
+          )}
+          <div class="rig-highlight__body">
+            <div class="card-value rig-highlight__name">{hardwareData.primary.name}</div>
+            <p class="rig-highlight__meta">{hardwareData.primary.specs[0]}</p>
+          </div>
+        </div>
       </div>
     </div>
 

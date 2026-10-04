@@ -1,6 +1,7 @@
 {
     "primary": {
         "name": "Alinco DR 735T",
+        "brandLogo": "alinco.png",
         "category": "Dual Band VHF/UHF Transceiver",
         "specs": [
             "2m/70cm",
@@ -9,15 +10,29 @@
         ],
         "status": "Active"
     },
-    "handheld": {
-        "name": "Baofeng M13 Pro",
-        "category": "Handheld Transceiver",
-        "specs": [
-            "2m/70cm",
-            "QRP Operation",
-            "Mobile Ready"
-        ],
-        "status": "Active"
-    },
+    "handhelds": [
+        {
+            "name": "Baofeng M13 Pro",
+            "brandLogo": "baofeng.png",
+            "category": "Handheld Transceiver",
+            "specs": [
+                "2m/70cm",
+                "QRP Operation",
+                "Mobile Ready"
+            ],
+            "status": "Active"
+        },
+        {
+            "name": "Baofeng UV-5R Mini",
+            "brandLogo": "baofeng.png",
+            "category": "Handheld Transceiver",
+            "specs": [
+                "2m/70cm",
+                "Compact Form Factor",
+                "Field Backup"
+            ],
+            "status": "Active"
+        }
+    ],
     "accessories": []
 }

@@ -187,6 +187,137 @@ p {
   color: var(--foreground);
 }
 
+/* Rig brand logos & list layout (home + station) */
+.rig-brand-mark {
+  display: block;
+  flex: 0 0 var(--rig-logo-slot, 4.25rem);
+  width: var(--rig-logo-slot, 4.25rem);
+  line-height: 0;
+}
+
+.rig-brand-mark img {
+  display: block;
+  width: 100%;
+  height: 28px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.rig-brand-mark--sm {
+  --rig-logo-slot: 3.75rem;
+  flex-basis: var(--rig-logo-slot);
+  width: var(--rig-logo-slot);
+}
+
+.rig-brand-mark--sm img {
+  height: 24px;
+}
+
+.rig-highlight {
+  --rig-logo-slot: 3.75rem;
+  --rig-logo-gap: 0.625rem;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rig-logo-gap);
+  margin-top: 0.125rem;
+}
+
+.rig-highlight__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rig-highlight__name {
+  line-height: 1.35;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.rig-highlight__meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.rig-list {
+  --rig-logo-slot: 4.25rem;
+  --rig-logo-gap: 0.625rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.rig-entry:not(:first-child) {
+  border-top: 1px dashed var(--border);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.rig-entry__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rig-logo-gap, 0.625rem);
+}
+
+.rig-entry__brand {
+  padding-top: 0.125rem;
+}
+
+.rig-entry__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rig-entry__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.rig-entry__name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  min-width: 0;
+}
+
+.rig-entry__status {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.rig-entry__category {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.rig-entry__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.5rem;
+}
+
+.rig-entry:has(.rig-brand-mark) .rig-entry__specs {
+  margin-left: calc(var(--rig-logo-slot, 4.25rem) + var(--rig-logo-gap, 0.625rem));
+}
+
+.rig-entry__spec {
+  font-size: 0.7rem;
+  background: var(--secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
 /* Weather & Large Sections */
 .full-width-card {
   grid-column: span 2;
